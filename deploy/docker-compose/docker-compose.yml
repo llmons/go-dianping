@@ -1,0 +1,21 @@
+version: '3'
+
+services:
+  mysql:
+    image: mysql
+    hostname: mysql
+    container_name: mysql
+    ports:
+      - "3306:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=123456
+      - MYSQL_DATABASE=hmdp
+    volumes:
+      - ./hmdp.sql:/docker-entrypoint-initdb.d/init.sql
+  redis:
+    image: redis
+    hostname: mysql
+    container_name: redis
+    ports:
+      - "6379:6379"
+#    command: [ "redis-server","/etc/redis/redis.conf" ]
