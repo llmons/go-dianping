@@ -1,6 +1,6 @@
 env: local
 http:
-  port: 8000
+  port: 8081
 security:
   api_sign:
     app_key: 123456
@@ -11,7 +11,7 @@ data:
   mysql:
     user: root:123456@tcp(127.0.0.1:3306)/hmdp?charset=utf8mb4&parseTime=True&loc=Local
   redis:
-    addr: 127.0.0.1:6350
+    addr: 127.0.0.1:6379
     password: ""
     db: 0
     read_timeout: 0.2s
