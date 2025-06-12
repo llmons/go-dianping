@@ -1,12 +1,11 @@
 package repository
 
 import (
-	"context"
 	"go-dianping/internal/model"
 )
 
 type ShopTypeRepository interface {
-	GetShopTypeList(ctx context.Context) ([]*model.ShopType, error)
+	GetShopTypeList() ([]*model.ShopType, error)
 }
 
 func NewShopTypeRepository(
@@ -21,7 +20,7 @@ type shopTypeRepository struct {
 	*Repository
 }
 
-func (r *shopTypeRepository) GetShopTypeList(ctx context.Context) ([]*model.ShopType, error) {
+func (r *shopTypeRepository) GetShopTypeList() ([]*model.ShopType, error) {
 	var shopTypes []*model.ShopType
 	err := r.db.Order("sort").Select("id", "name", "icon", "sort").Find(&shopTypes).Error
 	if err != nil {
