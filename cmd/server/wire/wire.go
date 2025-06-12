@@ -14,10 +14,10 @@ import (
 	"go-dianping/pkg/log"
 )
 
-var ServerSet = wire.NewSet(server.NewServerHTTP)
+var ServerSet = wire.NewSet(server.NewHttpServer)
 
 var RepositorySet = wire.NewSet(
-	repository.NewDb,
+	repository.NewDB,
 	repository.NewRepository,
 	repository.NewUserRepository,
 	repository.NewShopTypeRepository,

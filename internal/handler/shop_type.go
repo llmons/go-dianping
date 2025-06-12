@@ -25,7 +25,7 @@ func NewShopTypeHandler(
 
 func (h *ShopTypeHandler) GetShopTypeList(ctx *gin.Context) {
 	shopTypeList, err := h.shopTypeService.GetShopTypeList()
-	h.logger.Info("GetShopTypeList", zap.Any("shopTypeList", shopTypeList))
+	h.logger.Info("GetShopTypeList", zap.Int("shopTypeListLength", len(shopTypeList)))
 	if err != nil {
 		resp.HandleError(ctx, http.StatusInternalServerError, err.Error(), nil)
 		return

@@ -21,7 +21,7 @@ func NewRepository(logger *log.Logger, db *gorm.DB) *Repository {
 	}
 }
 
-func NewDb(conf *viper.Viper) *gorm.DB {
+func NewDB(conf *viper.Viper) *gorm.DB {
 	db, err := gorm.Open(mysql.Open(conf.GetString("data.mysql.dsn")), &gorm.Config{})
 	if err != nil {
 		panic(err)

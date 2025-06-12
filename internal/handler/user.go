@@ -4,7 +4,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"go-dianping/internal/service"
 	"go-dianping/pkg/helper/resp"
-	"go.uber.org/zap"
 	"net/http"
 )
 
@@ -22,24 +21,19 @@ type UserHandler struct {
 	userService service.UserService
 }
 
-func (h *UserHandler) GetUserById(ctx *gin.Context) {
+func (h *UserHandler) SendCode(ctx *gin.Context) {
 	var params struct {
-		Id int64 `form:"id" binding:"required"`
+		Phone string `form:"phone" binding:"required"`
 	}
 	if err := ctx.ShouldBind(&params); err != nil {
 		resp.HandleError(ctx, http.StatusBadRequest, err.Error(), nil)
 		return
 	}
 
-	user, err := h.userService.GetUserById(params.Id)
-	h.logger.Info("GetUserByID", zap.Any("user", user))
+	err := h.userService.SendCode(ctx, params.Phone)
 	if err != nil {
 		resp.HandleError(ctx, http.StatusInternalServerError, err.Error(), nil)
 		return
 	}
-	resp.HandleSuccess(ctx, user)
-}
-
-func (h *UserHandler) UpdateUser(ctx *gin.Context) {
 	resp.HandleSuccess(ctx, nil)
 }
