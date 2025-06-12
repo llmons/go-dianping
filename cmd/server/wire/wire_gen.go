@@ -8,13 +8,13 @@ package wire
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/google/wire"
+	"github.com/spf13/viper"
 	"go-dianping/internal/handler"
 	"go-dianping/internal/repository"
 	"go-dianping/internal/server"
 	"go-dianping/internal/service"
 	"go-dianping/pkg/log"
-	"github.com/google/wire"
-	"github.com/spf13/viper"
 )
 
 // Injectors from wire.go:
@@ -22,12 +22,15 @@ import (
 func NewWire(viperViper *viper.Viper, logger *log.Logger) (*gin.Engine, func(), error) {
 	handlerHandler := handler.NewHandler(logger)
 	serviceService := service.NewService(logger)
-	db := repository.NewDb()
+	db := repository.NewDb(viperViper)
 	repositoryRepository := repository.NewRepository(logger, db)
 	userRepository := repository.NewUserRepository(repositoryRepository)
 	userService := service.NewUserService(serviceService, userRepository)
 	userHandler := handler.NewUserHandler(handlerHandler, userService)
-	engine := server.NewServerHTTP(logger, userHandler)
+	shopTypeRepository := repository.NewShopTypeRepository(repositoryRepository)
+	shopTypeService := service.NewShopTypeService(serviceService, shopTypeRepository)
+	shopTypeHandler := handler.NewShopTypeHandler(handlerHandler, shopTypeService)
+	engine := server.NewServerHTTP(logger, userHandler, shopTypeHandler)
 	return engine, func() {
 	}, nil
 }
@@ -36,8 +39,8 @@ func NewWire(viperViper *viper.Viper, logger *log.Logger) (*gin.Engine, func(), 
 
 var ServerSet = wire.NewSet(server.NewServerHTTP)
 
-var RepositorySet = wire.NewSet(repository.NewDb, repository.NewRepository, repository.NewUserRepository)
+var RepositorySet = wire.NewSet(repository.NewDb, repository.NewRepository, repository.NewUserRepository, repository.NewShopTypeRepository)
 
-var ServiceSet = wire.NewSet(service.NewService, service.NewUserService)
+var ServiceSet = wire.NewSet(service.NewService, service.NewUserService, service.NewShopTypeService)
 
-var HandlerSet = wire.NewSet(handler.NewHandler, handler.NewUserHandler)
+var HandlerSet = wire.NewSet(handler.NewHandler, handler.NewUserHandler, handler.NewShopTypeHandler)

@@ -6,23 +6,32 @@ import (
 )
 
 type response struct {
-	Code    int         `json:"code"`
-	Message string      `json:"message"`
-	Data    interface{} `json:"data"`
+	Success  bool        `json:"success"`
+	ErrorMsg string      `json:"error_msg"`
+	Data     interface{} `json:"data"`
+	Total    int         `json:"total"`
 }
 
 func HandleSuccess(ctx *gin.Context, data interface{}) {
 	if data == nil {
 		data = map[string]string{}
 	}
-	resp := response{Code: 0, Message: "success", Data: data}
+	resp := response{Success: true, ErrorMsg: "success", Data: data}
 	ctx.JSON(http.StatusOK, resp)
 }
 
-func HandleError(ctx *gin.Context, httpCode, code int, message string, data interface{}) {
+func HandleListSuccess(ctx *gin.Context, data interface{}, total int) {
 	if data == nil {
 		data = map[string]string{}
 	}
-	resp := response{Code: code, Message: message, Data: data}
+	resp := response{Success: true, ErrorMsg: "success", Data: data, Total: total}
+	ctx.JSON(http.StatusOK, resp)
+}
+
+func HandleError(ctx *gin.Context, httpCode int, message string, data interface{}) {
+	if data == nil {
+		data = map[string]string{}
+	}
+	resp := response{Success: false, ErrorMsg: message, Data: data}
 	ctx.JSON(httpCode, resp)
 }

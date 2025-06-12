@@ -11,6 +11,7 @@ import (
 func NewServerHTTP(
 	logger *log.Logger,
 	userHandler *handler.UserHandler,
+	shopType *handler.ShopTypeHandler,
 ) *gin.Engine {
 	gin.SetMode(gin.ReleaseMode)
 	r := gin.Default()
@@ -22,5 +23,6 @@ func NewServerHTTP(
 	})
 	r.GET("/user", userHandler.GetUserById)
 
+	r.GET("/shop-type/list", shopType.GetShopTypeList)
 	return r
 }
