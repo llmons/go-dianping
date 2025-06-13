@@ -22,7 +22,7 @@ type shopTypeRepository struct {
 
 func (r *shopTypeRepository) GetShopTypeList() ([]*model.ShopType, error) {
 	var shopTypes []*model.ShopType
-	err := r.db.Order("sort").Select("id", "name", "icon", "sort").Find(&shopTypes).Error
+	err := r.db.Order("sort").Find(&shopTypes).Error
 	if err != nil {
 		return nil, err
 	}

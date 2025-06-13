@@ -1,15 +1,22 @@
 package random
 
 import (
-	"crypto/rand"
-	"fmt"
-	"math/big"
+	"math/rand"
 )
 
-func Gen6DigitCode() (string, error) {
-	n, err := rand.Int(rand.Reader, big.NewInt(1_000_000))
-	if err != nil {
-		return "", err
+func Number(length int) string {
+	digits := make([]byte, length)
+	for i := 0; i < length; i++ {
+		digits[i] = byte(rand.Intn(10)) + '0'
 	}
-	return fmt.Sprintf("%06d", n.Int64()), nil
+	return string(digits)
+}
+
+func String(length int) string {
+	const charset = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+	bytes := make([]byte, length)
+	for i := range bytes {
+		bytes[i] = charset[rand.Intn(len(charset))]
+	}
+	return string(bytes)
 }

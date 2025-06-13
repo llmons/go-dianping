@@ -38,6 +38,7 @@ func NewHttpServer(
 		userRouter := api.Group("/user")
 		{
 			userRouter.POST("/code", userHandler.SendCode)
+			userRouter.POST("/login", userHandler.Login)
 		}
 	}
 	return r

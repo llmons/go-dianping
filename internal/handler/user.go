@@ -37,3 +37,23 @@ func (h *UserHandler) SendCode(ctx *gin.Context) {
 	}
 	resp.HandleSuccess(ctx, nil)
 }
+
+func (h *UserHandler) Login(ctx *gin.Context) {
+	var params struct {
+		Phone    string `json:"phone" binding:"required"`
+		Code     string `json:"code"`
+		Password string `json:"password"`
+	}
+	if err := ctx.ShouldBind(&params); err != nil {
+		resp.HandleError(ctx, http.StatusBadRequest, err.Error(), nil)
+		return
+	}
+
+	err := h.userService.Login(ctx, params.Phone, params.Code, params.Password)
+	if err != nil {
+		resp.HandleError(ctx, http.StatusInternalServerError, err.Error(), nil)
+		return
+	}
+
+	resp.HandleSuccess(ctx, nil)
+}
