@@ -5,6 +5,7 @@ import (
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 	"github.com/pkg/errors"
+	"go-dianping/internal/dto"
 	"go-dianping/internal/model"
 	"go-dianping/internal/repository"
 	"go-dianping/pkg/constants"
@@ -15,7 +16,8 @@ import (
 
 type UserService interface {
 	SendCode(ctx *gin.Context, phone string) error
-	Login(ctx *gin.Context, phone, code, password string) error
+	Login(ctx *gin.Context, form *dto.LoginForm) error
+	Me(ctx *gin.Context) (*dto.User, error)
 }
 
 type userService struct {
@@ -49,35 +51,50 @@ func (s *userService) SendCode(ctx *gin.Context, phone string) error {
 	return nil
 }
 
-func (s *userService) Login(ctx *gin.Context, phone, code, _ string) error {
-	if !validator.IsPhone(phone) {
+func (s *userService) Login(ctx *gin.Context, form *dto.LoginForm) error {
+	if !validator.IsPhone(form.Phone) {
 		return errors.New("phone is invalidate")
 	}
 
 	session := sessions.Default(ctx)
 	cacheCode := session.Get("code")
-	if code != cacheCode {
+	if form.Code != cacheCode {
 		return errors.New("code is invalidate")
 	}
 
-	user, err := s.userRepository.GetUserByPhone(phone)
+	user, err := s.userRepository.GetUserByPhone(form.Phone)
 	if err != nil {
 		return err
 	}
 	if user == nil {
-		user, err = s.createUserWithPhone(phone)
+		user, err = s.createUserWithPhone(form.Phone)
 		if err != nil {
 			return err
 		}
 	}
 
-	session.Set("userID", user.Id)
+	var userDto = dto.User{
+		Id:       user.Id,
+		NickName: user.NickName,
+		Icon:     user.Icon,
+	}
+	session.Set("user", userDto)
 	err = session.Save()
 	if err != nil {
 		return err
 	}
 
 	return nil
+}
+
+func (s *userService) Me(ctx *gin.Context) (*dto.User, error) {
+	session := sessions.Default(ctx)
+	val := session.Get("user")
+	user, ok := val.(*dto.User)
+	if !ok {
+		return nil, errors.New("user not found")
+	}
+	return user, nil
 }
 
 func (s *userService) createUserWithPhone(phone string) (*model.User, error) {

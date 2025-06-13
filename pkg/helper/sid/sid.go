@@ -1,9 +1,9 @@
 package sid
 
 import (
-	"go-dianping/pkg/helper/convert"
 	"github.com/pkg/errors"
 	"github.com/sony/sonyflake"
+	"go-dianping/pkg/helper/convert"
 )
 
 type Sid struct {
@@ -21,7 +21,7 @@ func (s Sid) GenString() (string, error) {
 	// 生成分布式ID
 	id, err := s.sf.NextID()
 	if err != nil {
-		return "", errors.Wrap(err, "failed to generate sonyflake ID")
+		return "", errors.Wrap(err, "failed to generate sonyflake Id")
 	}
 	// 将ID转换为字符串
 	return convert.IntToBase62(int(id)), nil
