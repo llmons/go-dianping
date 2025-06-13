@@ -3,8 +3,10 @@ package repository
 import (
 	"github.com/spf13/viper"
 	"go-dianping/pkg/log"
+	"go-dianping/pkg/zapgorm2"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
+	gormlogger "gorm.io/gorm/logger"
 )
 
 type Repository struct {
@@ -21,8 +23,12 @@ func NewRepository(logger *log.Logger, db *gorm.DB) *Repository {
 	}
 }
 
-func NewDB(conf *viper.Viper) *gorm.DB {
-	db, err := gorm.Open(mysql.Open(conf.GetString("data.mysql.dsn")), &gorm.Config{})
+func NewDB(conf *viper.Viper, l *log.Logger) *gorm.DB {
+	dsn := conf.GetString("data.mysql.dsn")
+	logger := zapgorm2.New(l.Logger).LogMode(gormlogger.Info)
+	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{
+		Logger: logger,
+	})
 	if err != nil {
 		panic(err)
 	}
