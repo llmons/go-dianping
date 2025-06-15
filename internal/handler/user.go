@@ -2,7 +2,7 @@ package handler
 
 import (
 	"github.com/gin-gonic/gin"
-	"go-dianping/internal/dto"
+	"go-dianping/internal/pkg/dto"
 	"go-dianping/internal/service"
 	"go-dianping/pkg/helper/resp"
 	"net/http"
@@ -46,13 +46,13 @@ func (h *UserHandler) Login(ctx *gin.Context) {
 		return
 	}
 
-	err := h.userService.Login(ctx, &params)
+	token, err := h.userService.Login(ctx, &params)
 	if err != nil {
 		resp.HandleError(ctx, http.StatusInternalServerError, err.Error(), nil)
 		return
 	}
 
-	resp.HandleSuccess(ctx, nil)
+	resp.HandleSuccess(ctx, token)
 }
 
 func (h *UserHandler) Me(ctx *gin.Context) {

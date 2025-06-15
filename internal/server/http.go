@@ -1,30 +1,23 @@
 package server
 
 import (
-	"encoding/gob"
-	"github.com/gin-contrib/sessions"
-	"github.com/gin-contrib/sessions/cookie"
 	"github.com/gin-gonic/gin"
-	"github.com/spf13/viper"
-	"go-dianping/internal/dto"
+	"github.com/redis/go-redis/v9"
 	"go-dianping/internal/handler"
 	"go-dianping/internal/middleware"
 	"net/http"
 )
 
 func NewHttpServer(
-	conf *viper.Viper,
+	rdb *redis.Client,
 	userHandler *handler.UserHandler,
 	shopTypeHandler *handler.ShopTypeHandler,
 ) *gin.Engine {
 	gin.SetMode(gin.ReleaseMode)
 	r := gin.Default()
 
-	store := cookie.NewStore([]byte(conf.GetString("security.session.key")))
-	gob.Register(&dto.User{}) // register user struct for sessions
 	r.Use(
 		middleware.CORSMiddleware(),
-		sessions.Sessions("hmdp", store),
 	)
 
 	r.GET("/", func(ctx *gin.Context) {
@@ -60,7 +53,7 @@ func NewHttpServer(
 				noAuthRouter.POST("/code", userHandler.SendCode)
 				noAuthRouter.POST("/login", userHandler.Login)
 			}
-			authRouter := userRouter.Group("/").Use(middleware.Auth())
+			authRouter := userRouter.Group("/").Use(middleware.Auth(rdb))
 			{
 				authRouter.GET("/me", userHandler.Me)
 			}

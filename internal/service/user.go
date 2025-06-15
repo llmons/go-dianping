@@ -2,21 +2,23 @@ package service
 
 import (
 	"fmt"
-	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 	"github.com/pkg/errors"
-	"go-dianping/internal/dto"
 	"go-dianping/internal/model"
+	"go-dianping/internal/pkg/constants"
+	"go-dianping/internal/pkg/dto"
 	"go-dianping/internal/repository"
-	"go-dianping/pkg/constants"
 	"go-dianping/pkg/helper/random"
+	"go-dianping/pkg/helper/uuid"
 	"go-dianping/pkg/helper/validator"
 	"go.uber.org/zap"
+	"strconv"
+	"time"
 )
 
 type UserService interface {
 	SendCode(ctx *gin.Context, phone string) error
-	Login(ctx *gin.Context, form *dto.LoginForm) error
+	Login(ctx *gin.Context, form *dto.LoginForm) (string, error)
 	Me(ctx *gin.Context) (*dto.User, error)
 }
 
@@ -39,9 +41,7 @@ func (s *userService) SendCode(ctx *gin.Context, phone string) error {
 
 	code := random.Number(6)
 
-	session := sessions.Default(ctx)
-	session.Set("code", code)
-	err := session.Save()
+	err := s.rdb.Set(ctx, constants.RedisLoginCodeKey+phone, code, time.Minute*constants.RedisLoginCodeTTL).Err()
 	if err != nil {
 		return err
 	}
@@ -51,50 +51,59 @@ func (s *userService) SendCode(ctx *gin.Context, phone string) error {
 	return nil
 }
 
-func (s *userService) Login(ctx *gin.Context, form *dto.LoginForm) error {
+func (s *userService) Login(ctx *gin.Context, form *dto.LoginForm) (string, error) {
 	if !validator.IsPhone(form.Phone) {
-		return errors.New("phone is invalidate")
+		return "", errors.New("phone is invalidate")
 	}
 
-	session := sessions.Default(ctx)
-	cacheCode := session.Get("code")
+	cacheCode, err := s.rdb.Get(ctx, constants.RedisLoginCodeKey+form.Phone).Result()
+	if err != nil {
+		return "", err
+	}
 	if form.Code != cacheCode {
-		return errors.New("code is invalidate")
+		return "", errors.New("code is invalidate")
 	}
 
 	user, err := s.userRepository.GetUserByPhone(form.Phone)
 	if err != nil {
-		return err
+		return "", err
 	}
 	if user == nil {
 		user, err = s.createUserWithPhone(form.Phone)
 		if err != nil {
-			return err
+			return "", err
 		}
 	}
 
-	var userDto = dto.User{
-		Id:       user.Id,
-		NickName: user.NickName,
-		Icon:     user.Icon,
-	}
-	session.Set("user", userDto)
-	err = session.Save()
+	token := uuid.GenUUID()
+	err = s.rdb.HSet(ctx, constants.RedisLoginUserKey+token, map[string]string{
+		"id":       strconv.Itoa(int(user.Id)),
+		"nickname": user.NickName,
+		"icon":     user.Icon,
+	}).Err()
 	if err != nil {
-		return err
+		return "", err
 	}
 
-	return nil
+	err = s.rdb.Expire(ctx, constants.RedisLoginUserKey+token, time.Minute*constants.RedisLoginUserTTL).Err()
+	if err != nil {
+		return "", err
+	}
+	return token, nil
 }
 
 func (s *userService) Me(ctx *gin.Context) (*dto.User, error) {
-	session := sessions.Default(ctx)
-	val := session.Get("user")
-	user, ok := val.(*dto.User)
-	if !ok {
+	result, err := s.rdb.HGetAll(ctx, constants.RedisLoginUserKey).Result()
+	if err != nil {
+		return nil, err
+	}
+	if len(result) == 0 {
 		return nil, errors.New("user not found")
 	}
-	return user, nil
+	var user dto.User
+	user.NickName = result["nickname"]
+	user.Icon = result["icon"]
+	return &user, nil
 }
 
 func (s *userService) createUserWithPhone(phone string) (*model.User, error) {

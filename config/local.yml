@@ -12,7 +12,7 @@ data:
     dsn: root:123@tcp(127.0.0.1:3306)/hmdp?charset=utf8mb4&parseTime=True&loc=Local
   redis:
     addr: 127.0.0.1:6379
-    password: ""
+    password: "123321"
     db: 0
     read_timeout: 0.2s
     write_timeout: 0.2s

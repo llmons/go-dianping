@@ -2,7 +2,7 @@ version: '3'
 
 services:
   mysql:
-    image: mysql
+    image: mariadb
     hostname: mysql
     container_name: mysql
     ports:
@@ -14,7 +14,7 @@ services:
       - ./hmdp.sql:/docker-entrypoint-initdb.d/init.sql
 
   redis:
-    image: redis
+    image: redis:alpine
     hostname: redis
     container_name: redis
     ports:
