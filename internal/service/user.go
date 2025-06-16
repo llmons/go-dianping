@@ -6,6 +6,7 @@ import (
 	"github.com/pkg/errors"
 	"go-dianping/api"
 	"go-dianping/internal/base/constants"
+	"go-dianping/internal/base/user_holder"
 	"go-dianping/internal/model"
 	"go-dianping/internal/repository"
 	"go-dianping/pkg/helper/random"
@@ -99,17 +100,12 @@ func (s *userService) Login(ctx context.Context, params *api.LoginReq) (*api.Log
 }
 
 func (s *userService) GetMe(ctx context.Context) (*api.SimpleUser, error) {
-	result, err := s.rdb.HGetAll(ctx, constants.RedisLoginUserKey).Result()
-	if err != nil {
-		return nil, err
-	}
-	if len(result) == 0 {
+	user := user_holder.GetUser(ctx)
+	s.logger.Debug("user", zap.Any("user", user))
+	if user == nil {
 		return nil, errors.New("user not found")
 	}
-	var user api.SimpleUser
-	user.NickName = result["nickname"]
-	user.Icon = result["icon"]
-	return &user, nil
+	return user, nil
 }
 
 func (s *userService) createUserWithPhone(phone string) (*model.User, error) {

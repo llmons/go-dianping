@@ -36,7 +36,7 @@ func (h *UserHandler) SendCode(ctx *gin.Context) {
 		return
 	}
 
-	err := h.userService.SendCode(ctx, params.Phone)
+	err := h.userService.SendCode(ctx.Request.Context(), params.Phone)
 	if err != nil {
 		api.HandleError(ctx, http.StatusInternalServerError, err.Error(), nil)
 		return
@@ -62,7 +62,7 @@ func (h *UserHandler) Login(ctx *gin.Context) {
 		return
 	}
 
-	data, err := h.userService.Login(ctx, &params)
+	data, err := h.userService.Login(ctx.Request.Context(), &params)
 	if err != nil {
 		api.HandleError(ctx, http.StatusInternalServerError, err.Error(), nil)
 		return
@@ -72,7 +72,7 @@ func (h *UserHandler) Login(ctx *gin.Context) {
 }
 
 func (h *UserHandler) GetMe(ctx *gin.Context) {
-	user, err := h.userService.GetMe(ctx)
+	user, err := h.userService.GetMe(ctx.Request.Context())
 	if err != nil {
 		api.HandleError(ctx, http.StatusInternalServerError, err.Error(), nil)
 		return
