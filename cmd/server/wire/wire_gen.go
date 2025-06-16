@@ -11,11 +11,11 @@ import (
 	"github.com/google/wire"
 	"github.com/spf13/viper"
 	"go-dianping/internal/handler"
-	"go-dianping/internal/pkg/redis"
 	"go-dianping/internal/repository"
 	"go-dianping/internal/server"
 	"go-dianping/internal/service"
 	"go-dianping/pkg/log"
+	"go-dianping/pkg/redis"
 )
 
 // Injectors from wire.go:

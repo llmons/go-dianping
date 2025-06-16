@@ -9,11 +9,26 @@ import (
 	"go.uber.org/zap"
 )
 
+// @title           Go Dian Ping
+// @version         1.0.0
+// @description     hmdp implemented by go
+// @contact.name   llmons
+// @contact.url    https://github.com/llmons
+// @contact.email  llmons@foxmail.com
+// @license.name  MIT
+// @license.url   https://opensource.org/licenses/MIT
+// @host      localhost:8081
+// @securityDefinitions.apiKey Bearer
+// @in header
+// @name Authorization
+// @externalDocs.description  GitHub
+// @externalDocs.url          https://github.com/llmons/go-dianping
 func main() {
 	conf := config.NewConfig()
 	logger := log.NewLog(conf)
 
-	logger.Info("server start", zap.String("host", "http://127.0.0.1:"+conf.GetString("http.port")))
+	logger.Info("server start", zap.String("host", fmt.Sprintf("http://%s:%d", conf.GetString("http.host"), conf.GetInt("http.port"))))
+	logger.Info("docs addr", zap.String("addr", fmt.Sprintf("http://%s:%d/swagger/index.html", conf.GetString("http.host"), conf.GetInt("http.port"))))
 
 	app, cleanup, err := wire.NewWire(conf, logger)
 	if err != nil {

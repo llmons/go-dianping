@@ -3,6 +3,9 @@ package server
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/redis/go-redis/v9"
+	swaggerfiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
+	"go-dianping/docs"
 	"go-dianping/internal/handler"
 	"go-dianping/internal/middleware"
 	"net/http"
@@ -15,6 +18,15 @@ func NewHttpServer(
 ) *gin.Engine {
 	gin.SetMode(gin.ReleaseMode)
 	r := gin.Default()
+
+	// swagger doc
+	docs.SwaggerInfo.BasePath = "/api"
+	r.GET("/swagger/*any", ginSwagger.WrapHandler(
+		swaggerfiles.Handler,
+		//ginSwagger.URL(fmt.Sprintf("http://localhost:%d/swagger/doc.json", conf.GetInt("app.http.port"))),
+		ginSwagger.DefaultModelsExpandDepth(-1),
+		ginSwagger.PersistAuthorization(true),
+	))
 
 	r.Use(
 		middleware.CORSMiddleware(),

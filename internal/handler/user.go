@@ -2,9 +2,9 @@ package handler
 
 import (
 	"github.com/gin-gonic/gin"
-	"go-dianping/internal/pkg/dto"
+	"go-dianping/api"
+	"go-dianping/internal/base/dto"
 	"go-dianping/internal/service"
-	"go-dianping/pkg/helper/resp"
 	"net/http"
 )
 
@@ -27,39 +27,39 @@ func (h *UserHandler) SendCode(ctx *gin.Context) {
 		Phone string `form:"phone" binding:"required"`
 	}
 	if err := ctx.ShouldBind(&params); err != nil {
-		resp.HandleError(ctx, http.StatusBadRequest, err.Error(), nil)
+		api.HandleError(ctx, http.StatusBadRequest, err.Error(), nil)
 		return
 	}
 
 	err := h.userService.SendCode(ctx, params.Phone)
 	if err != nil {
-		resp.HandleError(ctx, http.StatusInternalServerError, err.Error(), nil)
+		api.HandleError(ctx, http.StatusInternalServerError, err.Error(), nil)
 		return
 	}
-	resp.HandleSuccess(ctx, nil)
+	api.HandleSuccess(ctx, nil)
 }
 
 func (h *UserHandler) Login(ctx *gin.Context) {
 	var params dto.LoginForm
 	if err := ctx.ShouldBind(&params); err != nil {
-		resp.HandleError(ctx, http.StatusBadRequest, err.Error(), nil)
+		api.HandleError(ctx, http.StatusBadRequest, err.Error(), nil)
 		return
 	}
 
 	token, err := h.userService.Login(ctx, &params)
 	if err != nil {
-		resp.HandleError(ctx, http.StatusInternalServerError, err.Error(), nil)
+		api.HandleError(ctx, http.StatusInternalServerError, err.Error(), nil)
 		return
 	}
 
-	resp.HandleSuccess(ctx, token)
+	api.HandleSuccess(ctx, token)
 }
 
 func (h *UserHandler) Me(ctx *gin.Context) {
 	user, err := h.userService.Me(ctx)
 	if err != nil {
-		resp.HandleError(ctx, http.StatusInternalServerError, err.Error(), nil)
+		api.HandleError(ctx, http.StatusInternalServerError, err.Error(), nil)
 		return
 	}
-	resp.HandleSuccess(ctx, user)
+	api.HandleSuccess(ctx, user)
 }

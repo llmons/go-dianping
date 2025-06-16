@@ -3,7 +3,7 @@ package middleware
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/redis/go-redis/v9"
-	"go-dianping/internal/pkg/constants"
+	"go-dianping/internal/base/constants"
 	"time"
 )
 

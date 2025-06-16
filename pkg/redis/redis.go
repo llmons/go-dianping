@@ -8,8 +8,6 @@ import (
 	"time"
 )
 
-var client *goRedis.Client
-
 func NewRedis(conf *viper.Viper) *goRedis.Client {
 	rdb := goRedis.NewClient(&goRedis.Options{
 		Addr:     conf.GetString("data.redis.addr"),
