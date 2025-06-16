@@ -19,23 +19,24 @@ func NewHttpServer(
 	gin.SetMode(gin.ReleaseMode)
 	r := gin.Default()
 
-	// swagger doc
+	// ========== swagger doc ==========
 	docs.SwaggerInfo.BasePath = "/api"
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(
 		swaggerfiles.Handler,
-		//ginSwagger.URL(fmt.Sprintf("http://localhost:%d/swagger/doc.json", conf.GetInt("app.http.port"))),
 		ginSwagger.DefaultModelsExpandDepth(-1),
 		ginSwagger.PersistAuthorization(true),
 	))
 
+	// ========== middleware ==========
 	r.Use(
 		middleware.CORSMiddleware(),
+		middleware.RefreshToken(rdb),
 	)
 
+	// ========== router ==========
 	r.GET("/", func(ctx *gin.Context) {
 		ctx.String(http.StatusOK, "OK")
 	})
-
 	api := r.Group("/api")
 	{
 		blogRouter := api.Group("/blog")
@@ -65,7 +66,7 @@ func NewHttpServer(
 				noAuthRouter.POST("/code", userHandler.SendCode)
 				noAuthRouter.POST("/login", userHandler.Login)
 			}
-			authRouter := userRouter.Group("/").Use(middleware.Auth(rdb))
+			authRouter := userRouter.Group("/").Use(middleware.Login())
 			{
 				authRouter.GET("/me", userHandler.GetMe)
 			}

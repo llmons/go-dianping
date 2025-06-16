@@ -2,12 +2,6 @@ env: local
 http:
   host: 127.0.0.1
   port: 8081
-security:
-  api_sign:
-    app_key: 123456
-    app_security: 123456
-  session:
-    key: llmons-hmdp
 data:
   mysql:
     dsn: root:123@tcp(127.0.0.1:3306)/hmdp?charset=utf8mb4&parseTime=True&loc=Local
