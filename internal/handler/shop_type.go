@@ -28,7 +28,6 @@ func NewShopTypeHandler(
 // @Schemes
 // @Description
 // @Tags shop-type
-// @Accept json
 // @Produce json
 // @Success 200 {object} api.GetShopTypeListRespData
 // @Router /shop-type/list [get]
