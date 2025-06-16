@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/pkg/errors"
+	"go-dianping/api"
 	"go-dianping/internal/base/constants"
-	"go-dianping/internal/base/dto"
 	"go-dianping/internal/model"
 	"go-dianping/internal/repository"
 	"go-dianping/pkg/helper/random"
@@ -18,8 +18,8 @@ import (
 
 type UserService interface {
 	SendCode(ctx *gin.Context, phone string) error
-	Login(ctx *gin.Context, form *dto.LoginForm) (string, error)
-	Me(ctx *gin.Context) (*dto.User, error)
+	Login(ctx *gin.Context, params *api.LoginReq) (*api.LoginResp, error)
+	GetMe(ctx *gin.Context) (*api.SimpleUser, error)
 }
 
 type userService struct {
@@ -41,7 +41,8 @@ func (s *userService) SendCode(ctx *gin.Context, phone string) error {
 
 	code := random.Number(6)
 
-	err := s.rdb.Set(ctx, constants.RedisLoginCodeKey+phone, code, time.Minute*constants.RedisLoginCodeTTL).Err()
+	key, ttl := constants.RedisLoginCodeKey+phone, time.Minute*constants.RedisLoginCodeTTL
+	err := s.rdb.Set(ctx, key, code, ttl).Err()
 	if err != nil {
 		return err
 	}
@@ -51,48 +52,53 @@ func (s *userService) SendCode(ctx *gin.Context, phone string) error {
 	return nil
 }
 
-func (s *userService) Login(ctx *gin.Context, form *dto.LoginForm) (string, error) {
-	if !validator.IsPhone(form.Phone) {
-		return "", errors.New("phone is invalidate")
+func (s *userService) Login(ctx *gin.Context, params *api.LoginReq) (*api.LoginResp, error) {
+	if !validator.IsPhone(params.Phone) {
+		return &api.LoginResp{}, errors.New("phone is invalidate")
 	}
 
-	cacheCode, err := s.rdb.Get(ctx, constants.RedisLoginCodeKey+form.Phone).Result()
+	key := constants.RedisLoginCodeKey + params.Phone
+	cacheCode, err := s.rdb.Get(ctx, key).Result()
 	if err != nil {
-		return "", err
+		return &api.LoginResp{}, err
 	}
-	if form.Code != cacheCode {
-		return "", errors.New("code is invalidate")
+	if params.Code != cacheCode {
+		return &api.LoginResp{}, errors.New("code is invalidate")
 	}
 
-	user, err := s.userRepository.GetUserByPhone(form.Phone)
+	user, err := s.userRepository.GetUserByPhone(params.Phone)
 	if err != nil {
-		return "", err
+		return &api.LoginResp{}, err
 	}
 	if user == nil {
-		user, err = s.createUserWithPhone(form.Phone)
+		user, err = s.createUserWithPhone(params.Phone)
 		if err != nil {
-			return "", err
+			return &api.LoginResp{}, err
 		}
 	}
 
 	token := uuid.GenUUID()
-	err = s.rdb.HSet(ctx, constants.RedisLoginUserKey+token, map[string]string{
+	key = constants.RedisLoginUserKey + token
+	err = s.rdb.HSet(ctx, key, map[string]string{
 		"id":       strconv.Itoa(int(user.Id)),
 		"nickname": user.NickName,
 		"icon":     user.Icon,
 	}).Err()
 	if err != nil {
-		return "", err
+		return &api.LoginResp{}, err
 	}
 
-	err = s.rdb.Expire(ctx, constants.RedisLoginUserKey+token, time.Minute*constants.RedisLoginUserTTL).Err()
+	ttl := time.Minute * constants.RedisLoginUserTTL
+	err = s.rdb.Expire(ctx, key, ttl).Err()
 	if err != nil {
-		return "", err
+		return &api.LoginResp{}, err
 	}
-	return token, nil
+	return &api.LoginResp{
+		Token: token,
+	}, nil
 }
 
-func (s *userService) Me(ctx *gin.Context) (*dto.User, error) {
+func (s *userService) GetMe(ctx *gin.Context) (*api.SimpleUser, error) {
 	result, err := s.rdb.HGetAll(ctx, constants.RedisLoginUserKey).Result()
 	if err != nil {
 		return nil, err
@@ -100,7 +106,7 @@ func (s *userService) Me(ctx *gin.Context) (*dto.User, error) {
 	if len(result) == 0 {
 		return nil, errors.New("user not found")
 	}
-	var user dto.User
+	var user api.SimpleUser
 	user.NickName = result["nickname"]
 	user.Icon = result["icon"]
 	return &user, nil

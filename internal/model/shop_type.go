@@ -7,8 +7,8 @@ type ShopType struct {
 	Name       string    `json:"name"`
 	Icon       string    `json:"icon"`
 	Sort       uint      `json:"sort"`
-	CreateTime time.Time `json:"create_time"`
-	UpdateTime time.Time `json:"update_time"`
+	CreateTime time.Time `gorm:"autoCreateTime" json:"create_time"`
+	UpdateTime time.Time `gorm:"autoUpdateTime" json:"update_time"`
 }
 
 func (m *ShopType) TableName() string {

@@ -1,19 +1,23 @@
 definitions:
-  api.GetShopTypeListResp:
+  api.GetShopTypeListRespDataItem:
     properties:
-      data:
-        items:
-          properties:
-            icon:
-              type: string
-            id:
-              type: integer
-            name:
-              type: string
-            sort:
-              type: integer
-          type: object
-        type: array
+      icon:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      sort:
+        type: integer
+    type: object
+  api.LoginResp:
+    properties:
+      token:
+        type: string
+    type: object
+  api.SendCodeResp:
+    properties:
+      data: {}
       error_msg:
         type: string
       success:
@@ -45,10 +49,44 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/api.GetShopTypeListResp'
-      summary: Get Shop Type List
+            items:
+              $ref: '#/definitions/api.GetShopTypeListRespDataItem'
+            type: array
+      summary: 获取商品类别列表
       tags:
       - shop-type
+  /user:
+    get:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.LoginResp'
+      security:
+      - Bearer: []
+      summary: 登录
+      tags:
+      - user
+  /user/code:
+    post:
+      parameters:
+      - description: 手机号
+        in: query
+        name: phone
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.SendCodeResp'
+      summary: 发送验证码
+      tags:
+      - user
 securityDefinitions:
   Bearer:
     in: header

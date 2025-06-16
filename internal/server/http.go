@@ -67,7 +67,7 @@ func NewHttpServer(
 			}
 			authRouter := userRouter.Group("/").Use(middleware.Auth(rdb))
 			{
-				authRouter.GET("/me", userHandler.Me)
+				authRouter.GET("/me", userHandler.GetMe)
 			}
 		}
 

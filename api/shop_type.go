@@ -1,15 +1,17 @@
 package api
 
-type GetShopTypeListReq struct{}
+type (
+	GetShopTypeListRespDataItem struct {
+		Id   uint   `json:"id"`
+		Name string `json:"name"`
+		Icon string `json:"icon"`
+		Sort uint   `json:"sort"`
+	}
 
-type GetShopTypeListRespData []struct {
-	Id   int    `json:"id"`
-	Name string `json:"name"`
-	Icon string `json:"icon"`
-	Sort int    `json:"sort"`
-}
+	GetShopTypeListRespData []*GetShopTypeListRespDataItem
 
-type GetShopTypeListResp struct {
-	response
-	Data GetShopTypeListRespData `json:"data"`
-}
+	GetShopTypeListResp struct {
+		response
+		Data GetShopTypeListRespData `json:"data"`
+	}
+)

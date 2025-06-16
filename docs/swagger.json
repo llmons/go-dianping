@@ -27,12 +27,67 @@
                 "tags": [
                     "shop-type"
                 ],
-                "summary": "Get Shop Type List",
+                "summary": "获取商品类别列表",
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/api.GetShopTypeListResp"
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/api.GetShopTypeListRespDataItem"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/user": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "登录",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/api.LoginResp"
+                        }
+                    }
+                }
+            }
+        },
+        "/user/code": {
+            "post": {
+                "tags": [
+                    "user"
+                ],
+                "summary": "发送验证码",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "手机号",
+                        "name": "phone",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/api.SendCodeResp"
                         }
                     }
                 }
@@ -40,29 +95,35 @@
         }
     },
     "definitions": {
-        "api.GetShopTypeListResp": {
+        "api.GetShopTypeListRespDataItem": {
             "type": "object",
             "properties": {
-                "data": {
-                    "type": "array",
-                    "items": {
-                        "type": "object",
-                        "properties": {
-                            "icon": {
-                                "type": "string"
-                            },
-                            "id": {
-                                "type": "integer"
-                            },
-                            "name": {
-                                "type": "string"
-                            },
-                            "sort": {
-                                "type": "integer"
-                            }
-                        }
-                    }
+                "icon": {
+                    "type": "string"
                 },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "sort": {
+                    "type": "integer"
+                }
+            }
+        },
+        "api.LoginResp": {
+            "type": "object",
+            "properties": {
+                "token": {
+                    "type": "string"
+                }
+            }
+        },
+        "api.SendCodeResp": {
+            "type": "object",
+            "properties": {
+                "data": {},
                 "error_msg": {
                     "type": "string"
                 },
