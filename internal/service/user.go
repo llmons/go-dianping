@@ -101,7 +101,6 @@ func (s *userService) Login(ctx context.Context, params *api.LoginReq) (*api.Log
 
 func (s *userService) GetMe(ctx context.Context) (*api.SimpleUser, error) {
 	user := user_holder.GetUser(ctx)
-	s.logger.Debug("user", zap.Any("user", user))
 	if user == nil {
 		return nil, errors.New("user not found")
 	}
@@ -111,7 +110,7 @@ func (s *userService) GetMe(ctx context.Context) (*api.SimpleUser, error) {
 func (s *userService) createUserWithPhone(phone string) (*model.User, error) {
 	var user model.User
 	user.Phone = phone
-	user.NickName = fmt.Sprintf("%s%s", constants.UserNickNamePrefix, random.String(10))
+	user.NickName = constants.UserNickNamePrefix+ random.String(10)
 	err := s.userRepository.CreateUser(nil, &user)
 	if err != nil {
 		return nil, err
