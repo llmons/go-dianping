@@ -1,14 +1,15 @@
 package repository
 
 import (
+	"context"
 	"github.com/pkg/errors"
 	"go-dianping/internal/model"
 	"gorm.io/gorm"
 )
 
 type UserRepository interface {
-	GetUserByPhone(phone string) (*model.User, error)
-	CreateUser(*model.User) error
+	GetUserByPhone(ctx context.Context, phone string) (*model.User, error)
+	CreateUser(ctx context.Context, user *model.User) error
 }
 type userRepository struct {
 	*Repository
@@ -20,7 +21,7 @@ func NewUserRepository(repository *Repository) UserRepository {
 	}
 }
 
-func (r *userRepository) GetUserByPhone(phone string) (*model.User, error) {
+func (r *userRepository) GetUserByPhone(ctx context.Context, phone string) (*model.User, error) {
 	var user model.User
 	err := r.db.Where(&model.User{Phone: phone}).First(&user).Error
 	if err != nil {
@@ -32,7 +33,7 @@ func (r *userRepository) GetUserByPhone(phone string) (*model.User, error) {
 	return &user, nil
 }
 
-func (r *userRepository) CreateUser(user *model.User) error {
+func (r *userRepository) CreateUser(ctx context.Context, user *model.User) error {
 	err := r.db.Create(user).Error
 	if err != nil {
 		return err

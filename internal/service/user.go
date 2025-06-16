@@ -1,8 +1,8 @@
 package service
 
 import (
+	"context"
 	"fmt"
-	"github.com/gin-gonic/gin"
 	"github.com/pkg/errors"
 	"go-dianping/api"
 	"go-dianping/internal/base/constants"
@@ -17,9 +17,9 @@ import (
 )
 
 type UserService interface {
-	SendCode(ctx *gin.Context, phone string) error
-	Login(ctx *gin.Context, params *api.LoginReq) (*api.LoginResp, error)
-	GetMe(ctx *gin.Context) (*api.SimpleUser, error)
+	SendCode(ctx context.Context, phone string) error
+	Login(ctx context.Context, params *api.LoginReq) (*api.LoginResp, error)
+	GetMe(ctx context.Context) (*api.SimpleUser, error)
 }
 
 type userService struct {
@@ -34,7 +34,7 @@ func NewUserService(service *Service, userRepository repository.UserRepository) 
 	}
 }
 
-func (s *userService) SendCode(ctx *gin.Context, phone string) error {
+func (s *userService) SendCode(ctx context.Context, phone string) error {
 	if !validator.IsPhone(phone) {
 		return errors.New("phone is invalidate")
 	}
@@ -52,7 +52,7 @@ func (s *userService) SendCode(ctx *gin.Context, phone string) error {
 	return nil
 }
 
-func (s *userService) Login(ctx *gin.Context, params *api.LoginReq) (*api.LoginResp, error) {
+func (s *userService) Login(ctx context.Context, params *api.LoginReq) (*api.LoginResp, error) {
 	if !validator.IsPhone(params.Phone) {
 		return &api.LoginResp{}, errors.New("phone is invalidate")
 	}
@@ -66,7 +66,7 @@ func (s *userService) Login(ctx *gin.Context, params *api.LoginReq) (*api.LoginR
 		return &api.LoginResp{}, errors.New("code is invalidate")
 	}
 
-	user, err := s.userRepository.GetUserByPhone(params.Phone)
+	user, err := s.userRepository.GetUserByPhone(ctx, params.Phone)
 	if err != nil {
 		return &api.LoginResp{}, err
 	}
@@ -98,7 +98,7 @@ func (s *userService) Login(ctx *gin.Context, params *api.LoginReq) (*api.LoginR
 	}, nil
 }
 
-func (s *userService) GetMe(ctx *gin.Context) (*api.SimpleUser, error) {
+func (s *userService) GetMe(ctx context.Context) (*api.SimpleUser, error) {
 	result, err := s.rdb.HGetAll(ctx, constants.RedisLoginUserKey).Result()
 	if err != nil {
 		return nil, err
@@ -116,7 +116,7 @@ func (s *userService) createUserWithPhone(phone string) (*model.User, error) {
 	var user model.User
 	user.Phone = phone
 	user.NickName = fmt.Sprintf("%s%s", constants.UserNickNamePrefix, random.String(10))
-	err := s.userRepository.CreateUser(&user)
+	err := s.userRepository.CreateUser(nil, &user)
 	if err != nil {
 		return nil, err
 	}

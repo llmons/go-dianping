@@ -33,7 +33,7 @@ func NewShopTypeHandler(
 // @Success 200 {object} api.GetShopTypeListRespData
 // @Router /shop-type/list [get]
 func (h *ShopTypeHandler) GetShopTypeList(ctx *gin.Context) {
-	shopTypeList, err := h.shopTypeService.GetShopTypeList()
+	shopTypeList, err := h.shopTypeService.GetShopTypeList(ctx)
 	h.logger.Info("GetShopTypeList", zap.Int("shopTypeListLength", len(shopTypeList)))
 	if err != nil {
 		api.HandleError(ctx, http.StatusInternalServerError, err.Error(), nil)

@@ -1,12 +1,13 @@
 package service
 
 import (
+	"context"
 	"go-dianping/api"
 	"go-dianping/internal/repository"
 )
 
 type ShopTypeService interface {
-	GetShopTypeList() (api.GetShopTypeListRespData, error)
+	GetShopTypeList(ctx context.Context) (api.GetShopTypeListRespData, error)
 }
 
 func NewShopTypeService(
@@ -24,8 +25,8 @@ type shopTypeService struct {
 	shopTypeRepository repository.ShopTypeRepository
 }
 
-func (s *shopTypeService) GetShopTypeList() (api.GetShopTypeListRespData, error) {
-	list, err := s.shopTypeRepository.GetShopTypeList()
+func (s *shopTypeService) GetShopTypeList(ctx context.Context) (api.GetShopTypeListRespData, error) {
+	list, err := s.shopTypeRepository.GetShopTypeList(ctx)
 	if err != nil {
 		return api.GetShopTypeListRespData{}, err
 	}
