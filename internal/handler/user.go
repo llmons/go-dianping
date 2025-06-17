@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"go-dianping/api"
 	"go-dianping/internal/service"
+	"go.uber.org/zap"
 	"net/http"
 )
 
@@ -63,6 +64,7 @@ func (h *UserHandler) Login(ctx *gin.Context) {
 	}
 
 	data, err := h.userService.Login(ctx.Request.Context(), &params)
+	h.logger.Info("Login", zap.Any("data", data))
 	if err != nil {
 		api.HandleError(ctx, http.StatusInternalServerError, err.Error(), nil)
 		return
@@ -82,6 +84,7 @@ func (h *UserHandler) Login(ctx *gin.Context) {
 // @Router /user/me [get]
 func (h *UserHandler) GetMe(ctx *gin.Context) {
 	user, err := h.userService.GetMe(ctx.Request.Context())
+	h.logger.Info("Get", zap.Any("user", user))
 	if err != nil {
 		api.HandleError(ctx, http.StatusInternalServerError, err.Error(), nil)
 		return
