@@ -26,6 +26,7 @@ type UserHandler struct {
 // @Schemes
 // @Description
 // @Tags user
+// @Produce json
 // @Param phone query string true	"手机号"
 // @Success 200 {object} api.SendCodeResp
 // @Router /user/code [post]
@@ -51,10 +52,9 @@ func (h *UserHandler) SendCode(ctx *gin.Context) {
 // @Tags user
 // @Accept json
 // @Produce json
-// @Security Bearer
 // @Params request body api.LoginReq true "手机+验证码/密码"
 // @Success 200 {object} api.LoginResp
-// @Router /user [get]
+// @Router /user/login [post]
 func (h *UserHandler) Login(ctx *gin.Context) {
 	var params api.LoginReq
 	if err := ctx.ShouldBind(&params); err != nil {
@@ -71,6 +71,15 @@ func (h *UserHandler) Login(ctx *gin.Context) {
 	api.HandleSuccess(ctx, data)
 }
 
+// GetMe godoc
+// @Summary 获取当前登录的用户信息
+// @Schemes
+// @Description
+// @Tags user
+// @Produce json
+// @Security Bearer
+// @Success 200 {object} api.GetMeResp
+// @Router /user/me [get]
 func (h *UserHandler) GetMe(ctx *gin.Context) {
 	user, err := h.userService.GetMe(ctx.Request.Context())
 	if err != nil {
