@@ -16,9 +16,9 @@ type (
 	LoginRespData struct {
 		Token string `json:"token"`
 	}
- LoginResp struct {
-	 response
-  Data LoginRespData `json:"data"`
+	LoginResp struct {
+		response
+		Data LoginRespData `json:"data"`
 	}
 )
 
@@ -28,9 +28,9 @@ type (
 		NickName string `json:"nickname"`
 		Icon     string `json:"icon"`
 	}
- GetMeRespData SimpleUser
-	GetMeResp struct{
-  response
-  Data GetMeRespData `json:"data"`
- }
+	GetMeRespData SimpleUser
+	GetMeResp     struct {
+		response
+		Data GetMeRespData `json:"data"`
+	}
 )

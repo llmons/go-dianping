@@ -1,4 +1,39 @@
 definitions:
+  api.GetMeResp:
+    properties:
+      data:
+        $ref: '#/definitions/api.GetMeRespData'
+      error_msg:
+        type: string
+      success:
+        type: boolean
+      total:
+        description: pointer type cause of omitempty
+        type: integer
+    type: object
+  api.GetMeRespData:
+    properties:
+      icon:
+        type: string
+      id:
+        type: integer
+      nickname:
+        type: string
+    type: object
+  api.GetShopTypeListResp:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/api.GetShopTypeListRespDataItem'
+        type: array
+      error_msg:
+        type: string
+      success:
+        type: boolean
+      total:
+        description: pointer type cause of omitempty
+        type: integer
+    type: object
   api.GetShopTypeListRespDataItem:
     properties:
       icon:
@@ -11,6 +46,18 @@ definitions:
         type: integer
     type: object
   api.LoginResp:
+    properties:
+      data:
+        $ref: '#/definitions/api.LoginRespData'
+      error_msg:
+        type: string
+      success:
+        type: boolean
+      total:
+        description: pointer type cause of omitempty
+        type: integer
+    type: object
+  api.LoginRespData:
     properties:
       token:
         type: string
@@ -41,22 +88,36 @@ info:
 paths:
   /shop-type/list:
     get:
-      consumes:
-      - application/json
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            items:
-              $ref: '#/definitions/api.GetShopTypeListRespDataItem'
-            type: array
+            $ref: '#/definitions/api.GetShopTypeListResp'
       summary: 获取商品类别列表
       tags:
       - shop-type
-  /user:
-    get:
+  /user/code:
+    post:
+      parameters:
+      - description: 手机号
+        in: query
+        name: phone
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.SendCodeResp'
+      summary: 发送验证码
+      tags:
+      - user
+  /user/login:
+    post:
       consumes:
       - application/json
       produces:
@@ -66,25 +127,21 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/api.LoginResp'
-      security:
-      - Bearer: []
       summary: 登录
       tags:
       - user
-  /user/code:
-    post:
-      parameters:
-      - description: 手机号
-        in: query
-        name: phone
-        required: true
-        type: string
+  /user/me:
+    get:
+      produces:
+      - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/api.SendCodeResp'
-      summary: 发送验证码
+            $ref: '#/definitions/api.GetMeResp'
+      security:
+      - Bearer: []
+      summary: 获取当前登录的用户信息
       tags:
       - user
 securityDefinitions:

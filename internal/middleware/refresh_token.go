@@ -7,13 +7,15 @@ import (
 	"go-dianping/internal/base/constants"
 	"go-dianping/internal/base/user_holder"
 	"strconv"
+	"strings"
 	"time"
 )
 
 func RefreshToken(rdb *redis.Client) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		token := ctx.GetHeader("Authorization")
-		if token == "" {
+		token, found := strings.CutPrefix(token, "Bearer ")
+		if found == false {
 			ctx.Next()
 			return
 		}

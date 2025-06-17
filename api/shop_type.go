@@ -7,10 +7,8 @@ type (
 		Icon string `json:"icon"`
 		Sort uint   `json:"sort"`
 	}
-
 	GetShopTypeListRespData []*GetShopTypeListRespDataItem
-
-	GetShopTypeListResp struct {
+	GetShopTypeListResp     struct {
 		response
 		Data GetShopTypeListRespData `json:"data"`
 	}
