@@ -52,7 +52,7 @@ func (h *UserHandler) SendCode(ctx *gin.Context) {
 // @Tags user
 // @Accept json
 // @Produce json
-// @Params request body api.LoginReq true "手机+验证码/密码"
+// @Params request body api.LoginReq true "手机+验证码，密码暂不支持"
 // @Success 200 {object} api.LoginResp
 // @Router /user/login [post]
 func (h *UserHandler) Login(ctx *gin.Context) {

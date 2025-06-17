@@ -39,7 +39,12 @@ func (s *userService) SendCode(ctx context.Context, phone string) error {
 		return errors.New("phone is invalidate")
 	}
 
-	code := random.Number(6)
+	var code string
+	if s.conf.Get("env") == "prod" {
+		code = random.Number(6)
+	} else {
+		code = "123456"
+	}
 
 	key, ttl := constants.RedisLoginCodeKey+phone, time.Minute*constants.RedisLoginCodeTTL
 	err := s.rdb.Set(ctx, key, code, ttl).Err()

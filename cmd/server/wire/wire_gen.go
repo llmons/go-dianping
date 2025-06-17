@@ -23,7 +23,7 @@ import (
 func NewWire(viperViper *viper.Viper, logger *log.Logger) (*gin.Engine, func(), error) {
 	client := redis.NewRedis(viperViper)
 	handlerHandler := handler.NewHandler(logger)
-	serviceService := service.NewService(logger, client)
+	serviceService := service.NewService(logger, viperViper, client)
 	db := repository.NewDB(viperViper, logger)
 	repositoryRepository := repository.NewRepository(logger, db)
 	userRepository := repository.NewUserRepository(repositoryRepository)

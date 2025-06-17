@@ -11,7 +11,7 @@ type (
 	LoginReq struct {
 		Phone    string `form:"phone" binding:"required"`
 		Code     string `form:"code" binding:"required"`
-		Password string `form:"password" binding:"required"`
+		Password string `form:"password"`
 	}
 	LoginRespData struct {
 		Token string `json:"token"`
