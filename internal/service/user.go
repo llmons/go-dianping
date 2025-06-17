@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-	"fmt"
 	"github.com/pkg/errors"
 	"go-dianping/api"
 	"go-dianping/internal/base/constants"
@@ -19,8 +18,8 @@ import (
 
 type UserService interface {
 	SendCode(ctx context.Context, phone string) error
-	Login(ctx context.Context, params *api.LoginReq) (*api.LoginResp, error)
-	GetMe(ctx context.Context) (*api.SimpleUser, error)
+	Login(ctx context.Context, params *api.LoginReq) (*api.LoginRespData, error)
+	GetMe(ctx context.Context) (*api.GetMeRespData, error)
 }
 
 type userService struct {
@@ -53,28 +52,28 @@ func (s *userService) SendCode(ctx context.Context, phone string) error {
 	return nil
 }
 
-func (s *userService) Login(ctx context.Context, params *api.LoginReq) (*api.LoginResp, error) {
+func (s *userService) Login(ctx context.Context, params *api.LoginReq) (*api.LoginRespData, error) {
 	if !validator.IsPhone(params.Phone) {
-		return &api.LoginResp{}, errors.New("phone is invalidate")
+		return &api.LoginRespData{}, errors.New("phone is invalidate")
 	}
 
 	key := constants.RedisLoginCodeKey + params.Phone
 	cacheCode, err := s.rdb.Get(ctx, key).Result()
 	if err != nil {
-		return &api.LoginResp{}, err
+		return &api.LoginRespData{}, err
 	}
 	if params.Code != cacheCode {
-		return &api.LoginResp{}, errors.New("code is invalidate")
+		return &api.LoginRespData{}, errors.New("code is invalidate")
 	}
 
 	user, err := s.userRepository.GetUserByPhone(ctx, params.Phone)
 	if err != nil {
-		return &api.LoginResp{}, err
+		return &api.LoginRespData{}, err
 	}
 	if user == nil {
 		user, err = s.createUserWithPhone(params.Phone)
 		if err != nil {
-			return &api.LoginResp{}, err
+			return &api.LoginRespData{}, err
 		}
 	}
 
@@ -86,32 +85,32 @@ func (s *userService) Login(ctx context.Context, params *api.LoginReq) (*api.Log
 		"icon":     user.Icon,
 	}).Err()
 	if err != nil {
-		return &api.LoginResp{}, err
+		return &api.LoginRespData{}, err
 	}
 
 	ttl := time.Minute * constants.RedisLoginUserTTL
 	err = s.rdb.Expire(ctx, key, ttl).Err()
 	if err != nil {
-		return &api.LoginResp{}, err
+		return &api.LoginRespData{}, err
 	}
-	return &api.LoginResp{
+	return &api.LoginRespData{
 		Token: token,
 	}, nil
 }
 
-func (s *userService) GetMe(ctx context.Context) (*api.SimpleUser, error) {
+func (s *userService) GetMe(ctx context.Context) (*api.GetMeRespData, error) {
 	user := user_holder.GetUser(ctx)
-	s.logger.Debug("user", zap.Any("user", user))
 	if user == nil {
 		return nil, errors.New("user not found")
 	}
-	return user, nil
+	return (*api.GetMeRespData)(user), nil
 }
 
 func (s *userService) createUserWithPhone(phone string) (*model.User, error) {
-	var user model.User
-	user.Phone = phone
-	user.NickName = fmt.Sprintf("%s%s", constants.UserNickNamePrefix, random.String(10))
+	user := model.User{
+		Phone:    phone,
+		NickName: constants.UserNickNamePrefix + random.String(10),
+	}
 	err := s.userRepository.CreateUser(nil, &user)
 	if err != nil {
 		return nil, err

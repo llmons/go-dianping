@@ -4,7 +4,6 @@ type (
 	SendCodeReq struct {
 		Phone string `form:"phone" binding:"required"`
 	}
-
 	SendCodeResp response
 )
 
@@ -14,9 +13,12 @@ type (
 		Code     string `form:"code" binding:"required"`
 		Password string `form:"password" binding:"required"`
 	}
-
-	LoginResp struct {
+	LoginRespData struct {
 		Token string `json:"token"`
+	}
+	LoginResp struct {
+		response
+		Data LoginRespData `json:"data"`
 	}
 )
 
@@ -26,5 +28,9 @@ type (
 		NickName string `json:"nickname"`
 		Icon     string `json:"icon"`
 	}
-	GetMeResp SimpleUser
+	GetMeRespData SimpleUser
+	GetMeResp     struct {
+		response
+		Data GetMeRespData `json:"data"`
+	}
 )

@@ -25,9 +25,6 @@ const docTemplate = `{
     "paths": {
         "/shop-type/list": {
             "get": {
-                "consumes": [
-                    "application/json"
-                ],
                 "produces": [
                     "application/json"
                 ],
@@ -39,37 +36,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/api.GetShopTypeListRespDataItem"
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/user": {
-            "get": {
-                "security": [
-                    {
-                        "Bearer": []
-                    }
-                ],
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "user"
-                ],
-                "summary": "登录",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/api.LoginResp"
+                            "$ref": "#/definitions/api.GetShopTypeListResp"
                         }
                     }
                 }
@@ -77,6 +44,9 @@ const docTemplate = `{
         },
         "/user/code": {
             "post": {
+                "produces": [
+                    "application/json"
+                ],
                 "tags": [
                     "user"
                 ],
@@ -99,9 +69,108 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/user/login": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "登录",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/api.LoginResp"
+                        }
+                    }
+                }
+            }
+        },
+        "/user/me": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "获取当前登录的用户信息",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/api.GetMeResp"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
+        "api.GetMeResp": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/api.GetMeRespData"
+                },
+                "error_msg": {
+                    "type": "string"
+                },
+                "success": {
+                    "type": "boolean"
+                },
+                "total": {
+                    "description": "pointer type cause of omitempty",
+                    "type": "integer"
+                }
+            }
+        },
+        "api.GetMeRespData": {
+            "type": "object",
+            "properties": {
+                "icon": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "nickname": {
+                    "type": "string"
+                }
+            }
+        },
+        "api.GetShopTypeListResp": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/api.GetShopTypeListRespDataItem"
+                    }
+                },
+                "error_msg": {
+                    "type": "string"
+                },
+                "success": {
+                    "type": "boolean"
+                },
+                "total": {
+                    "description": "pointer type cause of omitempty",
+                    "type": "integer"
+                }
+            }
+        },
         "api.GetShopTypeListRespDataItem": {
             "type": "object",
             "properties": {
@@ -120,6 +189,24 @@ const docTemplate = `{
             }
         },
         "api.LoginResp": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/api.LoginRespData"
+                },
+                "error_msg": {
+                    "type": "string"
+                },
+                "success": {
+                    "type": "boolean"
+                },
+                "total": {
+                    "description": "pointer type cause of omitempty",
+                    "type": "integer"
+                }
+            }
+        },
+        "api.LoginRespData": {
             "type": "object",
             "properties": {
                 "token": {

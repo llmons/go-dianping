@@ -28,9 +28,8 @@ func NewShopTypeHandler(
 // @Schemes
 // @Description
 // @Tags shop-type
-// @Accept json
 // @Produce json
-// @Success 200 {object} api.GetShopTypeListRespData
+// @Success 200 {object} api.GetShopTypeListResp
 // @Router /shop-type/list [get]
 func (h *ShopTypeHandler) GetShopTypeList(ctx *gin.Context) {
 	shopTypeList, err := h.shopTypeService.GetShopTypeList(ctx.Request.Context())
