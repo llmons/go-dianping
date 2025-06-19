@@ -17,7 +17,7 @@ import (
 )
 
 type UserService interface {
-	SendCode(ctx context.Context, phone string) error
+	SendCode(ctx context.Context, params *api.SendCodeReq) error
 	Login(ctx context.Context, params *api.LoginReq) (*api.LoginRespData, error)
 	GetMe(ctx context.Context) (*api.GetMeRespData, error)
 }
@@ -34,8 +34,8 @@ func NewUserService(service *Service, userRepository repository.UserRepository) 
 	}
 }
 
-func (s *userService) SendCode(ctx context.Context, phone string) error {
-	if !validator.IsPhone(phone) {
+func (s *userService) SendCode(ctx context.Context, params *api.SendCodeReq) error {
+	if !validator.IsPhone(params.Phone) {
 		return errors.New("phone is invalidate")
 	}
 
@@ -46,7 +46,7 @@ func (s *userService) SendCode(ctx context.Context, phone string) error {
 		code = "123456"
 	}
 
-	key, ttl := constants.RedisLoginCodeKey+phone, time.Minute*constants.RedisLoginCodeTTL
+	key, ttl := constants.RedisLoginCodeKey+params.Phone, time.Minute*constants.RedisLoginCodeTTL
 	err := s.rdb.Set(ctx, key, code, ttl).Err()
 	if err != nil {
 		return err

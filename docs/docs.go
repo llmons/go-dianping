@@ -42,6 +42,25 @@ const docTemplate = `{
                 }
             }
         },
+        "/shop/:id": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "shop"
+                ],
+                "summary": "根据 id 获取商铺",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/api.GetShopByIdResp"
+                        }
+                    }
+                }
+            }
+        },
         "/user/code": {
             "post": {
                 "produces": [
@@ -147,6 +166,65 @@ const docTemplate = `{
                 },
                 "nickname": {
                     "type": "string"
+                }
+            }
+        },
+        "api.GetShopByIdResp": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/api.GetShopByIdRespData"
+                },
+                "error_msg": {
+                    "type": "string"
+                },
+                "success": {
+                    "type": "boolean"
+                },
+                "total": {
+                    "description": "pointer type cause of omitempty",
+                    "type": "integer"
+                }
+            }
+        },
+        "api.GetShopByIdRespData": {
+            "type": "object",
+            "properties": {
+                "address": {
+                    "type": "string"
+                },
+                "area": {
+                    "type": "string"
+                },
+                "avg_price": {
+                    "type": "integer"
+                },
+                "comments": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "images": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "score": {
+                    "type": "integer"
+                },
+                "sold": {
+                    "type": "integer"
+                },
+                "type_id": {
+                    "type": "string"
+                },
+                "x": {
+                    "type": "number"
+                },
+                "y": {
+                    "type": "number"
                 }
             }
         },

@@ -28,7 +28,7 @@ type UserHandler struct {
 // @Description
 // @Tags user
 // @Produce json
-// @Param phone query string true	"手机号"
+// @Param phone query string true "手机号"
 // @Success 200 {object} api.SendCodeResp
 // @Router /user/code [post]
 func (h *UserHandler) SendCode(ctx *gin.Context) {
@@ -38,7 +38,7 @@ func (h *UserHandler) SendCode(ctx *gin.Context) {
 		return
 	}
 
-	err := h.userService.SendCode(ctx.Request.Context(), params.Phone)
+	err := h.userService.SendCode(ctx.Request.Context(), &params)
 	if err != nil {
 		api.HandleError(ctx, http.StatusInternalServerError, err.Error(), nil)
 		return
@@ -53,7 +53,7 @@ func (h *UserHandler) SendCode(ctx *gin.Context) {
 // @Tags user
 // @Accept json
 // @Produce json
-// @Params request body api.LoginReq true "手机+验证码，密码暂不支持"
+// @Params request body api.LoginReq true "手机+验证码"
 // @Success 200 {object} api.LoginResp
 // @Router /user/login [post]
 func (h *UserHandler) Login(ctx *gin.Context) {
