@@ -21,7 +21,7 @@ type shopRepository struct {
 	*Repository
 }
 
-func (r *shopRepository) GetShopById(ctx context.Context, id int) (*model.Shop, error) {
+func (r *shopRepository) GetShopById(_ context.Context, id int) (*model.Shop, error) {
 	var shop model.Shop
 	r.db.First(&shop, id)
 	return &shop, nil

@@ -21,7 +21,7 @@ type shopTypeRepository struct {
 	*Repository
 }
 
-func (r *shopTypeRepository) GetShopTypeList(context.Context) ([]*model.ShopType, error) {
+func (r *shopTypeRepository) GetShopTypeList(_ context.Context) ([]*model.ShopType, error) {
 	var shopTypes []*model.ShopType
 	err := r.db.Order("sort").Find(&shopTypes).Error
 	if err != nil {
