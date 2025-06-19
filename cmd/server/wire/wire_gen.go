@@ -29,10 +29,13 @@ func NewWire(viperViper *viper.Viper, logger *log.Logger) (*gin.Engine, func(), 
 	userRepository := repository.NewUserRepository(repositoryRepository)
 	userService := service.NewUserService(serviceService, userRepository)
 	userHandler := handler.NewUserHandler(handlerHandler, userService)
+	shopRepository := repository.NewShopRepository(repositoryRepository)
+	shopService := service.NewShopService(serviceService, shopRepository)
+	shopHandler := handler.NewShopHandler(handlerHandler, shopService)
 	shopTypeRepository := repository.NewShopTypeRepository(repositoryRepository)
 	shopTypeService := service.NewShopTypeService(serviceService, shopTypeRepository)
 	shopTypeHandler := handler.NewShopTypeHandler(handlerHandler, shopTypeService)
-	engine := server.NewHttpServer(client, userHandler, shopTypeHandler)
+	engine := server.NewHttpServer(client, userHandler, shopHandler, shopTypeHandler)
 	return engine, func() {
 	}, nil
 }
@@ -41,8 +44,8 @@ func NewWire(viperViper *viper.Viper, logger *log.Logger) (*gin.Engine, func(), 
 
 var ServerSet = wire.NewSet(redis.NewRedis, server.NewHttpServer)
 
-var RepositorySet = wire.NewSet(repository.NewDB, repository.NewRepository, repository.NewUserRepository, repository.NewShopTypeRepository)
+var RepositorySet = wire.NewSet(repository.NewDB, repository.NewRepository, repository.NewUserRepository, repository.NewShopRepository, repository.NewShopTypeRepository)
 
-var ServiceSet = wire.NewSet(service.NewService, service.NewUserService, service.NewShopTypeService)
+var ServiceSet = wire.NewSet(service.NewService, service.NewUserService, service.NewShopService, service.NewShopTypeService)
 
-var HandlerSet = wire.NewSet(handler.NewHandler, handler.NewUserHandler, handler.NewShopTypeHandler)
+var HandlerSet = wire.NewSet(handler.NewHandler, handler.NewUserHandler, handler.NewShopHandler, handler.NewShopTypeHandler)

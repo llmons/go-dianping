@@ -14,6 +14,7 @@ import (
 func NewHttpServer(
 	rdb *redis.Client,
 	userHandler *handler.UserHandler,
+	shopHandler *handler.ShopHandler,
 	shopTypeHandler *handler.ShopTypeHandler,
 ) *gin.Engine {
 	gin.SetMode(gin.ReleaseMode)
@@ -46,7 +47,7 @@ func NewHttpServer(
 
 		shopRouter := api.Group("/shop")
 		{
-			shopRouter.GET("/")
+			shopRouter.GET("/:id", shopHandler.GetShopById)
 		}
 
 		shopTypeRouter := api.Group("/shop-type")

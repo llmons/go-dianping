@@ -1,15 +1,11 @@
 package model
 
-import "time"
-
 type User struct {
-	Id         uint      `gorm:"primary_key" json:"id"`
-	Phone      string    `json:"phone"`
-	Password   string    `json:"password"`
-	NickName   string    `json:"nickname"`
-	Icon       string    `json:"icon"`
-	CreateTime time.Time `gorm:"autoCreateTime" json:"create_time"`
-	UpdateTime time.Time `gorm:"autoUpdateTime" json:"update_time"`
+	Model
+	Phone    string `gorm:"unique"`
+	Password string
+	NickName string
+	Icon     string
 }
 
 func (u *User) TableName() string {
