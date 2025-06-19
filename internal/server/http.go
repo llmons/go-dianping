@@ -2,6 +2,7 @@ package server
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/mattn/go-colorable"
 	"github.com/redis/go-redis/v9"
 	swaggerfiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
@@ -18,6 +19,8 @@ func NewHttpServer(
 	shopTypeHandler *handler.ShopTypeHandler,
 ) *gin.Engine {
 	gin.SetMode(gin.ReleaseMode)
+	gin.ForceConsoleColor()
+	gin.DefaultWriter = colorable.NewColorableStdout()
 	r := gin.Default()
 
 	// ========== swagger doc ==========

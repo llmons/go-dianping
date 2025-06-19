@@ -6,7 +6,7 @@ import (
 )
 
 type ShopRepository interface {
-	GetShopById(ctx context.Context, id int64) (*model.Shop, error)
+	GetShopById(ctx context.Context, id int) (*model.Shop, error)
 }
 
 func NewShopRepository(
@@ -21,8 +21,8 @@ type shopRepository struct {
 	*Repository
 }
 
-func (r *shopRepository) GetShopById(ctx context.Context, id int64) (*model.Shop, error) {
+func (r *shopRepository) GetShopById(ctx context.Context, id int) (*model.Shop, error) {
 	var shop model.Shop
-
+	r.db.First(&shop, id)
 	return &shop, nil
 }

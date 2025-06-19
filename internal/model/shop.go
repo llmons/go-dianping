@@ -9,10 +9,10 @@ type Shop struct {
 	Address   string  `gorm:"not null"`
 	X         float64 `gorm:"not null"`
 	Y         float64 `gorm:"not null"`
-	AvgPrice  int
-	Sold      int    `gorm:"not null"`
-	Comments  string `gorm:"not null"`
-	Score     int    `gorm:"not null"`
+	AvgPrice  uint
+	Sold      uint `gorm:"not null"`
+	Comments  uint `gorm:"not null"`
+	Score     uint `gorm:"not null"`
 	OpenHours string
 }
 
