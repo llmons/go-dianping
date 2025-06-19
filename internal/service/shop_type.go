@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"github.com/redis/go-redis/v9"
 	"go-dianping/api"
 	"go-dianping/internal/base/constants"
@@ -37,8 +36,6 @@ func (s *shopTypeService) GetShopTypeList(ctx context.Context) (api.GetShopTypeL
 	if err != nil && !errors.Is(err, redis.Nil) {
 		return nil, err
 	}
-
-	fmt.Println("DEBUG")
 
 	var cacheShopType api.GetShopTypeListRespData
 	if cacheShopTypeStr != "" {
