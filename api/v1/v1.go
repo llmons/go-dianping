@@ -7,7 +7,7 @@ import (
 
 type Response struct {
 	Success  bool   `json:"success"`
-	ErrorMsg string `json:"error_msg,omitempty"`
+	ErrorMsg string `json:"errorMsg,omitempty"`
 	Data     any    `json:"data,omitempty"`
 	Total    int    `json:"total,omitempty"`
 }

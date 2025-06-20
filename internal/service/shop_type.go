@@ -4,9 +4,12 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"github.com/jinzhu/copier"
 	"github.com/redis/go-redis/v9"
+	lop "github.com/samber/lo/parallel"
 	"go-dianping/api/v1"
 	"go-dianping/internal/base/constants"
+	"go-dianping/internal/model"
 	"go-dianping/internal/repository"
 	"time"
 )
@@ -51,15 +54,22 @@ func (s *shopTypeService) GetShopTypeList(ctx context.Context) (v1.GetShopTypeLi
 		return v1.GetShopTypeListRespData{}, err
 	}
 
-	data := make(v1.GetShopTypeListRespData, len(list))
-	for i, shopType := range list {
-		data[i] = &v1.GetShopTypeListRespDataItem{
-			Id:   shopType.Id,
-			Name: shopType.Name,
-			Icon: shopType.Icon,
-			Sort: shopType.Sort,
+	//data := make(v1.GetShopTypeListRespData, len(list))
+	//for i, shopType := range list {
+	//	data[i] = &v1.GetShopTypeListRespDataItem{
+	//		Id:   shopType.Id,
+	//		Name: shopType.Name,
+	//		Icon: shopType.Icon,
+	//		Sort: shopType.Sort,
+	//	}
+	//}
+	data := lop.Map(list, func(el *model.ShopType, idx int) *v1.GetShopTypeListRespDataItem {
+		var item v1.GetShopTypeListRespDataItem
+		if err := copier.Copy(&item, el); err != nil {
+			return nil
 		}
-	}
+		return &item
+	})
 
 	// ========== save to redis and return ==========
 	bytes, err := json.Marshal(data)
