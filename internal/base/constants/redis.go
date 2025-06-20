@@ -18,4 +18,6 @@ const (
 	RedisCacheShopTypeTTL = 30
 
 	RedisCacheNullTTL = 2
+
+	RedisLockShopKey = "lock:shop:"
 )
