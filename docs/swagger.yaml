@@ -1,17 +1,16 @@
 definitions:
-  api.GetMeResp:
+  go-dianping_api_v1.GetMeResp:
     properties:
       data:
-        $ref: '#/definitions/api.GetMeRespData'
-      error_msg:
+        $ref: '#/definitions/go-dianping_api_v1.GetMeRespData'
+      errorMsg:
         type: string
       success:
         type: boolean
       total:
-        description: pointer type cause of omitempty
         type: integer
     type: object
-  api.GetMeRespData:
+  go-dianping_api_v1.GetMeRespData:
     properties:
       icon:
         type: string
@@ -20,62 +19,60 @@ definitions:
       nickname:
         type: string
     type: object
-  api.GetShopByIdResp:
+  go-dianping_api_v1.GetShopByIdResp:
     properties:
       data:
-        $ref: '#/definitions/api.GetShopByIdRespData'
-      error_msg:
+        $ref: '#/definitions/go-dianping_api_v1.GetShopByIdRespData'
+      errorMsg:
         type: string
       success:
         type: boolean
       total:
-        description: pointer type cause of omitempty
         type: integer
     type: object
-  api.GetShopByIdRespData:
+  go-dianping_api_v1.GetShopByIdRespData:
     properties:
       address:
         type: string
       area:
         type: string
-      avg_price:
+      avgPrice:
         type: integer
       comments:
         type: integer
       id:
-        type: string
+        type: integer
       images:
         type: string
       name:
         type: string
-      open_hours:
+      openHours:
         type: string
       score:
         type: integer
       sold:
         type: integer
-      type_id:
-        type: string
+      typeId:
+        type: integer
       x:
         type: number
       "y":
         type: number
     type: object
-  api.GetShopTypeListResp:
+  go-dianping_api_v1.GetShopTypeListResp:
     properties:
       data:
         items:
-          $ref: '#/definitions/api.GetShopTypeListRespDataItem'
+          $ref: '#/definitions/go-dianping_api_v1.GetShopTypeListRespDataItem'
         type: array
-      error_msg:
+      errorMsg:
         type: string
       success:
         type: boolean
       total:
-        description: pointer type cause of omitempty
         type: integer
     type: object
-  api.GetShopTypeListRespDataItem:
+  go-dianping_api_v1.GetShopTypeListRespDataItem:
     properties:
       icon:
         type: string
@@ -86,43 +83,30 @@ definitions:
       sort:
         type: integer
     type: object
-  api.LoginResp:
+  go-dianping_api_v1.LoginResp:
     properties:
       data:
-        $ref: '#/definitions/api.LoginRespData'
-      error_msg:
+        $ref: '#/definitions/go-dianping_api_v1.LoginRespData'
+      errorMsg:
         type: string
       success:
         type: boolean
       total:
-        description: pointer type cause of omitempty
         type: integer
     type: object
-  api.LoginRespData:
+  go-dianping_api_v1.LoginRespData:
     properties:
       token:
         type: string
     type: object
-  api.SendCodeResp:
+  go-dianping_api_v1.Response:
     properties:
       data: {}
-      error_msg:
+      errorMsg:
         type: string
       success:
         type: boolean
       total:
-        description: pointer type cause of omitempty
-        type: integer
-    type: object
-  api.UpdateShopResp:
-    properties:
-      data: {}
-      error_msg:
-        type: string
-      success:
-        type: boolean
-      total:
-        description: pointer type cause of omitempty
         type: integer
     type: object
 host: localhost:8081
@@ -146,7 +130,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/api.UpdateShopResp'
+            $ref: '#/definitions/go-dianping_api_v1.Response'
       summary: 更新商铺
       tags:
       - shop
@@ -158,7 +142,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/api.GetShopTypeListResp'
+            $ref: '#/definitions/go-dianping_api_v1.GetShopTypeListResp'
       summary: 获取商品类别列表
       tags:
       - shop-type
@@ -170,7 +154,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/api.GetShopByIdResp'
+            $ref: '#/definitions/go-dianping_api_v1.GetShopByIdResp'
       summary: 根据 id 获取商铺
       tags:
       - shop
@@ -188,7 +172,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/api.SendCodeResp'
+            $ref: '#/definitions/go-dianping_api_v1.Response'
       summary: 发送验证码
       tags:
       - user
@@ -202,7 +186,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/api.LoginResp'
+            $ref: '#/definitions/go-dianping_api_v1.LoginResp'
       summary: 登录
       tags:
       - user
@@ -214,7 +198,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/api.GetMeResp'
+            $ref: '#/definitions/go-dianping_api_v1.GetMeResp'
       security:
       - Bearer: []
       summary: 获取当前登录的用户信息

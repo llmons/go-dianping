@@ -11,7 +11,7 @@ import (
 	"time"
 )
 
-func RequestLog(logger *log.Logger) gin.HandlerFunc {
+func RequestLogMiddleware(logger *log.Logger) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		// The configuration is initialized once per request
 		uuid, err := random.UUIdV4()

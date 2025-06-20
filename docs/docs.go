@@ -36,7 +36,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/api.UpdateShopResp"
+                            "$ref": "#/definitions/go-dianping_api_v1.Response"
                         }
                     }
                 }
@@ -55,7 +55,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/api.GetShopTypeListResp"
+                            "$ref": "#/definitions/go-dianping_api_v1.GetShopTypeListResp"
                         }
                     }
                 }
@@ -74,7 +74,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/api.GetShopByIdResp"
+                            "$ref": "#/definitions/go-dianping_api_v1.GetShopByIdResp"
                         }
                     }
                 }
@@ -102,7 +102,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/api.SendCodeResp"
+                            "$ref": "#/definitions/go-dianping_api_v1.Response"
                         }
                     }
                 }
@@ -124,7 +124,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/api.LoginResp"
+                            "$ref": "#/definitions/go-dianping_api_v1.LoginResp"
                         }
                     }
                 }
@@ -148,7 +148,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/api.GetMeResp"
+                            "$ref": "#/definitions/go-dianping_api_v1.GetMeResp"
                         }
                     }
                 }
@@ -156,25 +156,24 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "api.GetMeResp": {
+        "go-dianping_api_v1.GetMeResp": {
             "type": "object",
             "properties": {
                 "data": {
-                    "$ref": "#/definitions/api.GetMeRespData"
+                    "$ref": "#/definitions/go-dianping_api_v1.GetMeRespData"
                 },
-                "error_msg": {
+                "errorMsg": {
                     "type": "string"
                 },
                 "success": {
                     "type": "boolean"
                 },
                 "total": {
-                    "description": "pointer type cause of omitempty",
                     "type": "integer"
                 }
             }
         },
-        "api.GetMeRespData": {
+        "go-dianping_api_v1.GetMeRespData": {
             "type": "object",
             "properties": {
                 "icon": {
@@ -188,25 +187,24 @@ const docTemplate = `{
                 }
             }
         },
-        "api.GetShopByIdResp": {
+        "go-dianping_api_v1.GetShopByIdResp": {
             "type": "object",
             "properties": {
                 "data": {
-                    "$ref": "#/definitions/api.GetShopByIdRespData"
+                    "$ref": "#/definitions/go-dianping_api_v1.GetShopByIdRespData"
                 },
-                "error_msg": {
+                "errorMsg": {
                     "type": "string"
                 },
                 "success": {
                     "type": "boolean"
                 },
                 "total": {
-                    "description": "pointer type cause of omitempty",
                     "type": "integer"
                 }
             }
         },
-        "api.GetShopByIdRespData": {
+        "go-dianping_api_v1.GetShopByIdRespData": {
             "type": "object",
             "properties": {
                 "address": {
@@ -215,14 +213,14 @@ const docTemplate = `{
                 "area": {
                     "type": "string"
                 },
-                "avg_price": {
+                "avgPrice": {
                     "type": "integer"
                 },
                 "comments": {
                     "type": "integer"
                 },
                 "id": {
-                    "type": "string"
+                    "type": "integer"
                 },
                 "images": {
                     "type": "string"
@@ -230,7 +228,7 @@ const docTemplate = `{
                 "name": {
                     "type": "string"
                 },
-                "open_hours": {
+                "openHours": {
                     "type": "string"
                 },
                 "score": {
@@ -239,8 +237,8 @@ const docTemplate = `{
                 "sold": {
                     "type": "integer"
                 },
-                "type_id": {
-                    "type": "string"
+                "typeId": {
+                    "type": "integer"
                 },
                 "x": {
                     "type": "number"
@@ -250,28 +248,27 @@ const docTemplate = `{
                 }
             }
         },
-        "api.GetShopTypeListResp": {
+        "go-dianping_api_v1.GetShopTypeListResp": {
             "type": "object",
             "properties": {
                 "data": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/api.GetShopTypeListRespDataItem"
+                        "$ref": "#/definitions/go-dianping_api_v1.GetShopTypeListRespDataItem"
                     }
                 },
-                "error_msg": {
+                "errorMsg": {
                     "type": "string"
                 },
                 "success": {
                     "type": "boolean"
                 },
                 "total": {
-                    "description": "pointer type cause of omitempty",
                     "type": "integer"
                 }
             }
         },
-        "api.GetShopTypeListRespDataItem": {
+        "go-dianping_api_v1.GetShopTypeListRespDataItem": {
             "type": "object",
             "properties": {
                 "icon": {
@@ -288,25 +285,24 @@ const docTemplate = `{
                 }
             }
         },
-        "api.LoginResp": {
+        "go-dianping_api_v1.LoginResp": {
             "type": "object",
             "properties": {
                 "data": {
-                    "$ref": "#/definitions/api.LoginRespData"
+                    "$ref": "#/definitions/go-dianping_api_v1.LoginRespData"
                 },
-                "error_msg": {
+                "errorMsg": {
                     "type": "string"
                 },
                 "success": {
                     "type": "boolean"
                 },
                 "total": {
-                    "description": "pointer type cause of omitempty",
                     "type": "integer"
                 }
             }
         },
-        "api.LoginRespData": {
+        "go-dianping_api_v1.LoginRespData": {
             "type": "object",
             "properties": {
                 "token": {
@@ -314,34 +310,17 @@ const docTemplate = `{
                 }
             }
         },
-        "api.SendCodeResp": {
+        "go-dianping_api_v1.Response": {
             "type": "object",
             "properties": {
                 "data": {},
-                "error_msg": {
+                "errorMsg": {
                     "type": "string"
                 },
                 "success": {
                     "type": "boolean"
                 },
                 "total": {
-                    "description": "pointer type cause of omitempty",
-                    "type": "integer"
-                }
-            }
-        },
-        "api.UpdateShopResp": {
-            "type": "object",
-            "properties": {
-                "data": {},
-                "error_msg": {
-                    "type": "string"
-                },
-                "success": {
-                    "type": "boolean"
-                },
-                "total": {
-                    "description": "pointer type cause of omitempty",
                     "type": "integer"
                 }
             }

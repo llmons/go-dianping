@@ -36,7 +36,8 @@ func NewHttpServer(
 	// ========== middleware ==========
 	r.Use(
 		middleware.CORSMiddleware(),
-		middleware.RequestLog(logger),
+		middleware.RequestLogMiddleware(logger),
+		middleware.ResponseLogMiddleware(logger),
 		middleware.RefreshToken(rdb),
 	)
 
