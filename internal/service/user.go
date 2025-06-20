@@ -2,14 +2,13 @@ package service
 
 import (
 	"context"
+	"github.com/duke-git/lancet/v2/random"
 	"github.com/pkg/errors"
 	"go-dianping/api/v1"
 	"go-dianping/internal/base/constants"
 	"go-dianping/internal/base/user_holder"
 	"go-dianping/internal/model"
 	"go-dianping/internal/repository"
-	"go-dianping/pkg/helper/random"
-	"go-dianping/pkg/helper/uuid"
 	"go-dianping/pkg/helper/validator"
 	"go.uber.org/zap"
 	"strconv"
@@ -41,7 +40,7 @@ func (s *userService) SendCode(ctx context.Context, req *v1.SendCodeReq) error {
 
 	var code string
 	if s.conf.Get("env") == "prod" {
-		code = random.Number(6)
+		code = random.RandNumeral(6)
 	} else {
 		code = "123456"
 	}
@@ -82,7 +81,10 @@ func (s *userService) Login(ctx context.Context, req *v1.LoginReq) (*v1.LoginRes
 		}
 	}
 
-	token := uuid.GenUUID()
+	token, err := random.UUIdV4()
+	if err != nil {
+		return nil, err
+	}
 	key = constants.RedisLoginUserKey + token
 	err = s.rdb.HSet(ctx, key, map[string]string{
 		"id":       strconv.Itoa(int(user.Id)),
@@ -114,7 +116,7 @@ func (s *userService) GetMe(ctx context.Context) (*v1.GetMeRespData, error) {
 func (s *userService) createUserWithPhone(phone string) (*model.User, error) {
 	user := model.User{
 		Phone:    phone,
-		NickName: constants.UserNickNamePrefix + random.String(10),
+		NickName: constants.UserNickNamePrefix + random.RandString(10),
 	}
 	err := s.userRepository.CreateUser(nil, &user)
 	if err != nil {

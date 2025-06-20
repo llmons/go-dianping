@@ -9,10 +9,12 @@ import (
 	"go-dianping/docs"
 	"go-dianping/internal/handler"
 	"go-dianping/internal/middleware"
+	"go-dianping/pkg/log"
 	"net/http"
 )
 
 func NewHttpServer(
+	logger *log.Logger,
 	rdb *redis.Client,
 	userHandler *handler.UserHandler,
 	shopHandler *handler.ShopHandler,
@@ -34,6 +36,7 @@ func NewHttpServer(
 	// ========== middleware ==========
 	r.Use(
 		middleware.CORSMiddleware(),
+		middleware.RequestLog(logger),
 		middleware.RefreshToken(rdb),
 	)
 

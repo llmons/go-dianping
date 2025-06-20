@@ -35,7 +35,7 @@ func NewWire(viperViper *viper.Viper, logger *log.Logger) (*gin.Engine, func(), 
 	shopTypeRepository := repository.NewShopTypeRepository(repositoryRepository)
 	shopTypeService := service.NewShopTypeService(serviceService, shopTypeRepository)
 	shopTypeHandler := handler.NewShopTypeHandler(handlerHandler, shopTypeService)
-	engine := server.NewHttpServer(client, userHandler, shopHandler, shopTypeHandler)
+	engine := server.NewHttpServer(logger, client, userHandler, shopHandler, shopTypeHandler)
 	return engine, func() {
 	}, nil
 }
