@@ -3,8 +3,11 @@ package service
 import (
 	"context"
 	"encoding/json"
+	"fmt"
+	"github.com/jinzhu/copier"
 	"github.com/pkg/errors"
 	"github.com/redis/go-redis/v9"
+	//"github.com/samber/lo"
 	"go-dianping/api"
 	"go-dianping/internal/base/constants"
 	"go-dianping/internal/model"
@@ -14,7 +17,8 @@ import (
 )
 
 type ShopService interface {
-	GetShopById(ctx context.Context, params *api.GetShopByIdReq) (*api.GetShopByIdRespData, error)
+	GetShopById(ctx context.Context, req *api.GetShopByIdReq) (*api.GetShopByIdRespData, error)
+	UpdateShop(ctx context.Context, req *api.UpdateShopReq) error
 }
 
 func NewShopService(
@@ -33,6 +37,8 @@ type shopService struct {
 }
 
 func (s *shopService) GetShopById(ctx context.Context, params *api.GetShopByIdReq) (*api.GetShopByIdRespData, error) {
+	var data api.GetShopByIdRespData
+
 	// ========== check cache ==========
 	key := constants.RedisCacheShopKey + params.Id
 	cacheShopStr, err := s.rdb.Get(ctx, key).Result()
@@ -44,20 +50,10 @@ func (s *shopService) GetShopById(ctx context.Context, params *api.GetShopByIdRe
 		if err := json.Unmarshal([]byte(cacheShopStr), &cacheShop); err != nil {
 			return nil, err
 		}
-		return &api.GetShopByIdRespData{
-			Id:       strconv.Itoa(int(cacheShop.Model.Id)),
-			Name:     cacheShop.Name,
-			TypeId:   strconv.Itoa(cacheShop.TypeId),
-			Images:   cacheShop.Images,
-			Area:     cacheShop.Area,
-			Address:  cacheShop.Address,
-			X:        cacheShop.X,
-			Y:        cacheShop.Y,
-			AvgPrice: cacheShop.AvgPrice,
-			Sold:     cacheShop.Sold,
-			Comments: cacheShop.Comments,
-			Score:    cacheShop.Score,
-		}, nil
+		if err := copier.CopyWithOption(&data, &cacheShop, copier.Option{IgnoreEmpty: true}); err != nil {
+			return nil, err
+		}
+		return &data, nil
 	}
 
 	// ========== query sql db ==========
@@ -79,18 +75,26 @@ func (s *shopService) GetShopById(ctx context.Context, params *api.GetShopByIdRe
 	if err := s.rdb.Set(ctx, key, bytes, ttl).Err(); err != nil {
 		return nil, err
 	}
-	return &api.GetShopByIdRespData{
-		Id:       strconv.Itoa(int(shop.Model.Id)),
-		Name:     shop.Name,
-		TypeId:   strconv.Itoa(shop.TypeId),
-		Images:   shop.Images,
-		Area:     shop.Area,
-		Address:  shop.Address,
-		X:        shop.X,
-		Y:        shop.Y,
-		AvgPrice: shop.AvgPrice,
-		Sold:     shop.Sold,
-		Comments: shop.Comments,
-		Score:    shop.Score,
-	}, nil
+	if err := copier.CopyWithOption(&data, &cacheShop, copier.Option{IgnoreEmpty: true}); err != nil {
+		return nil, err
+	}
+	return &data, nil
+}
+
+func (s *shopService) UpdateShop(ctx context.Context, newShop *api.UpdateShopReq) error {
+	// ========== update sql db ==========
+	// already check id with gin.Context shouldBind in handler
+	var shop model.Shop
+	if err := copier.CopyWithOption(&shop, &newShop, copier.Option{IgnoreEmpty: true}); err != nil {
+		return err
+	}
+
+	if err := s.shopRepository.Update(ctx, &shop); err != nil {
+		return err
+	}
+
+	// ========== delete cache ==========
+	key := fmt.Sprintf("%s%d", constants.RedisLoginCodeKey, newShop.Id)
+	s.rdb.Del(ctx, key)
+	return nil
 }

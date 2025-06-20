@@ -3,9 +3,11 @@ package middleware
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/redis/go-redis/v9"
+
 	"go-dianping/api"
 	"go-dianping/internal/base/constants"
 	"go-dianping/internal/base/user_holder"
+
 	"strconv"
 	"strings"
 	"time"
@@ -15,7 +17,7 @@ func RefreshToken(rdb *redis.Client) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		token := ctx.GetHeader("Authorization")
 		token, found := strings.CutPrefix(token, "Bearer ")
-		if found == false {
+		if !found {
 			ctx.Next()
 			return
 		}

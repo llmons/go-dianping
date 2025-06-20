@@ -23,6 +23,25 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/shop": {
+            "put": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "shop"
+                ],
+                "summary": "更新商铺",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/api.UpdateShopResp"
+                        }
+                    }
+                }
+            }
+        },
         "/shop-type/list": {
             "get": {
                 "produces": [
@@ -211,6 +230,9 @@ const docTemplate = `{
                 "name": {
                     "type": "string"
                 },
+                "open_hours": {
+                    "type": "string"
+                },
                 "score": {
                     "type": "integer"
                 },
@@ -293,6 +315,22 @@ const docTemplate = `{
             }
         },
         "api.SendCodeResp": {
+            "type": "object",
+            "properties": {
+                "data": {},
+                "error_msg": {
+                    "type": "string"
+                },
+                "success": {
+                    "type": "boolean"
+                },
+                "total": {
+                    "description": "pointer type cause of omitempty",
+                    "type": "integer"
+                }
+            }
+        },
+        "api.UpdateShopResp": {
             "type": "object",
             "properties": {
                 "data": {},

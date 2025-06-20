@@ -51,6 +51,7 @@ func NewHttpServer(
 		shopRouter := api.Group("/shop")
 		{
 			shopRouter.GET("/:id", shopHandler.GetShopById)
+			shopRouter.PUT("/", shopHandler.UpdateShop)
 		}
 
 		shopTypeRouter := api.Group("/shop-type")

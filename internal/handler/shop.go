@@ -47,3 +47,28 @@ func (h *ShopHandler) GetShopById(ctx *gin.Context) {
 	}
 	api.HandleSuccess(ctx, data)
 }
+
+// UpdateShop godoc
+// @Summary 更新商铺
+// @Schemes
+// @Description
+// @Tags shop
+// @Produce json
+// @Params request body api.UpdateShopReq true "商铺信息"
+// @Success 200 {object} api.UpdateShopResp
+// @Router /shop [put]
+func (h *ShopHandler) UpdateShop(ctx *gin.Context) {
+	var req api.UpdateShopReq
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		api.HandleError(ctx, http.StatusBadRequest, err.Error(), nil)
+		return
+	}
+
+	err := h.shopService.UpdateShop(ctx.Request.Context(), &req)
+	h.logger.Info("UpdateShop", zap.Any("update data", req))
+	if err != nil {
+		api.HandleError(ctx, http.StatusBadRequest, err.Error(), nil)
+		return
+	}
+	api.HandleSuccess(ctx, nil)
+}

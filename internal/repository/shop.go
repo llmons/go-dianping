@@ -7,6 +7,7 @@ import (
 
 type ShopRepository interface {
 	GetShopById(ctx context.Context, id int) (*model.Shop, error)
+	Update(ctx context.Context, shop *model.Shop) error
 }
 
 func NewShopRepository(
@@ -25,4 +26,9 @@ func (r *shopRepository) GetShopById(_ context.Context, id int) (*model.Shop, er
 	var shop model.Shop
 	r.db.First(&shop, id)
 	return &shop, nil
+}
+
+func (r Repository) Update(_ context.Context, shop *model.Shop) error {
+	r.db.Model(&model.Shop{}).Where("id = ?", shop.Model.Id).Updates(shop)
+	return nil
 }
