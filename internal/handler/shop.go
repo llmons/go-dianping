@@ -4,7 +4,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"go-dianping/api/v1"
 	"go-dianping/internal/service"
-	"go.uber.org/zap"
 	"net/http"
 )
 
@@ -30,7 +29,7 @@ func NewShopHandler(
 // @Tags shop
 // @Produce json
 // @Params id path string true "id"
-// @Success 200 {object} api.GetShopByIdResp
+// @Success 200 {object} v1.GetShopByIdResp
 // @Router /shop/:id [get]
 func (h *ShopHandler) GetShopById(ctx *gin.Context) {
 	var params v1.GetShopByIdReq
@@ -40,7 +39,6 @@ func (h *ShopHandler) GetShopById(ctx *gin.Context) {
 	}
 
 	data, err := h.shopService.GetShopById(ctx.Request.Context(), &params)
-	h.logger.Info("GetShopById", zap.Any("data", data))
 	if err != nil {
 		v1.HandleError(ctx, http.StatusBadRequest, err.Error(), nil)
 		return
@@ -54,8 +52,8 @@ func (h *ShopHandler) GetShopById(ctx *gin.Context) {
 // @Description
 // @Tags shop
 // @Produce json
-// @Params request body api.UpdateShopReq true "商铺信息"
-// @Success 200 {object} api.UpdateShopResp
+// @Params request body v1.UpdateShopReq true "商铺信息"
+// @Success 200 {object} v1.Response
 // @Router /shop [put]
 func (h *ShopHandler) UpdateShop(ctx *gin.Context) {
 	var req v1.UpdateShopReq
@@ -65,7 +63,6 @@ func (h *ShopHandler) UpdateShop(ctx *gin.Context) {
 	}
 
 	err := h.shopService.UpdateShop(ctx.Request.Context(), &req)
-	h.logger.Info("UpdateShop", zap.Any("update data", req))
 	if err != nil {
 		v1.HandleError(ctx, http.StatusBadRequest, err.Error(), nil)
 		return

@@ -4,7 +4,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"go-dianping/api/v1"
 	"go-dianping/internal/service"
-	"go.uber.org/zap"
 	"net/http"
 )
 
@@ -29,11 +28,10 @@ func NewShopTypeHandler(
 // @Description
 // @Tags shop-type
 // @Produce json
-// @Success 200 {object} api.GetShopTypeListResp
+// @Success 200 {object} v1.GetShopTypeListResp
 // @Router /shop-type/list [get]
 func (h *ShopTypeHandler) GetShopTypeList(ctx *gin.Context) {
 	shopTypeList, err := h.shopTypeService.GetShopTypeList(ctx.Request.Context())
-	h.logger.Info("GetShopTypeList", zap.Int("shopTypeListLength", len(shopTypeList)))
 	if err != nil {
 		v1.HandleError(ctx, http.StatusInternalServerError, err.Error(), nil)
 		return

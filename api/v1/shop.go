@@ -7,20 +7,20 @@ type (
 	GetShopByIdRespData struct {
 		Id        uint    `json:"id"`
 		Name      string  `json:"name"`
-		TypeId    uint    `json:"type_id"`
+		TypeId    uint    `json:"typeId"`
 		Images    string  `json:"images"`
 		Area      string  `json:"area"`
 		Address   string  `json:"address"`
 		X         float64 `json:"x"`
 		Y         float64 `json:"y"`
-		AvgPrice  uint    `json:"avg_price"`
+		AvgPrice  uint    `json:"avgPrice"`
 		Sold      uint    `json:"sold"`
 		Comments  uint    `json:"comments"`
 		Score     uint    `json:"score"`
-		OpenHours string  `json:"open_hours"`
+		OpenHours string  `json:"openHours"`
 	}
 	GetShopByIdResp struct {
-		response
+		Response
 		Data GetShopByIdRespData `json:"data"`
 	}
 )
@@ -41,5 +41,4 @@ type (
 		Score     *uint    `json:"score"`
 		OpenHours *string  `json:"open_hours"`
 	}
-	UpdateShopResp response
 )

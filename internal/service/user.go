@@ -17,8 +17,8 @@ import (
 )
 
 type UserService interface {
-	SendCode(ctx context.Context, params *v1.SendCodeReq) error
-	Login(ctx context.Context, params *v1.LoginReq) (*v1.LoginRespData, error)
+	SendCode(ctx context.Context, req *v1.SendCodeReq) error
+	Login(ctx context.Context, req *v1.LoginReq) (*v1.LoginRespData, error)
 	GetMe(ctx context.Context) (*v1.GetMeRespData, error)
 }
 
@@ -34,8 +34,8 @@ func NewUserService(service *Service, userRepository repository.UserRepository) 
 	}
 }
 
-func (s *userService) SendCode(ctx context.Context, params *v1.SendCodeReq) error {
-	if !validator.IsPhone(params.Phone) {
+func (s *userService) SendCode(ctx context.Context, req *v1.SendCodeReq) error {
+	if !validator.IsPhone(req.Phone) {
 		return errors.New("phone is invalidate")
 	}
 
@@ -46,7 +46,7 @@ func (s *userService) SendCode(ctx context.Context, params *v1.SendCodeReq) erro
 		code = "123456"
 	}
 
-	key, ttl := constants.RedisLoginCodeKey+params.Phone, time.Minute*constants.RedisLoginCodeTTL
+	key, ttl := constants.RedisLoginCodeKey+req.Phone, time.Minute*constants.RedisLoginCodeTTL
 	err := s.rdb.Set(ctx, key, code, ttl).Err()
 	if err != nil {
 		return err
@@ -57,26 +57,26 @@ func (s *userService) SendCode(ctx context.Context, params *v1.SendCodeReq) erro
 	return nil
 }
 
-func (s *userService) Login(ctx context.Context, params *v1.LoginReq) (*v1.LoginRespData, error) {
-	if !validator.IsPhone(params.Phone) {
+func (s *userService) Login(ctx context.Context, req *v1.LoginReq) (*v1.LoginRespData, error) {
+	if !validator.IsPhone(req.Phone) {
 		return &v1.LoginRespData{}, errors.New("phone is invalidate")
 	}
 
-	key := constants.RedisLoginCodeKey + params.Phone
+	key := constants.RedisLoginCodeKey + req.Phone
 	cacheCode, err := s.rdb.Get(ctx, key).Result()
 	if err != nil {
 		return &v1.LoginRespData{}, err
 	}
-	if params.Code != cacheCode {
+	if req.Code != cacheCode {
 		return &v1.LoginRespData{}, errors.New("code is invalidate")
 	}
 
-	user, err := s.userRepository.GetUserByPhone(ctx, params.Phone)
+	user, err := s.userRepository.GetUserByPhone(ctx, req.Phone)
 	if err != nil {
 		return &v1.LoginRespData{}, err
 	}
 	if user == nil {
-		user, err = s.createUserWithPhone(params.Phone)
+		user, err = s.createUserWithPhone(req.Phone)
 		if err != nil {
 			return &v1.LoginRespData{}, err
 		}

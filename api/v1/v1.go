@@ -5,7 +5,7 @@ import (
 	"net/http"
 )
 
-type response struct {
+type Response struct {
 	Success  bool   `json:"success"`
 	ErrorMsg string `json:"error_msg,omitempty"`
 	Data     any    `json:"data,omitempty"`
@@ -13,16 +13,16 @@ type response struct {
 }
 
 func HandleSuccess(ctx *gin.Context, data any) {
-	resp := response{Success: true, Data: data}
+	resp := Response{Success: true, Data: data}
 	ctx.JSON(http.StatusOK, resp)
 }
 
 func HandleListSuccess(ctx *gin.Context, data any, total int) {
-	resp := response{Success: true, Data: data, Total: total}
+	resp := Response{Success: true, Data: data, Total: total}
 	ctx.JSON(http.StatusOK, resp)
 }
 
 func HandleError(ctx *gin.Context, httpCode int, message string, data any) {
-	resp := response{Success: false, ErrorMsg: message, Data: data}
+	resp := Response{Success: false, ErrorMsg: message, Data: data}
 	ctx.JSON(httpCode, resp)
 }

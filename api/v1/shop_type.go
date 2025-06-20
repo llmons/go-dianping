@@ -9,7 +9,7 @@ type (
 	}
 	GetShopTypeListRespData []*GetShopTypeListRespDataItem
 	GetShopTypeListResp     struct {
-		response
+		Response
 		Data GetShopTypeListRespData `json:"data"`
 	}
 )

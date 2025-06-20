@@ -4,7 +4,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"go-dianping/api/v1"
 	"go-dianping/internal/service"
-	"go.uber.org/zap"
 	"net/http"
 )
 
@@ -29,16 +28,16 @@ type UserHandler struct {
 // @Tags user
 // @Produce json
 // @Param phone query string true "手机号"
-// @Success 200 {object} api.SendCodeResp
+// @Success 200 {object} v1.Response
 // @Router /user/code [post]
 func (h *UserHandler) SendCode(ctx *gin.Context) {
-	var params v1.SendCodeReq
-	if err := ctx.ShouldBind(&params); err != nil {
+	var req v1.SendCodeReq
+	if err := ctx.ShouldBindQuery(&req); err != nil {
 		v1.HandleError(ctx, http.StatusBadRequest, err.Error(), nil)
 		return
 	}
 
-	err := h.userService.SendCode(ctx.Request.Context(), &params)
+	err := h.userService.SendCode(ctx.Request.Context(), &req)
 	if err != nil {
 		v1.HandleError(ctx, http.StatusInternalServerError, err.Error(), nil)
 		return
@@ -53,8 +52,8 @@ func (h *UserHandler) SendCode(ctx *gin.Context) {
 // @Tags user
 // @Accept json
 // @Produce json
-// @Params request body api.LoginReq true "手机+验证码"
-// @Success 200 {object} api.LoginResp
+// @Params request body v1.LoginReq true "手机+验证码"
+// @Success 200 {object} v1.LoginResp
 // @Router /user/login [post]
 func (h *UserHandler) Login(ctx *gin.Context) {
 	var params v1.LoginReq
@@ -64,7 +63,6 @@ func (h *UserHandler) Login(ctx *gin.Context) {
 	}
 
 	data, err := h.userService.Login(ctx.Request.Context(), &params)
-	h.logger.Info("Login", zap.Any("data", data))
 	if err != nil {
 		v1.HandleError(ctx, http.StatusInternalServerError, err.Error(), nil)
 		return
@@ -80,11 +78,10 @@ func (h *UserHandler) Login(ctx *gin.Context) {
 // @Tags user
 // @Produce json
 // @Security Bearer
-// @Success 200 {object} api.GetMeResp
+// @Success 200 {object} v1.GetMeResp
 // @Router /user/me [get]
 func (h *UserHandler) GetMe(ctx *gin.Context) {
 	user, err := h.userService.GetMe(ctx.Request.Context())
-	h.logger.Info("Get", zap.Any("user", user))
 	if err != nil {
 		v1.HandleError(ctx, http.StatusInternalServerError, err.Error(), nil)
 		return
