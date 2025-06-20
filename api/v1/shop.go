@@ -1,13 +1,13 @@
-package api
+package v1
 
 type (
 	GetShopByIdReq struct {
 		Id string `uri:"id" binding:"required"`
 	}
 	GetShopByIdRespData struct {
-		Id        string  `json:"id"`
+		Id        uint    `json:"id"`
 		Name      string  `json:"name"`
-		TypeId    string  `json:"type_id"`
+		TypeId    uint    `json:"type_id"`
 		Images    string  `json:"images"`
 		Area      string  `json:"area"`
 		Address   string  `json:"address"`

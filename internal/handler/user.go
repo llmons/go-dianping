@@ -2,7 +2,7 @@ package handler
 
 import (
 	"github.com/gin-gonic/gin"
-	"go-dianping/api"
+	"go-dianping/api/v1"
 	"go-dianping/internal/service"
 	"go.uber.org/zap"
 	"net/http"
@@ -32,18 +32,18 @@ type UserHandler struct {
 // @Success 200 {object} api.SendCodeResp
 // @Router /user/code [post]
 func (h *UserHandler) SendCode(ctx *gin.Context) {
-	var params api.SendCodeReq
+	var params v1.SendCodeReq
 	if err := ctx.ShouldBind(&params); err != nil {
-		api.HandleError(ctx, http.StatusBadRequest, err.Error(), nil)
+		v1.HandleError(ctx, http.StatusBadRequest, err.Error(), nil)
 		return
 	}
 
 	err := h.userService.SendCode(ctx.Request.Context(), &params)
 	if err != nil {
-		api.HandleError(ctx, http.StatusInternalServerError, err.Error(), nil)
+		v1.HandleError(ctx, http.StatusInternalServerError, err.Error(), nil)
 		return
 	}
-	api.HandleSuccess(ctx, nil)
+	v1.HandleSuccess(ctx, nil)
 }
 
 // Login godoc
@@ -57,20 +57,20 @@ func (h *UserHandler) SendCode(ctx *gin.Context) {
 // @Success 200 {object} api.LoginResp
 // @Router /user/login [post]
 func (h *UserHandler) Login(ctx *gin.Context) {
-	var params api.LoginReq
+	var params v1.LoginReq
 	if err := ctx.ShouldBind(&params); err != nil {
-		api.HandleError(ctx, http.StatusBadRequest, err.Error(), nil)
+		v1.HandleError(ctx, http.StatusBadRequest, err.Error(), nil)
 		return
 	}
 
 	data, err := h.userService.Login(ctx.Request.Context(), &params)
 	h.logger.Info("Login", zap.Any("data", data))
 	if err != nil {
-		api.HandleError(ctx, http.StatusInternalServerError, err.Error(), nil)
+		v1.HandleError(ctx, http.StatusInternalServerError, err.Error(), nil)
 		return
 	}
 
-	api.HandleSuccess(ctx, data)
+	v1.HandleSuccess(ctx, data)
 }
 
 // GetMe godoc
@@ -86,8 +86,8 @@ func (h *UserHandler) GetMe(ctx *gin.Context) {
 	user, err := h.userService.GetMe(ctx.Request.Context())
 	h.logger.Info("Get", zap.Any("user", user))
 	if err != nil {
-		api.HandleError(ctx, http.StatusInternalServerError, err.Error(), nil)
+		v1.HandleError(ctx, http.StatusInternalServerError, err.Error(), nil)
 		return
 	}
-	api.HandleSuccess(ctx, user)
+	v1.HandleSuccess(ctx, user)
 }

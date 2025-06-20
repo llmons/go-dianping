@@ -3,7 +3,7 @@ package service
 import (
 	"context"
 	"github.com/pkg/errors"
-	"go-dianping/api"
+	"go-dianping/api/v1"
 	"go-dianping/internal/base/constants"
 	"go-dianping/internal/base/user_holder"
 	"go-dianping/internal/model"
@@ -17,9 +17,9 @@ import (
 )
 
 type UserService interface {
-	SendCode(ctx context.Context, params *api.SendCodeReq) error
-	Login(ctx context.Context, params *api.LoginReq) (*api.LoginRespData, error)
-	GetMe(ctx context.Context) (*api.GetMeRespData, error)
+	SendCode(ctx context.Context, params *v1.SendCodeReq) error
+	Login(ctx context.Context, params *v1.LoginReq) (*v1.LoginRespData, error)
+	GetMe(ctx context.Context) (*v1.GetMeRespData, error)
 }
 
 type userService struct {
@@ -34,7 +34,7 @@ func NewUserService(service *Service, userRepository repository.UserRepository) 
 	}
 }
 
-func (s *userService) SendCode(ctx context.Context, params *api.SendCodeReq) error {
+func (s *userService) SendCode(ctx context.Context, params *v1.SendCodeReq) error {
 	if !validator.IsPhone(params.Phone) {
 		return errors.New("phone is invalidate")
 	}
@@ -57,28 +57,28 @@ func (s *userService) SendCode(ctx context.Context, params *api.SendCodeReq) err
 	return nil
 }
 
-func (s *userService) Login(ctx context.Context, params *api.LoginReq) (*api.LoginRespData, error) {
+func (s *userService) Login(ctx context.Context, params *v1.LoginReq) (*v1.LoginRespData, error) {
 	if !validator.IsPhone(params.Phone) {
-		return &api.LoginRespData{}, errors.New("phone is invalidate")
+		return &v1.LoginRespData{}, errors.New("phone is invalidate")
 	}
 
 	key := constants.RedisLoginCodeKey + params.Phone
 	cacheCode, err := s.rdb.Get(ctx, key).Result()
 	if err != nil {
-		return &api.LoginRespData{}, err
+		return &v1.LoginRespData{}, err
 	}
 	if params.Code != cacheCode {
-		return &api.LoginRespData{}, errors.New("code is invalidate")
+		return &v1.LoginRespData{}, errors.New("code is invalidate")
 	}
 
 	user, err := s.userRepository.GetUserByPhone(ctx, params.Phone)
 	if err != nil {
-		return &api.LoginRespData{}, err
+		return &v1.LoginRespData{}, err
 	}
 	if user == nil {
 		user, err = s.createUserWithPhone(params.Phone)
 		if err != nil {
-			return &api.LoginRespData{}, err
+			return &v1.LoginRespData{}, err
 		}
 	}
 
@@ -90,25 +90,25 @@ func (s *userService) Login(ctx context.Context, params *api.LoginReq) (*api.Log
 		"icon":     user.Icon,
 	}).Err()
 	if err != nil {
-		return &api.LoginRespData{}, err
+		return &v1.LoginRespData{}, err
 	}
 
 	ttl := time.Minute * constants.RedisLoginUserTTL
 	err = s.rdb.Expire(ctx, key, ttl).Err()
 	if err != nil {
-		return &api.LoginRespData{}, err
+		return &v1.LoginRespData{}, err
 	}
-	return &api.LoginRespData{
+	return &v1.LoginRespData{
 		Token: token,
 	}, nil
 }
 
-func (s *userService) GetMe(ctx context.Context) (*api.GetMeRespData, error) {
+func (s *userService) GetMe(ctx context.Context) (*v1.GetMeRespData, error) {
 	user := user_holder.GetUser(ctx)
 	if user == nil {
 		return nil, errors.New("user not found")
 	}
-	return (*api.GetMeRespData)(user), nil
+	return (*v1.GetMeRespData)(user), nil
 }
 
 func (s *userService) createUserWithPhone(phone string) (*model.User, error) {

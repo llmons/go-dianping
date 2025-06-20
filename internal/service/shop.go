@@ -7,8 +7,8 @@ import (
 	"github.com/jinzhu/copier"
 	"github.com/pkg/errors"
 	"github.com/redis/go-redis/v9"
-	//"github.com/samber/lo"
-	"go-dianping/api"
+	"go-dianping/api/v1"
+
 	"go-dianping/internal/base/constants"
 	"go-dianping/internal/model"
 	"go-dianping/internal/repository"
@@ -17,8 +17,8 @@ import (
 )
 
 type ShopService interface {
-	GetShopById(ctx context.Context, req *api.GetShopByIdReq) (*api.GetShopByIdRespData, error)
-	UpdateShop(ctx context.Context, req *api.UpdateShopReq) error
+	GetShopById(ctx context.Context, req *v1.GetShopByIdReq) (*v1.GetShopByIdRespData, error)
+	UpdateShop(ctx context.Context, req *v1.UpdateShopReq) error
 }
 
 func NewShopService(
@@ -36,8 +36,8 @@ type shopService struct {
 	shopRepository repository.ShopRepository
 }
 
-func (s *shopService) GetShopById(ctx context.Context, params *api.GetShopByIdReq) (*api.GetShopByIdRespData, error) {
-	var data api.GetShopByIdRespData
+func (s *shopService) GetShopById(ctx context.Context, params *v1.GetShopByIdReq) (*v1.GetShopByIdRespData, error) {
+	var data v1.GetShopByIdRespData
 
 	// ========== check cache ==========
 	key := constants.RedisCacheShopKey + params.Id
@@ -45,8 +45,8 @@ func (s *shopService) GetShopById(ctx context.Context, params *api.GetShopByIdRe
 	if err != nil && !errors.Is(err, redis.Nil) {
 		return nil, err
 	}
-	var cacheShop *model.Shop
 	if cacheShopStr != "" {
+		var cacheShop model.Shop
 		if err := json.Unmarshal([]byte(cacheShopStr), &cacheShop); err != nil {
 			return nil, err
 		}
@@ -75,13 +75,13 @@ func (s *shopService) GetShopById(ctx context.Context, params *api.GetShopByIdRe
 	if err := s.rdb.Set(ctx, key, bytes, ttl).Err(); err != nil {
 		return nil, err
 	}
-	if err := copier.CopyWithOption(&data, &cacheShop, copier.Option{IgnoreEmpty: true}); err != nil {
+	if err := copier.CopyWithOption(&data, &shop, copier.Option{IgnoreEmpty: true}); err != nil {
 		return nil, err
 	}
 	return &data, nil
 }
 
-func (s *shopService) UpdateShop(ctx context.Context, newShop *api.UpdateShopReq) error {
+func (s *shopService) UpdateShop(ctx context.Context, newShop *v1.UpdateShopReq) error {
 	// ========== update sql db ==========
 	// already check id with gin.Context shouldBind in handler
 	var shop model.Shop
@@ -94,7 +94,7 @@ func (s *shopService) UpdateShop(ctx context.Context, newShop *api.UpdateShopReq
 	}
 
 	// ========== delete cache ==========
-	key := fmt.Sprintf("%s%d", constants.RedisLoginCodeKey, newShop.Id)
+	key := fmt.Sprintf("%s%d", constants.RedisCacheShopKey, newShop.Id)
 	s.rdb.Del(ctx, key)
 	return nil
 }

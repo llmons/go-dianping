@@ -2,7 +2,7 @@ package handler
 
 import (
 	"github.com/gin-gonic/gin"
-	"go-dianping/api"
+	"go-dianping/api/v1"
 	"go-dianping/internal/service"
 	"go.uber.org/zap"
 	"net/http"
@@ -33,19 +33,19 @@ func NewShopHandler(
 // @Success 200 {object} api.GetShopByIdResp
 // @Router /shop/:id [get]
 func (h *ShopHandler) GetShopById(ctx *gin.Context) {
-	var params api.GetShopByIdReq
+	var params v1.GetShopByIdReq
 	if err := ctx.ShouldBindUri(&params); err != nil {
-		api.HandleError(ctx, http.StatusBadRequest, err.Error(), nil)
+		v1.HandleError(ctx, http.StatusBadRequest, err.Error(), nil)
 		return
 	}
 
 	data, err := h.shopService.GetShopById(ctx.Request.Context(), &params)
 	h.logger.Info("GetShopById", zap.Any("data", data))
 	if err != nil {
-		api.HandleError(ctx, http.StatusBadRequest, err.Error(), nil)
+		v1.HandleError(ctx, http.StatusBadRequest, err.Error(), nil)
 		return
 	}
-	api.HandleSuccess(ctx, data)
+	v1.HandleSuccess(ctx, data)
 }
 
 // UpdateShop godoc
@@ -58,17 +58,17 @@ func (h *ShopHandler) GetShopById(ctx *gin.Context) {
 // @Success 200 {object} api.UpdateShopResp
 // @Router /shop [put]
 func (h *ShopHandler) UpdateShop(ctx *gin.Context) {
-	var req api.UpdateShopReq
+	var req v1.UpdateShopReq
 	if err := ctx.ShouldBindJSON(&req); err != nil {
-		api.HandleError(ctx, http.StatusBadRequest, err.Error(), nil)
+		v1.HandleError(ctx, http.StatusBadRequest, err.Error(), nil)
 		return
 	}
 
 	err := h.shopService.UpdateShop(ctx.Request.Context(), &req)
 	h.logger.Info("UpdateShop", zap.Any("update data", req))
 	if err != nil {
-		api.HandleError(ctx, http.StatusBadRequest, err.Error(), nil)
+		v1.HandleError(ctx, http.StatusBadRequest, err.Error(), nil)
 		return
 	}
-	api.HandleSuccess(ctx, nil)
+	v1.HandleSuccess(ctx, nil)
 }

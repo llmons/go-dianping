@@ -3,8 +3,8 @@ package middleware
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/redis/go-redis/v9"
+	"go-dianping/api/v1"
 
-	"go-dianping/api"
 	"go-dianping/internal/base/constants"
 	"go-dianping/internal/base/user_holder"
 
@@ -39,7 +39,7 @@ func RefreshToken(rdb *redis.Client) gin.HandlerFunc {
 		if err != nil {
 			ctx.AbortWithStatus(500)
 		}
-		newCtx := user_holder.WithUser(ctx, &api.SimpleUser{
+		newCtx := user_holder.WithUser(ctx, &v1.SimpleUser{
 			Id:       uint(idInt),
 			NickName: userField["nickname"],
 			Icon:     userField["icon"],

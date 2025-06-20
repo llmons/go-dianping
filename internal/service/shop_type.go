@@ -5,14 +5,14 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/redis/go-redis/v9"
-	"go-dianping/api"
+	"go-dianping/api/v1"
 	"go-dianping/internal/base/constants"
 	"go-dianping/internal/repository"
 	"time"
 )
 
 type ShopTypeService interface {
-	GetShopTypeList(ctx context.Context) (api.GetShopTypeListRespData, error)
+	GetShopTypeList(ctx context.Context) (v1.GetShopTypeListRespData, error)
 }
 
 func NewShopTypeService(
@@ -30,14 +30,14 @@ type shopTypeService struct {
 	shopTypeRepository repository.ShopTypeRepository
 }
 
-func (s *shopTypeService) GetShopTypeList(ctx context.Context) (api.GetShopTypeListRespData, error) {
+func (s *shopTypeService) GetShopTypeList(ctx context.Context) (v1.GetShopTypeListRespData, error) {
 	// ========== check cache ==========
 	cacheShopTypeStr, err := s.rdb.Get(ctx, constants.RedisCacheShopKey).Result()
 	if err != nil && !errors.Is(err, redis.Nil) {
 		return nil, err
 	}
 
-	var cacheShopType api.GetShopTypeListRespData
+	var cacheShopType v1.GetShopTypeListRespData
 	if cacheShopTypeStr != "" {
 		if err := json.Unmarshal([]byte(cacheShopTypeStr), &cacheShopType); err != nil {
 			return nil, err
@@ -48,12 +48,12 @@ func (s *shopTypeService) GetShopTypeList(ctx context.Context) (api.GetShopTypeL
 	// ========== query sql db ==========
 	list, err := s.shopTypeRepository.GetShopTypeList(ctx)
 	if err != nil {
-		return api.GetShopTypeListRespData{}, err
+		return v1.GetShopTypeListRespData{}, err
 	}
 
-	data := make(api.GetShopTypeListRespData, len(list))
+	data := make(v1.GetShopTypeListRespData, len(list))
 	for i, shopType := range list {
-		data[i] = &api.GetShopTypeListRespDataItem{
+		data[i] = &v1.GetShopTypeListRespDataItem{
 			Id:   shopType.Id,
 			Name: shopType.Name,
 			Icon: shopType.Icon,

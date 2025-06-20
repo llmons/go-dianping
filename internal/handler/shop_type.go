@@ -2,7 +2,7 @@ package handler
 
 import (
 	"github.com/gin-gonic/gin"
-	"go-dianping/api"
+	"go-dianping/api/v1"
 	"go-dianping/internal/service"
 	"go.uber.org/zap"
 	"net/http"
@@ -35,9 +35,9 @@ func (h *ShopTypeHandler) GetShopTypeList(ctx *gin.Context) {
 	shopTypeList, err := h.shopTypeService.GetShopTypeList(ctx.Request.Context())
 	h.logger.Info("GetShopTypeList", zap.Int("shopTypeListLength", len(shopTypeList)))
 	if err != nil {
-		api.HandleError(ctx, http.StatusInternalServerError, err.Error(), nil)
+		v1.HandleError(ctx, http.StatusInternalServerError, err.Error(), nil)
 		return
 	}
 
-	api.HandleListSuccess(ctx, shopTypeList, len(shopTypeList))
+	v1.HandleListSuccess(ctx, shopTypeList, len(shopTypeList))
 }
