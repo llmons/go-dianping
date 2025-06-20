@@ -24,11 +24,12 @@ type shopRepository struct {
 
 func (r *shopRepository) GetShopById(_ context.Context, id int) (*model.Shop, error) {
 	var shop model.Shop
-	r.db.First(&shop, id)
+	if err := r.db.First(&shop, id).Error; err != nil {
+		return nil, err
+	}
 	return &shop, nil
 }
 
 func (r Repository) Update(_ context.Context, shop *model.Shop) error {
-	r.db.Model(&model.Shop{}).Where("id = ?", shop.Model.Id).Updates(shop)
-	return nil
+	return r.db.Model(&model.Shop{}).Where("id = ?", shop.Model.Id).Updates(shop).Error
 }
