@@ -10,23 +10,26 @@ import (
 	"go-dianping/api/v1"
 	"go-dianping/internal/base/constants"
 	"go-dianping/internal/entity"
-	"time"
+	"go-dianping/internal/repository"
 )
 
 type ShopTypeService interface {
 	GetShopTypeList(ctx context.Context) (v1.GetShopTypeListRespData, error)
 }
 
-func NewShopTypeService(
-	service *Service,
-) ShopTypeService {
-	return &shopTypeService{
-		Service: service,
-	}
-}
-
 type shopTypeService struct {
 	*Service
+	shopTypeRepository repository.ShopTypeRepository
+}
+
+func NewShopTypeService(
+	service *Service,
+	shopTypeRepository repository.ShopTypeRepository,
+) ShopTypeService {
+	return &shopTypeService{
+		Service:            service,
+		shopTypeRepository: shopTypeRepository,
+	}
 }
 
 func (s *shopTypeService) GetShopTypeList(ctx context.Context) (v1.GetShopTypeListRespData, error) {
@@ -45,7 +48,7 @@ func (s *shopTypeService) GetShopTypeList(ctx context.Context) (v1.GetShopTypeLi
 	}
 
 	// ========== query sql db ==========
-	list, err := s.repo.Query.ShopType.Find()
+	list, err := s.shopTypeRepository.GetAll(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -63,7 +66,6 @@ func (s *shopTypeService) GetShopTypeList(ctx context.Context) (v1.GetShopTypeLi
 	if err != nil {
 		return nil, err
 	}
-	ttl := time.Minute * constants.RedisCacheShopTypeTTL
-	s.rdb.Set(ctx, constants.RedisCacheShopTypeKey, bytes, ttl)
+	s.rdb.Set(ctx, constants.RedisCacheShopTypeKey, bytes, constants.RedisCacheShopTypeTTL)
 	return data, nil
 }

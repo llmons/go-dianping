@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"go-dianping/cmd/server/wire"
 	"go-dianping/pkg/config"
@@ -24,7 +25,10 @@ import (
 // @externalDocs.description  GitHub
 // @externalDocs.url          https://github.com/llmons/go-dianping
 func main() {
-	conf := config.NewConfig()
+	var envConf = flag.String("conf", "config/local.yml", "config path, eg: -conf ./config/local.yml")
+	flag.Parse()
+	conf := config.NewConfig(*envConf)
+
 	logger := log.NewLog(conf)
 
 	logger.Info("server start", zap.String("host", fmt.Sprintf("http://%s:%d", conf.GetString("http.host"), conf.GetInt("http.port"))))

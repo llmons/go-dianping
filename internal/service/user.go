@@ -8,9 +8,9 @@ import (
 	"go-dianping/internal/base/constants"
 	"go-dianping/internal/base/user_holder"
 	"go-dianping/internal/entity"
+	"go-dianping/internal/repository"
 	"go-dianping/pkg/helper/validator"
 	"go.uber.org/zap"
-	"time"
 )
 
 type UserService interface {
@@ -21,11 +21,13 @@ type UserService interface {
 
 type userService struct {
 	*Service
+	userRepository repository.UserRepository
 }
 
-func NewUserService(service *Service) UserService {
+func NewUserService(service *Service, userRepository repository.UserRepository) UserService {
 	return &userService{
-		Service: service,
+		Service:        service,
+		userRepository: userRepository,
 	}
 }
 
@@ -41,8 +43,8 @@ func (s *userService) SendCode(ctx context.Context, req *v1.SendCodeReq) error {
 		code = "123456"
 	}
 
-	key, ttl := constants.RedisLoginCodeKey+req.Phone, time.Minute*constants.RedisLoginCodeTTL
-	err := s.rdb.Set(ctx, key, code, ttl).Err()
+	key := constants.RedisLoginCodeKey + req.Phone
+	err := s.rdb.Set(ctx, key, code, constants.RedisLoginCodeTTL).Err()
 	if err != nil {
 		return err
 	}
@@ -66,12 +68,12 @@ func (s *userService) Login(ctx context.Context, req *v1.LoginReq) (*v1.LoginRes
 		return &v1.LoginRespData{}, errors.New("code is invalidate")
 	}
 
-	user, err := s.repo.Query.User.Where(s.repo.Query.User.Phone.Eq(req.Phone)).First()
+	user, err := s.userRepository.GetByPhone(ctx, req.Phone)
 	if err != nil {
 		return nil, err
 	}
 	if user == nil {
-		user, err = s.createUserWithPhone(req.Phone)
+		user, err = s.createUserWithPhone(ctx, req.Phone)
 		if err != nil {
 			return &v1.LoginRespData{}, err
 		}
@@ -96,8 +98,7 @@ func (s *userService) Login(ctx context.Context, req *v1.LoginReq) (*v1.LoginRes
 		return &v1.LoginRespData{}, err
 	}
 
-	ttl := time.Minute * constants.RedisLoginUserTTL
-	err = s.rdb.Expire(ctx, key, ttl).Err()
+	err = s.rdb.Expire(ctx, key, constants.RedisLoginUserTTL).Err()
 	if err != nil {
 		return &v1.LoginRespData{}, err
 	}
@@ -114,13 +115,13 @@ func (s *userService) GetMe(ctx context.Context) (*v1.GetMeRespData, error) {
 	return (*v1.GetMeRespData)(user), nil
 }
 
-func (s *userService) createUserWithPhone(phone string) (*entity.User, error) {
+func (s *userService) createUserWithPhone(ctx context.Context, phone string) (*entity.User, error) {
 	nickname := constants.UserNickNamePrefix + random.RandString(10)
 	user := entity.User{
 		Phone:    phone,
 		NickName: &nickname,
 	}
-	if err := s.repo.Query.User.Create(&user); err != nil {
+	if err := s.userRepository.Create(ctx, &user); err != nil {
 		return nil, err
 	}
 	return &user, nil

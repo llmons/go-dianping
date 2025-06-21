@@ -10,7 +10,6 @@ import (
 
 	"strconv"
 	"strings"
-	"time"
 )
 
 func RefreshToken(rdb *redis.Client) gin.HandlerFunc {
@@ -48,8 +47,8 @@ func RefreshToken(rdb *redis.Client) gin.HandlerFunc {
 		ctx.Request = ctx.Request.WithContext(newCtx)
 
 		// ========== refresh token ==========
-		key, ttl := constants.RedisLoginUserKey+token, time.Minute*constants.RedisLoginUserTTL
-		rdb.Expire(ctx, key, ttl)
+		key = constants.RedisLoginUserKey + token
+		rdb.Expire(ctx, key, constants.RedisLoginUserTTL)
 		ctx.Next()
 	}
 }

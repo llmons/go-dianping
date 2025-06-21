@@ -9,7 +9,9 @@ import (
 	"github.com/redis/go-redis/v9"
 	"go-dianping/api/v1"
 	"go-dianping/internal/base/constants"
+	"go-dianping/internal/base/redis_data"
 	"go-dianping/internal/entity"
+	"go-dianping/internal/repository"
 	"gorm.io/gorm"
 	"time"
 )
@@ -17,18 +19,22 @@ import (
 type ShopService interface {
 	GetShopById(ctx context.Context, req *v1.GetShopByIDReq) (*v1.GetShopByIDRespData, error)
 	UpdateShop(ctx context.Context, req *v1.UpdateShopReq) error
-}
-
-func NewShopService(
-	service *Service,
-) ShopService {
-	return &shopService{
-		Service: service,
-	}
+	SaveShop2Redis(ctx context.Context, id int64, expireTime time.Duration) error
 }
 
 type shopService struct {
 	*Service
+	shopRepository repository.ShopRepository
+}
+
+func NewShopService(
+	service *Service,
+	shopRepository repository.ShopRepository,
+) ShopService {
+	return &shopService{
+		Service:        service,
+		shopRepository: shopRepository,
+	}
 }
 
 func (s *shopService) GetShopById(ctx context.Context, req *v1.GetShopByIDReq) (*v1.GetShopByIDRespData, error) {
@@ -52,8 +58,7 @@ func (s *shopService) UpdateShop(ctx context.Context, req *v1.UpdateShopReq) err
 		return err
 	}
 
-	if _, err := s.repo.Query.Shop.Where(s.repo.Query.Shop.ID.Eq(req.ID)).
-		Updates(&shop); err != nil {
+	if _, err := s.shopRepository.Update(ctx, &shop); err != nil {
 		return err
 	}
 
@@ -88,24 +93,21 @@ func (s *shopService) queryWithPassThrough(ctx context.Context, req *v1.GetShopB
 	}
 
 	// ========== query sql db ==========
-	shop, err := s.repo.Query.Shop.Where(s.repo.Query.Shop.ID.Eq(req.ID)).First()
+	shop, err := s.shopRepository.GetById(ctx, req.ID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			// solve the cache penetration
-			s.rdb.Set(ctx, key, "", time.Minute*constants.RedisCacheNullTTL)
+			s.rdb.Set(ctx, key, "", constants.RedisCacheNullTTL)
 		}
 		return nil, err
 	}
 
 	// ========== record exist, save to redis and return ==========
-	ttl := time.Minute * constants.RedisCacheShopTTL
 	bytes, err := json.Marshal(shop)
 	if err != nil {
 		return nil, err
 	}
-	if err := s.rdb.Set(ctx, key, bytes, ttl).Err(); err != nil {
-		return nil, err
-	}
+	s.rdb.Set(ctx, key, bytes, constants.RedisCacheShopTTL)
 	if err := copier.CopyWithOption(&data, &shop, copier.Option{IgnoreEmpty: true}); err != nil {
 		return nil, err
 	}
@@ -148,27 +150,44 @@ func (s *shopService) queryWithMutex(ctx context.Context, req *v1.GetShopByIDReq
 		return s.queryWithMutex(ctx, req)
 	}
 
+	// ========== double check ==========
+	cacheShopStr, err = s.rdb.Get(ctx, key).Result()
+	if err != nil && !errors.Is(err, redis.Nil) {
+		return nil, err
+	}
+	// err == nil || err == redis.Nil
+	if err == nil && cacheShopStr == "" {
+		return nil, errors.New("shop not exist")
+	}
+	if cacheShopStr != "" {
+		var cacheShop entity.Shop
+		if err := json.Unmarshal([]byte(cacheShopStr), &cacheShop); err != nil {
+			return nil, err
+		}
+		if err := copier.CopyWithOption(&data, &cacheShop, copier.Option{IgnoreEmpty: true}); err != nil {
+			return nil, err
+		}
+		return &data, nil
+	}
+
 	// ========== query sql db ==========
-	shop, err := s.repo.Query.Shop.Where(s.repo.Query.Shop.ID.Eq(req.ID)).First()
+	shop, err := s.shopRepository.GetById(ctx, req.ID)
 	// mock time delay
 	time.Sleep(time.Millisecond * 200)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			// solve the cache penetration
-			s.rdb.Set(ctx, key, "", time.Minute*constants.RedisCacheNullTTL)
+			s.rdb.Set(ctx, key, "", constants.RedisCacheNullTTL)
 		}
 		return nil, err
 	}
 
 	// ========== record exist, save to redis and return ==========
-	ttl := time.Minute * constants.RedisCacheShopTTL
 	bytes, err := json.Marshal(shop)
 	if err != nil {
 		return nil, err
 	}
-	if err := s.rdb.Set(ctx, key, bytes, ttl).Err(); err != nil {
-		return nil, err
-	}
+	s.rdb.Set(ctx, key, bytes, constants.RedisCacheShopTTL)
 	if err := copier.CopyWithOption(&data, &shop, copier.Option{IgnoreEmpty: true}); err != nil {
 		return nil, err
 	}
@@ -185,4 +204,19 @@ func (s *shopService) tryLock(ctx context.Context, key string) (bool, error) {
 
 func (s *shopService) unlock(ctx context.Context, key string) {
 	s.rdb.Del(ctx, key)
+}
+
+func (s *shopService) SaveShop2Redis(ctx context.Context, id int64, expireTime time.Duration) error {
+	shop, err := s.shopRepository.GetById(ctx, id)
+	if err != nil {
+		return err
+	}
+
+	data := redis_data.RedisData{
+		ExpireTime: expireTime,
+		Data:       shop,
+	}
+	key := fmt.Sprintf("%s%d", constants.RedisCacheShopKey, shop.ID)
+	s.rdb.Set(ctx, key, data, 0)
+	return nil
 }

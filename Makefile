@@ -16,9 +16,10 @@ run:
 
 .PHONY: mock
 mock:
-	mockgen -source=internal/service/user.go -destination test/mocks/service/user.go
-	mockgen -source=internal/repository/user.go -destination test/mocks/repository/user.go
+	mockgen -source=internal/query/gen.go -destination test/mocks/query/gen.go
+	mockgen -source=internal/query/shop.gen.go -destination test/mocks/query/shop.gen.go
 	mockgen -source=internal/repository/repository.go -destination test/mocks/repository/repository.go
+	mockgen -source=internal/service/shop.go -destination test/mocks/service/shop.go
 
 .PHONY: test
 test:

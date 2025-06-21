@@ -1,23 +1,24 @@
 package constants
 
+import "time"
+
 type RedisKey string
 type RedisTTL int
 
-// TTL minute
 const (
 	RedisLoginCodeKey = "login:code:"
-	RedisLoginCodeTTL = 2
+	RedisLoginCodeTTL = time.Minute * 2
 
 	RedisLoginUserKey = "login:token:"
-	RedisLoginUserTTL = 30
+	RedisLoginUserTTL = time.Minute * 30
 
 	RedisCacheShopKey = "cache:shop:"
-	RedisCacheShopTTL = 30
+	RedisCacheShopTTL = time.Minute * 30
 
 	RedisCacheShopTypeKey = "cache:shop-type"
-	RedisCacheShopTypeTTL = 30
+	RedisCacheShopTypeTTL = time.Minute * 30
 
-	RedisCacheNullTTL = 2
+	RedisCacheNullTTL = time.Minute * 2
 
 	RedisLockShopKey = "lock:shop:"
 )

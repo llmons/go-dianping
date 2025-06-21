@@ -11,13 +11,13 @@ import (
 )
 
 type Repository struct {
-	Query  *query.Query
+	query  *query.Query
 	logger *log.Logger
 }
 
 func NewRepository(query *query.Query, logger *log.Logger) *Repository {
 	return &Repository{
-		Query:  query,
+		query:  query,
 		logger: logger,
 	}
 }
