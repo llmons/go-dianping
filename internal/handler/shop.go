@@ -29,10 +29,10 @@ func NewShopHandler(
 // @Tags shop
 // @Produce json
 // @Params id path string true "id"
-// @Success 200 {object} v1.GetShopByIdResp
+// @Success 200 {object} v1.GetShopByIDResp
 // @Router /shop/:id [get]
 func (h *ShopHandler) GetShopById(ctx *gin.Context) {
-	var params v1.GetShopByIdReq
+	var params v1.GetShopByIDReq
 	if err := ctx.ShouldBindUri(&params); err != nil {
 		v1.HandleError(ctx, http.StatusBadRequest, err.Error(), nil)
 		return

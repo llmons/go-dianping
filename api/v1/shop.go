@@ -1,44 +1,44 @@
 package v1
 
 type (
-	GetShopByIdReq struct {
-		Id string `uri:"id" binding:"required"`
+	GetShopByIDReq struct {
+		ID int64 `uri:"id" binding:"required"`
 	}
-	GetShopByIdRespData struct {
-		Id        uint    `json:"id"`
+	GetShopByIDRespData struct {
+		ID        int64   `json:"id"`
 		Name      string  `json:"name"`
-		TypeId    uint    `json:"typeId"`
+		TypeId    int64   `json:"typeID"`
 		Images    string  `json:"images"`
-		Area      string  `json:"area"`
+		Area      *string `json:"area"`
 		Address   string  `json:"address"`
 		X         float64 `json:"x"`
 		Y         float64 `json:"y"`
-		AvgPrice  uint    `json:"avgPrice"`
-		Sold      uint    `json:"sold"`
-		Comments  uint    `json:"comments"`
-		Score     uint    `json:"score"`
-		OpenHours string  `json:"openHours"`
+		AvgPrice  *int64  `json:"avgPrice"`
+		Sold      int32   `json:"sold"`
+		Comments  int32   `json:"comments"`
+		Score     int32   `json:"score"`
+		OpenHours *string `json:"openHours"`
 	}
-	GetShopByIdResp struct {
+	GetShopByIDResp struct {
 		Response
-		Data GetShopByIdRespData `json:"data"`
+		Data GetShopByIDRespData `json:"data"`
 	}
 )
 
 type (
 	UpdateShopReq struct {
-		Id        uint     `json:"id" bind:"required"`
-		Name      *string  `json:"name"`
-		TypeId    *uint    `json:"type_id"`
-		Images    *string  `json:"images"`
-		Area      *string  `json:"area"`
-		Address   *string  `json:"address"`
-		X         *float64 `json:"x"`
-		Y         *float64 `json:"y"`
-		AvgPrice  *uint    `json:"avg_price"`
-		Sold      *uint    `json:"sold"`
-		Comments  *uint    `json:"comments"`
-		Score     *uint    `json:"score"`
-		OpenHours *string  `json:"open_hours"`
+		ID        int64   `json:"id"`
+		Name      string  `json:"name"`
+		TypeId    int64   `json:"typeId"`
+		Images    string  `json:"images"`
+		Area      *string `json:"area"`
+		Address   string  `json:"address"`
+		X         float64 `json:"x"`
+		Y         float64 `json:"y"`
+		AvgPrice  *int64  `json:"avgPrice"`
+		Sold      int32   `json:"sold"`
+		Comments  int32   `json:"comments"`
+		Score     int32   `json:"score"`
+		OpenHours *string `json:"openHours"`
 	}
 )

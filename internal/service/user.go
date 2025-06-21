@@ -7,11 +7,9 @@ import (
 	"go-dianping/api/v1"
 	"go-dianping/internal/base/constants"
 	"go-dianping/internal/base/user_holder"
-	"go-dianping/internal/model"
-	"go-dianping/internal/repository"
+	"go-dianping/internal/entity"
 	"go-dianping/pkg/helper/validator"
 	"go.uber.org/zap"
-	"strconv"
 	"time"
 )
 
@@ -23,13 +21,11 @@ type UserService interface {
 
 type userService struct {
 	*Service
-	userRepository repository.UserRepository
 }
 
-func NewUserService(service *Service, userRepository repository.UserRepository) UserService {
+func NewUserService(service *Service) UserService {
 	return &userService{
-		Service:        service,
-		userRepository: userRepository,
+		Service: service,
 	}
 }
 
@@ -70,9 +66,9 @@ func (s *userService) Login(ctx context.Context, req *v1.LoginReq) (*v1.LoginRes
 		return &v1.LoginRespData{}, errors.New("code is invalidate")
 	}
 
-	user, err := s.userRepository.GetUserByPhone(ctx, req.Phone)
+	user, err := s.repo.Query.User.Where(s.repo.Query.User.Phone.Eq(req.Phone)).First()
 	if err != nil {
-		return &v1.LoginRespData{}, err
+		return nil, err
 	}
 	if user == nil {
 		user, err = s.createUserWithPhone(req.Phone)
@@ -86,11 +82,16 @@ func (s *userService) Login(ctx context.Context, req *v1.LoginReq) (*v1.LoginRes
 		return nil, err
 	}
 	key = constants.RedisLoginUserKey + token
-	err = s.rdb.HSet(ctx, key, map[string]string{
-		"id":       strconv.Itoa(int(user.Id)),
-		"nickname": user.NickName,
-		"icon":     user.Icon,
-	}).Err()
+
+	filed := make(map[string]any)
+	filed["id"] = user.ID
+	if user.NickName != nil {
+		filed["nickname"] = *user.NickName
+	}
+	if user.Icon != nil {
+		filed["icon"] = *user.Icon
+	}
+	err = s.rdb.HSet(ctx, key, filed).Err()
 	if err != nil {
 		return &v1.LoginRespData{}, err
 	}
@@ -113,13 +114,13 @@ func (s *userService) GetMe(ctx context.Context) (*v1.GetMeRespData, error) {
 	return (*v1.GetMeRespData)(user), nil
 }
 
-func (s *userService) createUserWithPhone(phone string) (*model.User, error) {
-	user := model.User{
+func (s *userService) createUserWithPhone(phone string) (*entity.User, error) {
+	nickname := constants.UserNickNamePrefix + random.RandString(10)
+	user := entity.User{
 		Phone:    phone,
-		NickName: constants.UserNickNamePrefix + random.RandString(10),
+		NickName: &nickname,
 	}
-	err := s.userRepository.CreateUser(nil, &user)
-	if err != nil {
+	if err := s.repo.Query.User.Create(&user); err != nil {
 		return nil, err
 	}
 	return &user, nil

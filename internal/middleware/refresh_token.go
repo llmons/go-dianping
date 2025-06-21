@@ -35,14 +35,15 @@ func RefreshToken(rdb *redis.Client) gin.HandlerFunc {
 
 		// ========== save user to user holder by context ==========
 		idStr := userField["id"]
-		idInt, err := strconv.Atoi(idStr)
+		id, err := strconv.Atoi(idStr)
 		if err != nil {
 			ctx.AbortWithStatus(500)
 		}
+		nickname, icon := userField["nickname"], userField["icon"]
 		newCtx := user_holder.WithUser(ctx, &v1.SimpleUser{
-			Id:       uint(idInt),
-			NickName: userField["nickname"],
-			Icon:     userField["icon"],
+			ID:       int64(id),
+			NickName: &nickname,
+			Icon:     &icon,
 		})
 		ctx.Request = ctx.Request.WithContext(newCtx)
 

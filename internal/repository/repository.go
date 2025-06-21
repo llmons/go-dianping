@@ -2,6 +2,7 @@ package repository
 
 import (
 	"github.com/spf13/viper"
+	"go-dianping/internal/query"
 	"go-dianping/pkg/log"
 	"go-dianping/pkg/zapgorm2"
 	"gorm.io/driver/mysql"
@@ -10,13 +11,13 @@ import (
 )
 
 type Repository struct {
-	db     *gorm.DB
+	Query  *query.Query
 	logger *log.Logger
 }
 
-func NewRepository(logger *log.Logger, db *gorm.DB) *Repository {
+func NewRepository(query *query.Query, logger *log.Logger) *Repository {
 	return &Repository{
-		db:     db,
+		Query:  query,
 		logger: logger,
 	}
 }
@@ -31,4 +32,8 @@ func NewDB(conf *viper.Viper, l *log.Logger) *gorm.DB {
 		panic(err)
 	}
 	return db
+}
+
+func NewQuery(db *gorm.DB) *query.Query {
+	return query.Use(db)
 }

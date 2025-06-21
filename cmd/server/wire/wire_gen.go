@@ -23,17 +23,15 @@ import (
 func NewWire(viperViper *viper.Viper, logger *log.Logger) (*gin.Engine, func(), error) {
 	client := redis.NewRedis(viperViper)
 	handlerHandler := handler.NewHandler(logger)
-	serviceService := service.NewService(logger, viperViper, client)
 	db := repository.NewDB(viperViper, logger)
-	repositoryRepository := repository.NewRepository(logger, db)
-	userRepository := repository.NewUserRepository(repositoryRepository)
-	userService := service.NewUserService(serviceService, userRepository)
+	query := repository.NewQuery(db)
+	repositoryRepository := repository.NewRepository(query, logger)
+	serviceService := service.NewService(logger, viperViper, repositoryRepository, client)
+	userService := service.NewUserService(serviceService)
 	userHandler := handler.NewUserHandler(handlerHandler, userService)
-	shopRepository := repository.NewShopRepository(repositoryRepository)
-	shopService := service.NewShopService(serviceService, shopRepository)
+	shopService := service.NewShopService(serviceService)
 	shopHandler := handler.NewShopHandler(handlerHandler, shopService)
-	shopTypeRepository := repository.NewShopTypeRepository(repositoryRepository)
-	shopTypeService := service.NewShopTypeService(serviceService, shopTypeRepository)
+	shopTypeService := service.NewShopTypeService(serviceService)
 	shopTypeHandler := handler.NewShopTypeHandler(handlerHandler, shopTypeService)
 	engine := server.NewHttpServer(logger, client, userHandler, shopHandler, shopTypeHandler)
 	return engine, func() {
@@ -44,7 +42,7 @@ func NewWire(viperViper *viper.Viper, logger *log.Logger) (*gin.Engine, func(), 
 
 var ServerSet = wire.NewSet(redis.NewRedis, server.NewHttpServer)
 
-var RepositorySet = wire.NewSet(repository.NewDB, repository.NewRepository, repository.NewUserRepository, repository.NewShopRepository, repository.NewShopTypeRepository)
+var RepositorySet = wire.NewSet(repository.NewDB, repository.NewQuery, repository.NewRepository)
 
 var ServiceSet = wire.NewSet(service.NewService, service.NewUserService, service.NewShopService, service.NewShopTypeService)
 

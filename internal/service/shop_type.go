@@ -9,8 +9,7 @@ import (
 	"github.com/samber/lo"
 	"go-dianping/api/v1"
 	"go-dianping/internal/base/constants"
-	"go-dianping/internal/model"
-	"go-dianping/internal/repository"
+	"go-dianping/internal/entity"
 	"time"
 )
 
@@ -20,17 +19,14 @@ type ShopTypeService interface {
 
 func NewShopTypeService(
 	service *Service,
-	shopTypeRepository repository.ShopTypeRepository,
 ) ShopTypeService {
 	return &shopTypeService{
-		Service:            service,
-		shopTypeRepository: shopTypeRepository,
+		Service: service,
 	}
 }
 
 type shopTypeService struct {
 	*Service
-	shopTypeRepository repository.ShopTypeRepository
 }
 
 func (s *shopTypeService) GetShopTypeList(ctx context.Context) (v1.GetShopTypeListRespData, error) {
@@ -49,12 +45,12 @@ func (s *shopTypeService) GetShopTypeList(ctx context.Context) (v1.GetShopTypeLi
 	}
 
 	// ========== query sql db ==========
-	list, err := s.shopTypeRepository.GetShopTypeList(ctx)
+	list, err := s.repo.Query.ShopType.Find()
 	if err != nil {
-		return v1.GetShopTypeListRespData{}, err
+		return nil, err
 	}
 
-	data := lo.Map(list, func(el *model.ShopType, idx int) *v1.GetShopTypeListRespDataItem {
+	data := lo.Map(list, func(el *entity.ShopType, idx int) *v1.GetShopTypeListRespDataItem {
 		var item v1.GetShopTypeListRespDataItem
 		if err := copier.Copy(&item, el); err != nil {
 			return nil

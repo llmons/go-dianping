@@ -22,10 +22,8 @@ var ServerSet = wire.NewSet(
 
 var RepositorySet = wire.NewSet(
 	repository.NewDB,
+	repository.NewQuery,
 	repository.NewRepository,
-	repository.NewUserRepository,
-	repository.NewShopRepository,
-	repository.NewShopTypeRepository,
 )
 
 var ServiceSet = wire.NewSet(

@@ -8,36 +8,30 @@ import (
 	"github.com/pkg/errors"
 	"github.com/redis/go-redis/v9"
 	"go-dianping/api/v1"
-	"gorm.io/gorm"
-
 	"go-dianping/internal/base/constants"
-	"go-dianping/internal/model"
-	"go-dianping/internal/repository"
-	"strconv"
+	"go-dianping/internal/entity"
+	"gorm.io/gorm"
 	"time"
 )
 
 type ShopService interface {
-	GetShopById(ctx context.Context, req *v1.GetShopByIdReq) (*v1.GetShopByIdRespData, error)
+	GetShopById(ctx context.Context, req *v1.GetShopByIDReq) (*v1.GetShopByIDRespData, error)
 	UpdateShop(ctx context.Context, req *v1.UpdateShopReq) error
 }
 
 func NewShopService(
 	service *Service,
-	shopRepository repository.ShopRepository,
 ) ShopService {
 	return &shopService{
-		Service:        service,
-		shopRepository: shopRepository,
+		Service: service,
 	}
 }
 
 type shopService struct {
 	*Service
-	shopRepository repository.ShopRepository
 }
 
-func (s *shopService) GetShopById(ctx context.Context, req *v1.GetShopByIdReq) (*v1.GetShopByIdRespData, error) {
+func (s *shopService) GetShopById(ctx context.Context, req *v1.GetShopByIDReq) (*v1.GetShopByIDRespData, error) {
 	//data, err := s.queryWithPassThrough(ctx, req)
 	//if err != nil {
 	//	return nil, err
@@ -53,26 +47,27 @@ func (s *shopService) GetShopById(ctx context.Context, req *v1.GetShopByIdReq) (
 func (s *shopService) UpdateShop(ctx context.Context, req *v1.UpdateShopReq) error {
 	// ========== update sql db ==========
 	// already check id with gin.Context shouldBind in handler
-	var shop model.Shop
+	var shop entity.Shop
 	if err := copier.CopyWithOption(&shop, &req, copier.Option{IgnoreEmpty: true}); err != nil {
 		return err
 	}
 
-	if err := s.shopRepository.Update(ctx, &shop); err != nil {
+	if _, err := s.repo.Query.Shop.Where(s.repo.Query.Shop.ID.Eq(req.ID)).
+		Updates(&shop); err != nil {
 		return err
 	}
 
 	// ========== delete cache ==========
-	key := fmt.Sprintf("%s%d", constants.RedisCacheShopKey, req.Id)
+	key := fmt.Sprintf("%s%d", constants.RedisCacheShopKey, req.ID)
 	s.rdb.Del(ctx, key)
 	return nil
 }
 
-func (s *shopService) queryWithPassThrough(ctx context.Context, req *v1.GetShopByIdReq) (*v1.GetShopByIdRespData, error) {
-	var data v1.GetShopByIdRespData
+func (s *shopService) queryWithPassThrough(ctx context.Context, req *v1.GetShopByIDReq) (*v1.GetShopByIDRespData, error) {
+	var data v1.GetShopByIDRespData
 
 	// ========== check cache ==========
-	key := constants.RedisCacheShopKey + req.Id
+	key := fmt.Sprintf("%s%d", constants.RedisCacheShopKey, req.ID)
 	cacheShopStr, err := s.rdb.Get(ctx, key).Result()
 	if err != nil && !errors.Is(err, redis.Nil) {
 		return nil, err
@@ -82,7 +77,7 @@ func (s *shopService) queryWithPassThrough(ctx context.Context, req *v1.GetShopB
 		return nil, errors.New("shop not exist")
 	}
 	if cacheShopStr != "" {
-		var cacheShop model.Shop
+		var cacheShop entity.Shop
 		if err := json.Unmarshal([]byte(cacheShopStr), &cacheShop); err != nil {
 			return nil, err
 		}
@@ -93,12 +88,7 @@ func (s *shopService) queryWithPassThrough(ctx context.Context, req *v1.GetShopB
 	}
 
 	// ========== query sql db ==========
-	id, err := strconv.Atoi(req.Id)
-	if err != nil {
-		return nil, err
-	}
-	shop, err := s.shopRepository.GetShopById(ctx, id)
-
+	shop, err := s.repo.Query.Shop.Where(s.repo.Query.Shop.ID.Eq(req.ID)).First()
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			// solve the cache penetration
@@ -122,11 +112,11 @@ func (s *shopService) queryWithPassThrough(ctx context.Context, req *v1.GetShopB
 	return &data, nil
 }
 
-func (s *shopService) queryWithMutex(ctx context.Context, req *v1.GetShopByIdReq) (*v1.GetShopByIdRespData, error) {
-	var data v1.GetShopByIdRespData
+func (s *shopService) queryWithMutex(ctx context.Context, req *v1.GetShopByIDReq) (*v1.GetShopByIDRespData, error) {
+	var data v1.GetShopByIDRespData
 
 	// ========== check cache ==========
-	key := constants.RedisCacheShopKey + req.Id
+	key := fmt.Sprintf("%s%d", constants.RedisCacheShopKey, req.ID)
 	cacheShopStr, err := s.rdb.Get(ctx, key).Result()
 	if err != nil && !errors.Is(err, redis.Nil) {
 		return nil, err
@@ -136,7 +126,7 @@ func (s *shopService) queryWithMutex(ctx context.Context, req *v1.GetShopByIdReq
 		return nil, errors.New("shop not exist")
 	}
 	if cacheShopStr != "" {
-		var cacheShop model.Shop
+		var cacheShop entity.Shop
 		if err := json.Unmarshal([]byte(cacheShopStr), &cacheShop); err != nil {
 			return nil, err
 		}
@@ -147,7 +137,7 @@ func (s *shopService) queryWithMutex(ctx context.Context, req *v1.GetShopByIdReq
 	}
 
 	// ========== lock ==========
-	lockKey := constants.RedisLockShopKey + req.Id
+	lockKey := fmt.Sprintf("%s%d", constants.RedisLockShopKey, req.ID)
 	isLock, err := s.tryLock(ctx, lockKey)
 	if err != nil {
 		return nil, err
@@ -159,11 +149,7 @@ func (s *shopService) queryWithMutex(ctx context.Context, req *v1.GetShopByIdReq
 	}
 
 	// ========== query sql db ==========
-	id, err := strconv.Atoi(req.Id)
-	if err != nil {
-		return nil, err
-	}
-	shop, err := s.shopRepository.GetShopById(ctx, id)
+	shop, err := s.repo.Query.Shop.Where(s.repo.Query.Shop.ID.Eq(req.ID)).First()
 	// mock time delay
 	time.Sleep(time.Millisecond * 200)
 	if err != nil {

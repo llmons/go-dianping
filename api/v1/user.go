@@ -23,9 +23,9 @@ type (
 
 type (
 	SimpleUser struct {
-		Id       uint   `json:"id"`
-		NickName string `json:"nickname"`
-		Icon     string `json:"icon"`
+		ID       int64   `json:"id"`
+		NickName *string `json:"nickname"`
+		Icon     *string `json:"icon"`
 	}
 	GetMeRespData SimpleUser
 	GetMeResp     struct {
