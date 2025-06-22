@@ -5,15 +5,17 @@ import (
 	"time"
 )
 
-type RedisData struct {
+// RedisData use generic type
+// "any" type will influence copier
+type RedisData[T any] struct {
 	ExpireTime time.Time
-	Data       any
+	Data       T
 }
 
-func (d *RedisData) MarshalBinary() ([]byte, error) {
+func (d RedisData[T]) MarshalBinary() ([]byte, error) {
 	return json.Marshal(d)
 }
 
-func (d *RedisData) UnmarshalBinary(data []byte) error {
-	return json.Unmarshal(data, d)
+func (d RedisData[T]) UnmarshalBinary(data []byte) error {
+	return json.Unmarshal(data, &d)
 }
