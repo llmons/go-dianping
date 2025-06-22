@@ -4,7 +4,7 @@ import "go-dianping/internal/entity"
 
 type (
 	GetShopByIDReq struct {
-		ID int64 `uri:"id" binding:"required"`
+		ID *int64 `uri:"id" binding:"required"`
 	}
 	GetShopByIDRespData entity.Shop
 	GetShopByIDResp     struct {

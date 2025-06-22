@@ -38,7 +38,7 @@ func (h *ShopHandler) GetShopById(ctx *gin.Context) {
 		return
 	}
 
-	data, err := h.shopService.GetShopById(ctx.Request.Context(), &params)
+	data, err := h.shopService.QueryById(ctx.Request.Context(), &params)
 	if err != nil {
 		v1.HandleError(ctx, http.StatusBadRequest, err.Error(), nil)
 		return
