@@ -8,8 +8,10 @@ import (
 	goRedis "github.com/redis/go-redis/v9"
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
+	"go-dianping/internal/base/cache_client"
+	"go-dianping/internal/base/constants"
+	"go-dianping/internal/entity"
 	"go-dianping/internal/repository"
-	"go-dianping/internal/service"
 	"go-dianping/pkg/config"
 	"go-dianping/pkg/log"
 	"go-dianping/pkg/redis"
@@ -45,7 +47,7 @@ func TestMain(m *testing.M) {
 	os.Exit(code)
 }
 
-func TestShopService_SaveShop2Redis(t *testing.T) {
+func TestShopService_SaveShop(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -53,11 +55,15 @@ func TestShopService_SaveShop2Redis(t *testing.T) {
 	query := repository.NewQuery(db)
 	repo := repository.NewRepository(query, logger)
 	shopRepo := repository.NewShopRepository(repo)
-	srv := service.NewService(logger, conf, rdb)
-	shopService := service.NewShopService(srv, shopRepo)
+	cacheClient := cache_client.NewCacheClient[entity.Shop](rdb)
 
 	ctx := context.Background()
-	err := shopService.SaveShop2Redis(ctx, 1, time.Second*10)
+	shop, err := shopRepo.GetById(ctx, 1)
+	if err != nil {
+		return
+	}
+	key := fmt.Sprintf("%s%d", constants.RedisCacheShopKey, 1)
+	cacheClient.SetWithLogicExpire(ctx, key, shop, time.Second*10)
 
 	assert.NoError(t, err)
 }

@@ -7,6 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/wire"
 	"github.com/spf13/viper"
+	"go-dianping/internal/base/cache_client"
 	"go-dianping/internal/handler"
 	"go-dianping/internal/repository"
 	"go-dianping/internal/server"
@@ -29,6 +30,10 @@ var RepositorySet = wire.NewSet(
 	repository.NewShopTypeRepository,
 )
 
+var CacheClientSet = wire.NewSet(
+	cache_client.NewCacheClientForShop,
+)
+
 var ServiceSet = wire.NewSet(
 	service.NewService,
 	service.NewUserService,
@@ -47,6 +52,7 @@ func NewWire(*viper.Viper, *log.Logger) (*gin.Engine, func(), error) {
 	panic(wire.Build(
 		ServerSet,
 		RepositorySet,
+		CacheClientSet,
 		ServiceSet,
 		HandlerSet,
 	))

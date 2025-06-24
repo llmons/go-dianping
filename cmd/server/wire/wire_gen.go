@@ -10,6 +10,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/wire"
 	"github.com/spf13/viper"
+	"go-dianping/internal/base/cache_client"
 	"go-dianping/internal/handler"
 	"go-dianping/internal/repository"
 	"go-dianping/internal/server"
@@ -31,7 +32,8 @@ func NewWire(viperViper *viper.Viper, logger *log.Logger) (*gin.Engine, func(), 
 	userService := service.NewUserService(serviceService, userRepository)
 	userHandler := handler.NewUserHandler(handlerHandler, userService)
 	shopRepository := repository.NewShopRepository(repositoryRepository)
-	shopService := service.NewShopService(serviceService, shopRepository)
+	cacheClient := cache_client.NewCacheClientForShop(client)
+	shopService := service.NewShopService(serviceService, shopRepository, cacheClient)
 	shopHandler := handler.NewShopHandler(handlerHandler, shopService)
 	shopTypeRepository := repository.NewShopTypeRepository(repositoryRepository)
 	shopTypeService := service.NewShopTypeService(serviceService, shopTypeRepository)
@@ -46,6 +48,8 @@ func NewWire(viperViper *viper.Viper, logger *log.Logger) (*gin.Engine, func(), 
 var ServerSet = wire.NewSet(redis.NewRedis, server.NewHttpServer)
 
 var RepositorySet = wire.NewSet(repository.NewDB, repository.NewQuery, repository.NewRepository, repository.NewUserRepository, repository.NewShopRepository, repository.NewShopTypeRepository)
+
+var CacheClientSet = wire.NewSet(cache_client.NewCacheClientForShop)
 
 var ServiceSet = wire.NewSet(service.NewService, service.NewUserService, service.NewShopService, service.NewShopTypeService)
 
