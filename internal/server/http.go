@@ -60,7 +60,7 @@ func NewHttpServer(
 
 		shopTypeRouter := api.Group("/shop-type")
 		{
-			shopTypeRouter.GET("/list", shopTypeHandler.GetShopTypeList)
+			shopTypeRouter.GET("/list", shopTypeHandler.QueryTypeList)
 		}
 
 		uploadRouter := api.Group("/upload")

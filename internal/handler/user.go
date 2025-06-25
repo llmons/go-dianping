@@ -27,7 +27,7 @@ type UserHandler struct {
 // @Description
 // @Tags user
 // @Produce json
-// @Param phone query string true "手机号"
+// @Params phone query string true "手机号"
 // @Success 200 {object} v1.Response
 // @Router /user/code [post]
 func (h *UserHandler) SendCode(ctx *gin.Context) {

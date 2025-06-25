@@ -55,7 +55,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/go-dianping_api_v1.GetShopTypeListResp"
+                            "$ref": "#/definitions/go-dianping_api_v1.QueryTypeListResp"
                         }
                     }
                 }
@@ -74,7 +74,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/go-dianping_api_v1.GetShopByIdResp"
+                            "$ref": "#/definitions/go-dianping_api_v1.GetShopByIDResp"
                         }
                     }
                 }
@@ -89,15 +89,6 @@ const docTemplate = `{
                     "user"
                 ],
                 "summary": "发送验证码",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "手机号",
-                        "name": "phone",
-                        "in": "query",
-                        "required": true
-                    }
-                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -187,11 +178,11 @@ const docTemplate = `{
                 }
             }
         },
-        "go-dianping_api_v1.GetShopByIdResp": {
+        "go-dianping_api_v1.GetShopByIDResp": {
             "type": "object",
             "properties": {
                 "data": {
-                    "$ref": "#/definitions/go-dianping_api_v1.GetShopByIdRespData"
+                    "$ref": "#/definitions/go-dianping_api_v1.GetShopByIDRespData"
                 },
                 "errorMsg": {
                     "type": "string"
@@ -204,84 +195,68 @@ const docTemplate = `{
                 }
             }
         },
-        "go-dianping_api_v1.GetShopByIdRespData": {
+        "go-dianping_api_v1.GetShopByIDRespData": {
             "type": "object",
             "properties": {
                 "address": {
+                    "description": "地址",
                     "type": "string"
                 },
                 "area": {
+                    "description": "商圈，例如陆家嘴",
                     "type": "string"
                 },
-                "avgPrice": {
+                "avg_price": {
+                    "description": "均价，取整数",
                     "type": "integer"
                 },
                 "comments": {
+                    "description": "评论数量",
                     "type": "integer"
                 },
+                "create_time": {
+                    "description": "创建时间",
+                    "type": "string"
+                },
                 "id": {
+                    "description": "主键",
                     "type": "integer"
                 },
                 "images": {
+                    "description": "商铺图片，多个图片以','隔开",
                     "type": "string"
                 },
                 "name": {
+                    "description": "商铺名称",
                     "type": "string"
                 },
-                "openHours": {
+                "open_hours": {
+                    "description": "营业时间，例如 10:00-22:00",
                     "type": "string"
                 },
                 "score": {
+                    "description": "评分，1~5分，乘10保存，避免小数",
                     "type": "integer"
                 },
                 "sold": {
+                    "description": "销量",
                     "type": "integer"
                 },
-                "typeId": {
+                "type_id": {
+                    "description": "商铺类型的id",
                     "type": "integer"
+                },
+                "update_time": {
+                    "description": "更新时间",
+                    "type": "string"
                 },
                 "x": {
+                    "description": "经度",
                     "type": "number"
                 },
                 "y": {
+                    "description": "维度",
                     "type": "number"
-                }
-            }
-        },
-        "go-dianping_api_v1.GetShopTypeListResp": {
-            "type": "object",
-            "properties": {
-                "data": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/go-dianping_api_v1.GetShopTypeListRespDataItem"
-                    }
-                },
-                "errorMsg": {
-                    "type": "string"
-                },
-                "success": {
-                    "type": "boolean"
-                },
-                "total": {
-                    "type": "integer"
-                }
-            }
-        },
-        "go-dianping_api_v1.GetShopTypeListRespDataItem": {
-            "type": "object",
-            "properties": {
-                "icon": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "integer"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "sort": {
-                    "type": "integer"
                 }
             }
         },
@@ -307,6 +282,43 @@ const docTemplate = `{
             "properties": {
                 "token": {
                     "type": "string"
+                }
+            }
+        },
+        "go-dianping_api_v1.QueryTypeListResp": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/go-dianping_api_v1.QueryTypeListRespDataItem"
+                    }
+                },
+                "errorMsg": {
+                    "type": "string"
+                },
+                "success": {
+                    "type": "boolean"
+                },
+                "total": {
+                    "type": "integer"
+                }
+            }
+        },
+        "go-dianping_api_v1.QueryTypeListRespDataItem": {
+            "type": "object",
+            "properties": {
+                "icon": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "sort": {
+                    "type": "integer"
                 }
             }
         },
@@ -342,7 +354,7 @@ var SwaggerInfo = &swag.Spec{
 	BasePath:         "",
 	Schemes:          []string{},
 	Title:            "Go Dian Ping",
-	Description:      "hmdp implemented by go",
+	Description:      "golang 实现的黑马点评",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 	LeftDelim:        "{{",

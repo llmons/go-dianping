@@ -12,7 +12,7 @@ import (
 
 // @title           Go Dian Ping
 // @version         1.0.0
-// @description     hmdp implemented by go
+// @description     golang 实现的黑马点评
 // @contact.name   llmons
 // @contact.url    https://github.com/llmons
 // @contact.email  llmons@foxmail.com

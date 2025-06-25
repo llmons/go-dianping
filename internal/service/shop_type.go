@@ -14,7 +14,7 @@ import (
 )
 
 type ShopTypeService interface {
-	GetShopTypeList(ctx context.Context) (v1.GetShopTypeListRespData, error)
+	QueryTypeList(ctx context.Context) (v1.QueryTypeListRespData, error)
 }
 
 type shopTypeService struct {
@@ -32,14 +32,14 @@ func NewShopTypeService(
 	}
 }
 
-func (s *shopTypeService) GetShopTypeList(ctx context.Context) (v1.GetShopTypeListRespData, error) {
+func (s *shopTypeService) QueryTypeList(ctx context.Context) (v1.QueryTypeListRespData, error) {
 	// ========== check cache ==========
 	cacheShopTypeStr, err := s.rdb.Get(ctx, constants.RedisCacheShopKey).Result()
 	if err != nil && !errors.Is(err, redis.Nil) {
 		return nil, err
 	}
 
-	var cacheShopType v1.GetShopTypeListRespData
+	var cacheShopType v1.QueryTypeListRespData
 	if cacheShopTypeStr != "" {
 		if err := json.Unmarshal([]byte(cacheShopTypeStr), &cacheShopType); err != nil {
 			return nil, err
@@ -53,8 +53,8 @@ func (s *shopTypeService) GetShopTypeList(ctx context.Context) (v1.GetShopTypeLi
 		return nil, err
 	}
 
-	data := lo.Map(list, func(el *entity.ShopType, idx int) *v1.GetShopTypeListRespDataItem {
-		var item v1.GetShopTypeListRespDataItem
+	data := lo.Map(list, func(el *entity.ShopType, idx int) *v1.QueryTypeListRespDataItem {
+		var item v1.QueryTypeListRespDataItem
 		if err := copier.Copy(&item, el); err != nil {
 			return nil
 		}

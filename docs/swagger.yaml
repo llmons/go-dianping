@@ -19,10 +19,10 @@ definitions:
       nickname:
         type: string
     type: object
-  go-dianping_api_v1.GetShopByIdResp:
+  go-dianping_api_v1.GetShopByIDResp:
     properties:
       data:
-        $ref: '#/definitions/go-dianping_api_v1.GetShopByIdRespData'
+        $ref: '#/definitions/go-dianping_api_v1.GetShopByIDRespData'
       errorMsg:
         type: string
       success:
@@ -30,58 +30,53 @@ definitions:
       total:
         type: integer
     type: object
-  go-dianping_api_v1.GetShopByIdRespData:
+  go-dianping_api_v1.GetShopByIDRespData:
     properties:
       address:
+        description: 地址
         type: string
       area:
+        description: 商圈，例如陆家嘴
         type: string
-      avgPrice:
+      avg_price:
+        description: 均价，取整数
         type: integer
       comments:
+        description: 评论数量
         type: integer
+      create_time:
+        description: 创建时间
+        type: string
       id:
+        description: 主键
         type: integer
       images:
+        description: 商铺图片，多个图片以','隔开
         type: string
       name:
+        description: 商铺名称
         type: string
-      openHours:
+      open_hours:
+        description: 营业时间，例如 10:00-22:00
         type: string
       score:
+        description: 评分，1~5分，乘10保存，避免小数
         type: integer
       sold:
+        description: 销量
         type: integer
-      typeId:
+      type_id:
+        description: 商铺类型的id
         type: integer
+      update_time:
+        description: 更新时间
+        type: string
       x:
+        description: 经度
         type: number
       "y":
+        description: 维度
         type: number
-    type: object
-  go-dianping_api_v1.GetShopTypeListResp:
-    properties:
-      data:
-        items:
-          $ref: '#/definitions/go-dianping_api_v1.GetShopTypeListRespDataItem'
-        type: array
-      errorMsg:
-        type: string
-      success:
-        type: boolean
-      total:
-        type: integer
-    type: object
-  go-dianping_api_v1.GetShopTypeListRespDataItem:
-    properties:
-      icon:
-        type: string
-      id:
-        type: integer
-      name:
-        type: string
-      sort:
-        type: integer
     type: object
   go-dianping_api_v1.LoginResp:
     properties:
@@ -99,6 +94,30 @@ definitions:
       token:
         type: string
     type: object
+  go-dianping_api_v1.QueryTypeListResp:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/go-dianping_api_v1.QueryTypeListRespDataItem'
+        type: array
+      errorMsg:
+        type: string
+      success:
+        type: boolean
+      total:
+        type: integer
+    type: object
+  go-dianping_api_v1.QueryTypeListRespDataItem:
+    properties:
+      icon:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      sort:
+        type: integer
+    type: object
   go-dianping_api_v1.Response:
     properties:
       data: {}
@@ -115,7 +134,7 @@ info:
     email: llmons@foxmail.com
     name: llmons
     url: https://github.com/llmons
-  description: hmdp implemented by go
+  description: golang 实现的黑马点评
   license:
     name: MIT
     url: https://opensource.org/licenses/MIT
@@ -142,7 +161,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/go-dianping_api_v1.GetShopTypeListResp'
+            $ref: '#/definitions/go-dianping_api_v1.QueryTypeListResp'
       summary: 获取商品类别列表
       tags:
       - shop-type
@@ -154,18 +173,12 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/go-dianping_api_v1.GetShopByIdResp'
+            $ref: '#/definitions/go-dianping_api_v1.GetShopByIDResp'
       summary: 根据 id 获取商铺
       tags:
       - shop
   /user/code:
     post:
-      parameters:
-      - description: 手机号
-        in: query
-        name: phone
-        required: true
-        type: string
       produces:
       - application/json
       responses:
