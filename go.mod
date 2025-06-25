@@ -6,12 +6,12 @@ toolchain go1.24.4
 
 require (
 	github.com/duke-git/lancet/v2 v2.3.6
-	github.com/fatih/structs v1.1.0
 	github.com/gin-gonic/gin v1.10.1
 	github.com/golang/mock v1.6.0
 	github.com/google/wire v0.6.0
 	github.com/jinzhu/copier v0.4.0
 	github.com/mattn/go-colorable v0.1.14
+	github.com/mitchellh/mapstructure v1.5.0
 	github.com/panjf2000/ants/v2 v2.11.3
 	github.com/pkg/errors v0.9.1
 	github.com/redis/go-redis/v9 v9.10.0

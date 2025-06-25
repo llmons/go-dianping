@@ -2,53 +2,47 @@ package middleware
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/mitchellh/mapstructure"
 	"github.com/redis/go-redis/v9"
 	"go-dianping/api/v1"
-
 	"go-dianping/internal/base/constants"
 	"go-dianping/internal/base/user_holder"
-
-	"strconv"
 	"strings"
 )
 
 func RefreshToken(rdb *redis.Client) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
+		// 1. 获取请求中的 token
 		token := ctx.GetHeader("Authorization")
 		token, found := strings.CutPrefix(token, "Bearer ")
 		if !found {
 			ctx.Next()
 			return
 		}
-
-		// ========== query user field from redis ==========
+		// 2. 基于 token 获取 redis 中的用户
 		key := constants.RedisLoginUserKey + token
-		userField, err := rdb.HGetAll(ctx, key).Result()
-		if err != nil {
-			return
-		}
-		if len(userField) == 0 {
+		userMap := rdb.HGetAll(ctx, key).Val()
+		// 3. 判断用户是否存在
+		if len(userMap) == 0 {
 			ctx.Next()
 			return
 		}
 
-		// ========== save user to user holder by context ==========
-		idStr := userField["ID"]
-		id, err := strconv.Atoi(idStr)
-		if err != nil {
-			ctx.AbortWithStatus(500)
+		// 5. 将查询到的 hash 数据转为 SimpleUser
+		simpleUser := v1.SimpleUser{}
+		if err := mapstructure.Decode(&userMap, &simpleUser); err != nil {
+			ctx.AbortWithStatusJSON(500, v1.Response{
+				Success:  false,
+				ErrorMsg: err.Error(),
+			})
+			return
 		}
-		nickname, icon := userField["NickName"], userField["Icon"]
-		newCtx := user_holder.WithUser(ctx, &v1.SimpleUser{
-			ID:       int64(id),
-			NickName: &nickname,
-			Icon:     &icon,
-		})
+		// 6. 存在，保存用户信息到 context
+		newCtx := user_holder.WithUser(ctx, &simpleUser)
 		ctx.Request = ctx.Request.WithContext(newCtx)
-
-		// ========== refresh token ==========
-		key = constants.RedisLoginUserKey + token
+		// 7. 刷新 token 有效期
 		rdb.Expire(ctx, key, constants.RedisLoginUserTTL)
+		// 8. 放行
 		ctx.Next()
 	}
 }
