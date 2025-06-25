@@ -17,7 +17,7 @@ import (
 type UserService interface {
 	SendCode(ctx context.Context, req *v1.SendCodeReq) error
 	Login(ctx context.Context, req *v1.LoginReq) (*v1.LoginRespData, error)
-	GetMe(ctx context.Context) (*v1.GetMeRespData, error)
+	Me(ctx context.Context) (*v1.MeRespData, error)
 }
 
 type userService struct {
@@ -121,12 +121,12 @@ func (s *userService) Login(ctx context.Context, req *v1.LoginReq) (*v1.LoginRes
 	}, nil
 }
 
-func (s *userService) GetMe(ctx context.Context) (*v1.GetMeRespData, error) {
+func (s *userService) Me(ctx context.Context) (*v1.MeRespData, error) {
 	user := user_holder.GetUser(ctx)
 	if user == nil {
-		return nil, errors.New("user not found")
+		return nil, errors.New("获取当前用户失败")
 	}
-	return (*v1.GetMeRespData)(user), nil
+	return (*v1.MeRespData)(user), nil
 }
 
 func (s *userService) createUserWithPhone(ctx context.Context, phone string) (*entity.User, error) {

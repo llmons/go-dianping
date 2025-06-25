@@ -2,7 +2,6 @@ package user_holder
 
 import (
 	"context"
-	"fmt"
 	"go-dianping/api/v1"
 )
 
@@ -15,8 +14,6 @@ func WithUser(ctx context.Context, user *v1.SimpleUser) context.Context {
 }
 
 func GetUser(ctx context.Context) *v1.SimpleUser {
-	fmt.Println(ctx.Value(userKey))
-
 	if user, ok := ctx.Value(userKey).(*v1.SimpleUser); ok {
 		return user
 	}

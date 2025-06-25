@@ -27,9 +27,9 @@ type (
 		NickName *string `json:"nickname"`
 		Icon     *string `json:"icon"`
 	}
-	GetMeRespData SimpleUser
-	GetMeResp     struct {
+	MeRespData SimpleUser
+	MeResp     struct {
 		Response
-		Data GetMeRespData `json:"data"`
+		Data MeRespData `json:"data"`
 	}
 )

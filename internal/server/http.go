@@ -77,7 +77,7 @@ func NewHttpServer(
 			}
 			authRouter := userRouter.Group("/").Use(middleware.Login())
 			{
-				authRouter.GET("/me", userHandler.GetMe)
+				authRouter.GET("/me", userHandler.Me)
 			}
 		}
 

@@ -22,7 +22,7 @@ type UserHandler struct {
 }
 
 // SendCode godoc
-// @Summary 发送验证码
+// @Summary 发送短信验证码并保存验证码
 // @Schemes
 // @Description
 // @Tags user
@@ -37,7 +37,6 @@ func (h *UserHandler) SendCode(ctx *gin.Context) {
 		return
 	}
 
-	// 发送短信验证码并保存验证码
 	err := h.userService.SendCode(ctx.Request.Context(), &req)
 	if err != nil {
 		v1.HandleError(ctx, http.StatusInternalServerError, err.Error(), nil)
@@ -47,7 +46,7 @@ func (h *UserHandler) SendCode(ctx *gin.Context) {
 }
 
 // Login godoc
-// @Summary 登录
+// @Summary 实现登录功能
 // @Schemes
 // @Description
 // @Tags user
@@ -63,27 +62,25 @@ func (h *UserHandler) Login(ctx *gin.Context) {
 		return
 	}
 
-	// 实现登录功能
 	data, err := h.userService.Login(ctx.Request.Context(), &req)
 	if err != nil {
 		v1.HandleError(ctx, http.StatusInternalServerError, err.Error(), nil)
 		return
 	}
-
 	v1.HandleSuccess(ctx, data)
 }
 
-// GetMe godoc
-// @Summary 获取当前登录的用户信息
+// Me godoc
+// @Summary 获取当前登录的用户并返回
 // @Schemes
 // @Description
 // @Tags user
 // @Produce json
 // @Security Bearer
-// @Success 200 {object} v1.GetMeResp
+// @Success 200 {object} v1.MeResp
 // @Router /user/me [get]
-func (h *UserHandler) GetMe(ctx *gin.Context) {
-	user, err := h.userService.GetMe(ctx.Request.Context())
+func (h *UserHandler) Me(ctx *gin.Context) {
+	user, err := h.userService.Me(ctx.Request.Context())
 	if err != nil {
 		v1.HandleError(ctx, http.StatusInternalServerError, err.Error(), nil)
 		return
