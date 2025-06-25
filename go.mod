@@ -6,6 +6,7 @@ toolchain go1.24.4
 
 require (
 	github.com/duke-git/lancet/v2 v2.3.6
+	github.com/fatih/structs v1.1.0
 	github.com/gin-gonic/gin v1.10.1
 	github.com/golang/mock v1.6.0
 	github.com/google/wire v0.6.0

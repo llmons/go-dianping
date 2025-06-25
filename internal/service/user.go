@@ -3,13 +3,15 @@ package service
 import (
 	"context"
 	"github.com/duke-git/lancet/v2/random"
+	"github.com/fatih/structs"
+	"github.com/jinzhu/copier"
 	"github.com/pkg/errors"
 	"go-dianping/api/v1"
 	"go-dianping/internal/base/constants"
-	"go-dianping/internal/base/regex_utils"
 	"go-dianping/internal/base/user_holder"
 	"go-dianping/internal/entity"
 	"go-dianping/internal/repository"
+	"go-dianping/pkg/helper/regex_utils"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
 )
@@ -46,12 +48,10 @@ func (s *userService) SendCode(ctx context.Context, req *v1.SendCodeReq) error {
 		code = "123456"
 	}
 
-	// 4. 保存验证码到 session
+	// 4. 保存验证码到 redis
 	key := constants.RedisLoginCodeKey + req.Phone
-	err := s.rdb.Set(ctx, key, code, constants.RedisLoginCodeTTL).Err()
-	if err != nil {
-		return err
-	}
+	s.rdb.Set(ctx, key, code, constants.RedisLoginCodeTTL)
+
 	// 5. 发送验证码
 	s.logger.Info("发送短信验证码成功", zap.String("验证码：", code))
 	// 返回 ok
@@ -65,14 +65,14 @@ func (s *userService) Login(ctx context.Context, req *v1.LoginReq) (*v1.LoginRes
 		return nil, errors.New("手机号格式错误！")
 	}
 
-	// 2. 校验验证码
+	// 3. 从 redis 获取验证码并校验
 	key := constants.RedisLoginCodeKey + req.Phone
 	cacheCode, err := s.rdb.Get(ctx, key).Result()
 	if err != nil {
 		return nil, err
 	}
 	if cacheCode != req.Code {
-		// 3. 不一致，报错
+		// 不一致，报错
 		return nil, errors.New("验证码错误")
 	}
 
@@ -92,30 +92,24 @@ func (s *userService) Login(ctx context.Context, req *v1.LoginReq) (*v1.LoginRes
 	}
 
 	// 7. 保存用户信息到 redis 中
-
+	// 7.1. 随机生成 token，作为登录令牌
 	token, err := random.UUIdV4()
 	if err != nil {
 		return nil, err
 	}
+	// 7.2. 将 User 对象转为 Hash 储存
+	var simpleUser v1.SimpleUser
+	if err := copier.Copy(&simpleUser, &user); err != nil {
+		return nil, err
+	}
+	userMap := structs.Map(simpleUser)
+	// 7.3. 存储
 	key = constants.RedisLoginUserKey + token
+	s.rdb.HSet(ctx, key, userMap)
+	// 7.4. 设置 token 有效期
+	s.rdb.Expire(ctx, key, constants.RedisLoginUserTTL)
 
-	filed := make(map[string]any)
-	filed["id"] = user.ID
-	if user.NickName != nil {
-		filed["nickname"] = *user.NickName
-	}
-	if user.Icon != nil {
-		filed["icon"] = *user.Icon
-	}
-	err = s.rdb.HSet(ctx, key, filed).Err()
-	if err != nil {
-		return &v1.LoginRespData{}, err
-	}
-
-	err = s.rdb.Expire(ctx, key, constants.RedisLoginUserTTL).Err()
-	if err != nil {
-		return &v1.LoginRespData{}, err
-	}
+	// 8. 返回 token
 	return &v1.LoginRespData{
 		Token: token,
 	}, nil
