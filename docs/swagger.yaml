@@ -78,6 +78,21 @@ definitions:
         description: 维度
         type: number
     type: object
+  go-dianping_api_v1.LoginReq:
+    properties:
+      code:
+        example: "123456"
+        type: string
+      password:
+        example: ""
+        type: string
+      phone:
+        example: "13456789001"
+        type: string
+    required:
+    - code
+    - phone
+    type: object
   go-dianping_api_v1.LoginResp:
     properties:
       data:
@@ -199,6 +214,13 @@ paths:
     post:
       consumes:
       - application/json
+      parameters:
+      - description: 登录请求体
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/go-dianping_api_v1.LoginReq'
       produces:
       - application/json
       responses:

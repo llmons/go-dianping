@@ -10,8 +10,8 @@ import (
 	"go-dianping/internal/base/user_holder"
 	"go-dianping/internal/entity"
 	"go-dianping/internal/repository"
-	"go-dianping/pkg/helper/validator"
 	"go.uber.org/zap"
+	"gorm.io/gorm"
 )
 
 type UserService interface {
@@ -22,13 +22,13 @@ type UserService interface {
 
 type userService struct {
 	*Service
-	userRepository repository.UserRepository
+	userRepo repository.UserRepository
 }
 
 func NewUserService(service *Service, userRepository repository.UserRepository) UserService {
 	return &userService{
-		Service:        service,
-		userRepository: userRepository,
+		Service:  service,
+		userRepo: userRepository,
 	}
 }
 
@@ -37,7 +37,6 @@ func (s *userService) SendCode(ctx context.Context, req *v1.SendCodeReq) error {
 	if regex_utils.IsPhoneInvalid(req.Phone) {
 		// 2. 如果不符合，返回错误信息
 		return errors.New("手机号格式错误！")
-
 	}
 	// 3. 符合，生成验证码
 	var code string
@@ -60,29 +59,39 @@ func (s *userService) SendCode(ctx context.Context, req *v1.SendCodeReq) error {
 }
 
 func (s *userService) Login(ctx context.Context, req *v1.LoginReq) (*v1.LoginRespData, error) {
-	if !validator.IsPhone(req.Phone) {
-		return &v1.LoginRespData{}, errors.New("phone is invalidate")
+	// 1. 校验手机号
+	if regex_utils.IsPhoneInvalid(req.Phone) {
+		// 2. 如果不符合，返回错误信息
+		return nil, errors.New("手机号格式错误！")
 	}
 
+	// 2. 校验验证码
 	key := constants.RedisLoginCodeKey + req.Phone
 	cacheCode, err := s.rdb.Get(ctx, key).Result()
 	if err != nil {
-		return &v1.LoginRespData{}, err
-	}
-	if req.Code != cacheCode {
-		return &v1.LoginRespData{}, errors.New("code is invalidate")
-	}
-
-	user, err := s.userRepository.GetByPhone(ctx, req.Phone)
-	if err != nil {
 		return nil, err
 	}
+	if cacheCode != req.Code {
+		// 3. 不一致，报错
+		return nil, errors.New("验证码错误")
+	}
+
+	// 4. 一致，根据手机号查询用户 select * from tb_user where phone = ?
+	user, err := s.userRepo.GetByPhone(ctx, req.Phone)
+	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil, err
+	}
+
+	// 5. 判断用户是否存在
 	if user == nil {
+		// 6. 不存在，创建新用户并保存
 		user, err = s.createUserWithPhone(ctx, req.Phone)
 		if err != nil {
-			return &v1.LoginRespData{}, err
+			return nil, err
 		}
 	}
+
+	// 7. 保存用户信息到 redis 中
 
 	token, err := random.UUIdV4()
 	if err != nil {
@@ -121,12 +130,14 @@ func (s *userService) GetMe(ctx context.Context) (*v1.GetMeRespData, error) {
 }
 
 func (s *userService) createUserWithPhone(ctx context.Context, phone string) (*entity.User, error) {
+	// 1. 创建用户
 	nickname := constants.UserNickNamePrefix + random.RandString(10)
 	user := entity.User{
 		Phone:    phone,
 		NickName: &nickname,
 	}
-	if err := s.userRepository.Create(ctx, &user); err != nil {
+	// 2. 保存用户
+	if err := s.userRepo.Save(ctx, &user); err != nil {
 		return nil, err
 	}
 	return &user, nil

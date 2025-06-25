@@ -8,9 +8,9 @@ type (
 
 type (
 	LoginReq struct {
-		Phone    string  `json:"phone" binding:"required"`
-		Code     string  `json:"code" binding:"required"`
-		Password *string `json:"password"`
+		Phone    string  `json:"phone" example:"13456789001" binding:"required"`
+		Code     string  `json:"code" example:"123456" binding:"required"`
+		Password *string `json:"password" example:""`
 	}
 	LoginRespData struct {
 		Token string `json:"token"`

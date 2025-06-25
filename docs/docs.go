@@ -120,6 +120,17 @@ const docTemplate = `{
                     "user"
                 ],
                 "summary": "登录",
+                "parameters": [
+                    {
+                        "description": "登录请求体",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/go-dianping_api_v1.LoginReq"
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -266,6 +277,27 @@ const docTemplate = `{
                 "y": {
                     "description": "维度",
                     "type": "number"
+                }
+            }
+        },
+        "go-dianping_api_v1.LoginReq": {
+            "type": "object",
+            "required": [
+                "code",
+                "phone"
+            ],
+            "properties": {
+                "code": {
+                    "type": "string",
+                    "example": "123456"
+                },
+                "password": {
+                    "type": "string",
+                    "example": ""
+                },
+                "phone": {
+                    "type": "string",
+                    "example": "13456789001"
                 }
             }
         },

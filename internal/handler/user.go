@@ -37,6 +37,7 @@ func (h *UserHandler) SendCode(ctx *gin.Context) {
 		return
 	}
 
+	// 发送短信验证码并保存验证码
 	err := h.userService.SendCode(ctx.Request.Context(), &req)
 	if err != nil {
 		v1.HandleError(ctx, http.StatusInternalServerError, err.Error(), nil)
@@ -52,17 +53,18 @@ func (h *UserHandler) SendCode(ctx *gin.Context) {
 // @Tags user
 // @Accept json
 // @Produce json
-// @Params request body v1.LoginReq true "手机+验证码"
+// @Param request body v1.LoginReq true "登录请求体"
 // @Success 200 {object} v1.LoginResp
 // @Router /user/login [post]
 func (h *UserHandler) Login(ctx *gin.Context) {
-	var params v1.LoginReq
-	if err := ctx.ShouldBind(&params); err != nil {
+	var req v1.LoginReq
+	if err := ctx.ShouldBind(&req); err != nil {
 		v1.HandleError(ctx, http.StatusBadRequest, err.Error(), nil)
 		return
 	}
 
-	data, err := h.userService.Login(ctx.Request.Context(), &params)
+	// 实现登录功能
+	data, err := h.userService.Login(ctx.Request.Context(), &req)
 	if err != nil {
 		v1.HandleError(ctx, http.StatusInternalServerError, err.Error(), nil)
 		return
