@@ -179,6 +179,12 @@ paths:
       - shop
   /user/code:
     post:
+      parameters:
+      - description: 手机号
+        in: query
+        name: phone
+        required: true
+        type: string
       produces:
       - application/json
       responses:

@@ -89,6 +89,15 @@ const docTemplate = `{
                     "user"
                 ],
                 "summary": "发送验证码",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "手机号",
+                        "name": "phone",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",

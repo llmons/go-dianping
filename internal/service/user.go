@@ -6,6 +6,7 @@ import (
 	"github.com/pkg/errors"
 	"go-dianping/api/v1"
 	"go-dianping/internal/base/constants"
+	"go-dianping/internal/base/regex_utils"
 	"go-dianping/internal/base/user_holder"
 	"go-dianping/internal/entity"
 	"go-dianping/internal/repository"
@@ -32,10 +33,13 @@ func NewUserService(service *Service, userRepository repository.UserRepository) 
 }
 
 func (s *userService) SendCode(ctx context.Context, req *v1.SendCodeReq) error {
-	if !validator.IsPhone(req.Phone) {
-		return errors.New("phone is invalidate")
-	}
+	// 1. 校验手机号
+	if regex_utils.IsPhoneInvalid(req.Phone) {
+		// 2. 如果不符合，返回错误信息
+		return errors.New("手机号格式错误！")
 
+	}
+	// 3. 符合，生成验证码
 	var code string
 	if s.conf.Get("env") == "prod" {
 		code = random.RandNumeral(6)
@@ -43,14 +47,15 @@ func (s *userService) SendCode(ctx context.Context, req *v1.SendCodeReq) error {
 		code = "123456"
 	}
 
+	// 4. 保存验证码到 session
 	key := constants.RedisLoginCodeKey + req.Phone
 	err := s.rdb.Set(ctx, key, code, constants.RedisLoginCodeTTL).Err()
 	if err != nil {
 		return err
 	}
-
-	s.logger.Info("send code success", zap.String("code", code))
-
+	// 5. 发送验证码
+	s.logger.Info("发送短信验证码成功", zap.String("验证码：", code))
+	// 返回 ok
 	return nil
 }
 
