@@ -4,7 +4,6 @@ import (
 	"context"
 	"github.com/duke-git/lancet/v2/random"
 	"github.com/jinzhu/copier"
-	"github.com/mitchellh/mapstructure"
 	"github.com/pkg/errors"
 	"go-dianping/api/v1"
 	"go-dianping/internal/base/constants"
@@ -97,22 +96,15 @@ func (s *userService) Login(ctx context.Context, req *v1.LoginReq) (*v1.LoginRes
 	if err != nil {
 		return nil, err
 	}
-	// 7.2. 将 User 对象转为 Hash 储存
+	// 7.2. 存储 User 对象
 	var simpleUser v1.SimpleUser
 	if err := copier.Copy(&simpleUser, &user); err != nil {
 		return nil, err
 	}
-	//userMap := structs.Map(simpleUser)
-	var userMap map[string]any
-	if err := mapstructure.Decode(&simpleUser, &userMap); err != nil {
-		s.logger.Debug("decode", zap.Any("err", err))
-		return nil, err
-	}
-	s.logger.Debug("userMap", zap.Any("userMap", userMap))
 
 	// 7.3. 存储
 	key = constants.RedisLoginUserKey + token
-	s.rdb.HSet(ctx, key, userMap)
+	s.rdb.HSet(ctx, key, simpleUser)
 	// 7.4. 设置 token 有效期
 	s.rdb.Expire(ctx, key, constants.RedisLoginUserTTL)
 

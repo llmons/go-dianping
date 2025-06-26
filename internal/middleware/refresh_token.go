@@ -2,11 +2,11 @@ package middleware
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/mitchellh/mapstructure"
 	"github.com/redis/go-redis/v9"
 	"go-dianping/api/v1"
 	"go-dianping/internal/base/constants"
 	"go-dianping/internal/base/user_holder"
+	"net/http"
 	"strings"
 )
 
@@ -21,20 +21,17 @@ func RefreshToken(rdb *redis.Client) gin.HandlerFunc {
 		}
 		// 2. 基于 token 获取 redis 中的用户
 		key := constants.RedisLoginUserKey + token
-		userMap := rdb.HGetAll(ctx, key).Val()
-		// 3. 判断用户是否存在
-		if len(userMap) == 0 {
-			ctx.Next()
-			return
-		}
-
-		// 5. 将查询到的 hash 数据转为 SimpleUser
 		simpleUser := v1.SimpleUser{}
-		if err := mapstructure.Decode(&userMap, &simpleUser); err != nil {
-			ctx.AbortWithStatusJSON(500, v1.Response{
+		if err := rdb.HGetAll(ctx, key).Scan(&simpleUser); err != nil {
+			ctx.AbortWithStatusJSON(http.StatusInternalServerError, v1.Response{
 				Success:  false,
 				ErrorMsg: err.Error(),
 			})
+			return
+		}
+		// 3. 判断用户是否存在
+		if simpleUser.ID == nil {
+			ctx.Next()
 			return
 		}
 		// 6. 存在，保存用户信息到 context

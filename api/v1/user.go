@@ -23,9 +23,9 @@ type (
 
 type (
 	SimpleUser struct {
-		ID       int64   `json:"id"`
-		NickName *string `json:"nickname"`
-		Icon     *string `json:"icon"`
+		ID       *int64  `json:"id" redis:"id"`
+		NickName *string `json:"nickname" redis:"nickname"`
+		Icon     *string `json:"icon" redis:"icon"`
 	}
 	MeRespData SimpleUser
 	MeResp     struct {
