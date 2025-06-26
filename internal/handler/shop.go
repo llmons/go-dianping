@@ -30,7 +30,7 @@ func NewShopHandler(
 // @Produce json
 // @Param id path string true "商铺 id"
 // @Success 200 {object} v1.QueryShopByIDResp
-// @Router /shop/:id [get]
+// @Router /shop/{id} [get]
 func (h *ShopHandler) QueryShopById(ctx *gin.Context) {
 	var req v1.QueryShopByIDReq
 	if err := ctx.ShouldBindUri(&req); err != nil {
@@ -47,12 +47,13 @@ func (h *ShopHandler) QueryShopById(ctx *gin.Context) {
 }
 
 // UpdateShop godoc
-// @Summary 更新商铺
+// @Summary 更新商铺信息
 // @Schemes
 // @Description
 // @Tags shop
+// @Accept json
 // @Produce json
-// @Params request body v1.UpdateShopReq true "商铺信息"
+// @Param request body v1.UpdateShopReq true "商铺数据"
 // @Success 200 {object} v1.Response
 // @Router /shop [put]
 func (h *ShopHandler) UpdateShop(ctx *gin.Context) {

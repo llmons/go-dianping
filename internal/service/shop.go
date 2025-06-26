@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"github.com/jinzhu/copier"
 	"github.com/panjf2000/ants/v2"
@@ -10,6 +11,7 @@ import (
 	"go-dianping/internal/base/constants"
 	"go-dianping/internal/entity"
 	"go-dianping/internal/repository"
+	"go.uber.org/zap"
 	"time"
 )
 
@@ -67,19 +69,23 @@ func (s *shopService) QueryById(ctx context.Context, req *v1.QueryShopByIDReq) (
 }
 
 func (s *shopService) UpdateShop(ctx context.Context, req *v1.UpdateShopReq) error {
-	// ========== update sql db ==========
-	// already check id with gin.Context shouldBind in handler
+	if req.ID == nil {
+		return errors.New("商铺 id 不能为空")
+	}
+	// 1. 更新数据库
 	var shop entity.Shop
-	if err := copier.CopyWithOption(&shop, &req, copier.Option{IgnoreEmpty: true}); err != nil {
+	if err := copier.Copy(&shop, &req); err != nil {
 		return err
 	}
 
-	if _, err := s.shopRepo.Update(ctx, &shop); err != nil {
+	s.logger.Debug("req", zap.Any("req", req))
+	s.logger.Debug("shop", zap.Any("shop", shop))
+
+	if _, err := s.shopRepo.Updates(ctx, &shop); err != nil {
 		return err
 	}
+	// 2. 删除缓存
+	s.rdb.Del(ctx, fmt.Sprintf("%s%d", constants.RedisCacheShopKey, req.ID))
 
-	// ========== delete cache ==========
-	key := fmt.Sprintf("%s%d", constants.RedisCacheShopKey, req.ID)
-	s.rdb.Del(ctx, key)
 	return nil
 }

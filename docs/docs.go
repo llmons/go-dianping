@@ -25,13 +25,27 @@ const docTemplate = `{
     "paths": {
         "/shop": {
             "put": {
+                "consumes": [
+                    "application/json"
+                ],
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "shop"
                 ],
-                "summary": "更新商铺",
+                "summary": "更新商铺信息",
+                "parameters": [
+                    {
+                        "description": "商铺数据",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/go-dianping_api_v1.UpdateShopReq"
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -61,7 +75,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/shop/:id": {
+        "/shop/{id}": {
             "get": {
                 "produces": [
                     "application/json"
@@ -384,6 +398,63 @@ const docTemplate = `{
                 },
                 "total": {
                     "type": "integer"
+                }
+            }
+        },
+        "go-dianping_api_v1.UpdateShopReq": {
+            "type": "object",
+            "properties": {
+                "address": {
+                    "type": "string",
+                    "example": "金华路锦昌文华苑29号"
+                },
+                "area": {
+                    "type": "string",
+                    "example": "大关"
+                },
+                "avgPrice": {
+                    "type": "integer",
+                    "example": 80
+                },
+                "comments": {
+                    "type": "integer",
+                    "example": 3035
+                },
+                "id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "images": {
+                    "type": "string",
+                    "example": ""
+                },
+                "name": {
+                    "type": "string",
+                    "example": "120茶餐厅"
+                },
+                "openHours": {
+                    "type": "string",
+                    "example": "10:00-22:00"
+                },
+                "score": {
+                    "type": "integer",
+                    "example": 37
+                },
+                "sold": {
+                    "type": "integer",
+                    "example": 4215
+                },
+                "typeId": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "x": {
+                    "type": "number",
+                    "example": 0
+                },
+                "y": {
+                    "type": "number",
+                    "example": 0
                 }
             }
         }
