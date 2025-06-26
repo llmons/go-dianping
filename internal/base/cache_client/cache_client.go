@@ -19,7 +19,7 @@ type CacheClient[ENTITY any] interface {
 	Set(ctx context.Context, key string, value any, expireTime time.Duration)
 	SetWithLogicExpire(ctx context.Context, key string, value *ENTITY, expireTime time.Duration)
 	QueryWithPassThrough(ctx context.Context, keyPrefix string, id int64, dbFallback func(context.Context, int64) (*ENTITY, error), expireTime time.Duration) (*ENTITY, error)
-	//QueryWithMutex(ctx context.Context, req *v1.GetShopByIDReq) (*v1.GetShopByIDRespData, error)
+	QueryWithMutex(ctx context.Context, keyPrefix string, id int64, dbFallback func(context.Context, int64) (*ENTITY, error), expireTime time.Duration) (*ENTITY, error)
 	QueryWithLogicalExpire(ctx context.Context, keyPrefix string, id int64, dbFallback func(context.Context, int64) (*ENTITY, error), expireTime time.Duration) (*ENTITY, error)
 }
 type cacheClient[ENTITY any] struct {
@@ -56,15 +56,15 @@ func (c *cacheClient[ENTITY]) SetWithLogicExpire(ctx context.Context, key string
 func (c *cacheClient[ENTITY]) QueryWithPassThrough(ctx context.Context, keyPrefix string, id int64, dbFallback func(context.Context, int64) (*ENTITY, error), expireTime time.Duration) (*ENTITY, error) {
 	key := fmt.Sprintf("%s%d", keyPrefix, id)
 	// 1. 从 redis 查询店铺缓存
-	_json, err := c.rdb.Get(ctx, key).Result()
+	shopJson, err := c.rdb.Get(ctx, key).Result()
 	if err != nil && !errors.Is(err, redis.Nil) {
 		return nil, err
 	}
 	// 2. 判断是否存在
-	if _json != "" {
+	if shopJson != "" {
 		// 3. 存在，直接返回
 		var ret ENTITY
-		if err := json.Unmarshal([]byte(_json), &ret); err != nil {
+		if err := json.Unmarshal([]byte(shopJson), &ret); err != nil {
 			return nil, err
 		}
 		return &ret, nil
@@ -92,108 +92,102 @@ func (c *cacheClient[ENTITY]) QueryWithPassThrough(ctx context.Context, keyPrefi
 	return ret, nil
 }
 
-//func (c *cacheClient[ENTITY]) QueryWithMutex(ctx context.Context, req *v1.GetShopByIDReq) (*v1.GetShopByIDRespData, error) {
-//	var data v1.GetShopByIDRespData
-//
-//	// ========== check cache ==========
-//	key := fmt.Sprintf("%s%d", constants.RedisCacheShopKey, req.ID)
-//	cacheShopStr, err := c.rdb.Get(ctx, key).Result()
-//	if err != nil && !errors.Is(err, redis.Nil) {
-//		return nil, err
-//	}
-//	// err == nil || err == redis.Nil
-//	if err == nil && cacheShopStr == "" {
-//		return nil, errors.New("shop not exist")
-//	}
-//	if cacheShopStr != "" {
-//		var cacheShop entity.Shop
-//		if err := json.Unmarshal([]byte(cacheShopStr), &cacheShop); err != nil {
-//			return nil, err
-//		}
-//		if err := copier.CopyWithOption(&data, &cacheShop, copier.Option{IgnoreEmpty: true}); err != nil {
-//			return nil, err
-//		}
-//		return &data, nil
-//	}
-//
-//	// ========== lock ==========
-//	lockKey := fmt.Sprintf("%s%d", constants.RedisLockShopKey, req.ID)
-//	isLock, err := s.tryLock(ctx, lockKey)
-//	if err != nil {
-//		return nil, err
-//	}
-//	defer s.unlock(ctx, lockKey) // finally
-//	if !isLock {
-//		time.Sleep(time.Millisecond * 50)
-//		return s.queryWithMutex(ctx, req)
-//	}
-//
-//	// ========== double check ==========
-//	cacheShopStr, err = c.rdb.Get(ctx, key).Result()
-//	if err != nil && !errors.Is(err, redis.Nil) {
-//		return nil, err
-//	}
-//	// err == nil || err == redis.Nil
-//	if err == nil && cacheShopStr == "" {
-//		return nil, errors.New("shop not exist")
-//	}
-//	if cacheShopStr != "" {
-//		var cacheShop entity.Shop
-//		if err := json.Unmarshal([]byte(cacheShopStr), &cacheShop); err != nil {
-//			return nil, err
-//		}
-//		if err := copier.CopyWithOption(&data, &cacheShop, copier.Option{IgnoreEmpty: true}); err != nil {
-//			return nil, err
-//		}
-//		return &data, nil
-//	}
-//
-//	// ========== query sql db ==========
-//	shop, err := s.shopRepo.GetById(ctx, *req.ID)
-//	// mock time delay
-//	time.Sleep(time.Millisecond * 200)
-//	if err != nil {
-//		if errors.Is(err, gorm.ErrRecordNotFound) {
-//			// solve the cache penetration
-//			_, err := c.rdb.Set(ctx, key, "", constants.RedisCacheNullTTL).Result()
-//			if err != nil {
-//				return nil, err
-//			}
-//		}
-//		return nil, err
-//	}
-//
-//	// ========== record exist, save to redis and return ==========
-//	bytes, err := json.Marshal(shop)
-//	if err != nil {
-//		return nil, err
-//	}
-//	_, err = c.rdb.Set(ctx, key, bytes, constants.RedisCacheShopTTL).Result()
-//	if err != nil {
-//		return nil, err
-//	}
-//	if err := copier.CopyWithOption(&data, &shop, copier.Option{IgnoreEmpty: true}); err != nil {
-//		return nil, err
-//	}
-//	return &data, nil
-//}
-
-func (c *cacheClient[ENTITY]) QueryWithLogicalExpire(ctx context.Context, keyPrefix string, id int64, dbFallback func(context.Context, int64) (*ENTITY, error), expireTime time.Duration) (*ENTITY, error) {
+func (c *cacheClient[ENTITY]) QueryWithMutex(ctx context.Context, keyPrefix string, id int64, dbFallback func(context.Context, int64) (*ENTITY, error), expireTime time.Duration) (*ENTITY, error) {
 	key := fmt.Sprintf("%s%d", keyPrefix, id)
-	// 1. 从 redis 查询商铺缓存
-	_json, err := c.rdb.Get(ctx, key).Result()
+	// 1. 从 redis 查询店铺缓存
+	shopJson, err := c.rdb.Get(ctx, key).Result()
 	if err != nil && !errors.Is(err, redis.Nil) {
 		return nil, err
 	}
 	// 2. 判断是否存在
-	if errors.Is(err, redis.Nil) || _json == "" {
+	if shopJson != "" {
+		// 3. 存在，直接返回
+		var ret ENTITY
+		if err := json.Unmarshal([]byte(shopJson), &ret); err != nil {
+			return nil, err
+		}
+		return &ret, nil
+	}
+	// 判断命中的是否是空值
+	if err == nil {
+		// 返回一个错误信息
+		return nil, gorm.ErrRecordNotFound
+	}
+
+	// 4. 实现缓存重建
+	// 4.1. 获取互斥锁
+	lockKey := fmt.Sprintf("%s%d", constants.RedisLockShopKey, id)
+	isLock, err := c.tryLock(ctx, lockKey)
+	if err != nil {
+		return nil, err
+	}
+	// 等待释放锁
+	defer c.unlock(ctx, lockKey)
+	if !isLock {
+		// 4.3. 获取锁失败，休眠并重试
+		time.Sleep(time.Millisecond * 50)
+		return c.QueryWithMutex(ctx, keyPrefix, id, dbFallback, expireTime)
+	}
+
+	// ========== Double Check ==========
+	// 1. 从 redis 查询店铺缓存
+	shopJson, err = c.rdb.Get(ctx, key).Result()
+	if err != nil && !errors.Is(err, redis.Nil) {
+		return nil, err
+	}
+	// 2. 判断是否存在
+	if shopJson != "" {
+		// 3. 存在，直接返回
+		var ret ENTITY
+		if err := json.Unmarshal([]byte(shopJson), &ret); err != nil {
+			return nil, err
+		}
+		return &ret, nil
+	}
+	// 判断命中的是否是空值
+	if err == nil {
+		// 返回一个错误信息
+		return nil, gorm.ErrRecordNotFound
+	}
+
+	// 4.4. 获取锁成功，根据 id 查询数据库
+	shop, err := dbFallback(ctx, id)
+	// 5. 不存在，返回错误
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			// 将空值写入 redis
+			c.rdb.Set(ctx, key, "", constants.RedisCacheNullTTL)
+		}
+		// 返回错误信息
+		return nil, err
+	}
+
+	// 6. 存在，写入 redis
+	err = c.rdb.Set(ctx, key, shop, expireTime).Err()
+	if err != nil {
+		return nil, err
+	}
+
+	// 8. 返回
+	return shop, nil
+}
+
+func (c *cacheClient[ENTITY]) QueryWithLogicalExpire(ctx context.Context, keyPrefix string, id int64, dbFallback func(context.Context, int64) (*ENTITY, error), expireTime time.Duration) (*ENTITY, error) {
+	key := fmt.Sprintf("%s%d", keyPrefix, id)
+	// 1. 从 redis 查询商铺缓存
+	shopJson, err := c.rdb.Get(ctx, key).Result()
+	if err != nil && !errors.Is(err, redis.Nil) {
+		return nil, err
+	}
+	// 2. 判断是否存在
+	if errors.Is(err, redis.Nil) || shopJson == "" {
 		// 3. 不存在，返回错误
 		return nil, errors.New("shop not exist")
 	}
 
 	// 4. 命中，需要先把 json 反序列化为对象
 	var redisData redis_data.RedisData[ENTITY]
-	if err := json.Unmarshal([]byte(_json), &redisData); err != nil {
+	if err := json.Unmarshal([]byte(shopJson), &redisData); err != nil {
 		return nil, err
 	}
 	var ret ENTITY
@@ -217,11 +211,11 @@ func (c *cacheClient[ENTITY]) QueryWithLogicalExpire(ctx context.Context, keyPre
 	// 6.2. 判断是否获取锁成功
 	if isLock {
 		// ========== Double Check ==========
-		_json, err := c.rdb.Get(ctx, key).Result()
+		shopJson, err := c.rdb.Get(ctx, key).Result()
 		if err != nil && !errors.Is(err, redis.Nil) {
 			return nil, err
 		}
-		if errors.Is(err, redis.Nil) || _json == "" {
+		if errors.Is(err, redis.Nil) || shopJson == "" {
 			return nil, errors.New("shop not exist")
 		}
 

@@ -12,7 +12,6 @@ import (
 	"go-dianping/internal/entity"
 	"go-dianping/internal/repository"
 	"go.uber.org/zap"
-	"time"
 )
 
 type ShopService interface {
@@ -32,36 +31,34 @@ func NewShopService(
 	shopRepository repository.ShopRepository,
 	cacheClient cache_client.CacheClient[entity.Shop],
 ) ShopService {
-	pool, err := ants.NewPool(10)
-	if err != nil {
-		return nil
-	}
-
 	return &shopService{
-		Service:          service,
-		shopRepo:         shopRepository,
-		cacheClient:      cacheClient,
-		cacheRebuildPool: pool,
+		Service:     service,
+		shopRepo:    shopRepository,
+		cacheClient: cacheClient,
 	}
 }
 
 func (s *shopService) QueryById(ctx context.Context, req *v1.QueryShopByIDReq) (*v1.QueryShopByIDRespData, error) {
 	// 解决缓存穿透
-	//shop, err := s.cacheClient.QueryWithPassThrough(ctx, constants.RedisCacheShopKey, *req.ID, s.shopRepo.GetById, constants.RedisCacheShopTTL)
-	//if err != nil {
-	//	return nil, err
-	//}
-
-	// 互斥锁解决缓存击穿
-
-	// 逻辑过期解决缓存击穿
-	shop, err := s.cacheClient.QueryWithLogicalExpire(ctx, constants.RedisCacheShopKey, *req.ID, s.shopRepo.GetById, time.Second*20)
+	shop, err := s.cacheClient.QueryWithPassThrough(ctx, constants.RedisCacheShopKey, *req.ID, s.shopRepo.GetById, constants.RedisCacheShopTTL)
 	if err != nil {
 		return nil, err
 	}
 
+	// 互斥锁解决缓存击穿
+	//shop, err := s.cacheClient.QueryWithMutex(ctx, constants.RedisCacheShopKey, *req.ID, s.shopRepo.GetById, constants.RedisCacheShopTTL)
+	//if err != nil {
+	//	return nil, err
+	//}
+
+	// 逻辑过期解决缓存击穿
+	//shop, err := s.cacheClient.QueryWithLogicalExpire(ctx, constants.RedisCacheShopKey, *req.ID, s.shopRepo.GetById, time.Second*20)
+	//if err != nil {
+	//	return nil, err
+	//}
+
 	// 返回
-	var data = v1.QueryShopByIDRespData{}
+	var data v1.QueryShopByIDRespData
 	if err := copier.Copy(&data, shop); err != nil {
 		return nil, err
 	}
