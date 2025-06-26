@@ -14,7 +14,7 @@ import (
 )
 
 type ShopService interface {
-	QueryById(ctx context.Context, req *v1.GetShopByIDReq) (*v1.GetShopByIDRespData, error)
+	QueryById(ctx context.Context, req *v1.QueryShopByIDReq) (*v1.QueryShopByIDRespData, error)
 	UpdateShop(ctx context.Context, req *v1.UpdateShopReq) error
 }
 
@@ -43,7 +43,7 @@ func NewShopService(
 	}
 }
 
-func (s *shopService) QueryById(ctx context.Context, req *v1.GetShopByIDReq) (*v1.GetShopByIDRespData, error) {
+func (s *shopService) QueryById(ctx context.Context, req *v1.QueryShopByIDReq) (*v1.QueryShopByIDRespData, error) {
 	// 解决缓存穿透
 	//shop, err := s.cacheClient.QueryWithPassThrough(ctx, constants.RedisCacheShopKey, *req.ID, s.shopRepo.GetById, constants.RedisCacheShopTTL)
 	//if err != nil {
@@ -59,7 +59,7 @@ func (s *shopService) QueryById(ctx context.Context, req *v1.GetShopByIDReq) (*v
 	}
 
 	// 返回
-	var data = v1.GetShopByIDRespData{}
+	var data = v1.QueryShopByIDRespData{}
 	if err := copier.Copy(&data, shop); err != nil {
 		return nil, err
 	}
@@ -83,89 +83,3 @@ func (s *shopService) UpdateShop(ctx context.Context, req *v1.UpdateShopReq) err
 	s.rdb.Del(ctx, key)
 	return nil
 }
-
-//func (s *shopService) queryWithMutex(ctx context.Context, req *v1.GetShopByIDReq) (*v1.GetShopByIDRespData, error) {
-//	var data v1.GetShopByIDRespData
-//
-//	// ========== check cache ==========
-//	key := fmt.Sprintf("%s%d", constants.RedisCacheShopKey, req.ID)
-//	cacheShopStr, err := s.rdb.Get(ctx, key).Result()
-//	if err != nil && !errors.Is(err, redis.Nil) {
-//		return nil, err
-//	}
-//	// err == nil || err == redis.Nil
-//	if err == nil && cacheShopStr == "" {
-//		return nil, errors.New("shop not exist")
-//	}
-//	if cacheShopStr != "" {
-//		var cacheShop entity.Shop
-//		if err := json.Unmarshal([]byte(cacheShopStr), &cacheShop); err != nil {
-//			return nil, err
-//		}
-//		if err := copier.CopyWithOption(&data, &cacheShop, copier.Option{IgnoreEmpty: true}); err != nil {
-//			return nil, err
-//		}
-//		return &data, nil
-//	}
-//
-//	// ========== lock ==========
-//	lockKey := fmt.Sprintf("%s%d", constants.RedisLockShopKey, req.ID)
-//	isLock, err := s.tryLock(ctx, lockKey)
-//	if err != nil {
-//		return nil, err
-//	}
-//	defer s.unlock(ctx, lockKey) // finally
-//	if !isLock {
-//		time.Sleep(time.Millisecond * 50)
-//		return s.queryWithMutex(ctx, req)
-//	}
-//
-//	// ========== double check ==========
-//	cacheShopStr, err = s.rdb.Get(ctx, key).Result()
-//	if err != nil && !errors.Is(err, redis.Nil) {
-//		return nil, err
-//	}
-//	// err == nil || err == redis.Nil
-//	if err == nil && cacheShopStr == "" {
-//		return nil, errors.New("shop not exist")
-//	}
-//	if cacheShopStr != "" {
-//		var cacheShop entity.Shop
-//		if err := json.Unmarshal([]byte(cacheShopStr), &cacheShop); err != nil {
-//			return nil, err
-//		}
-//		if err := copier.CopyWithOption(&data, &cacheShop, copier.Option{IgnoreEmpty: true}); err != nil {
-//			return nil, err
-//		}
-//		return &data, nil
-//	}
-//
-//	// ========== query sql db ==========
-//	shop, err := s.shopRepo.GetById(ctx, *req.ID)
-//	// mock time delay
-//	time.Sleep(time.Millisecond * 200)
-//	if err != nil {
-//		if errors.Is(err, gorm.ErrRecordNotFound) {
-//			// solve the cache penetration
-//			_, err := s.rdb.Set(ctx, key, "", constants.RedisCacheNullTTL).Result()
-//			if err != nil {
-//				return nil, err
-//			}
-//		}
-//		return nil, err
-//	}
-//
-//	// ========== record exist, save to redis and return ==========
-//	bytes, err := json.Marshal(shop)
-//	if err != nil {
-//		return nil, err
-//	}
-//	_, err = s.rdb.Set(ctx, key, bytes, constants.RedisCacheShopTTL).Result()
-//	if err != nil {
-//		return nil, err
-//	}
-//	if err := copier.CopyWithOption(&data, &shop, copier.Option{IgnoreEmpty: true}); err != nil {
-//		return nil, err
-//	}
-//	return &data, nil
-//}

@@ -3,13 +3,13 @@ package v1
 import "go-dianping/internal/entity"
 
 type (
-	GetShopByIDReq struct {
+	QueryShopByIDReq struct {
 		ID *int64 `uri:"id" binding:"required"`
 	}
-	GetShopByIDRespData entity.Shop
-	GetShopByIDResp     struct {
+	QueryShopByIDRespData entity.Shop
+	QueryShopByIDResp     struct {
 		Response
-		Data GetShopByIDRespData `json:"data"`
+		Data QueryShopByIDRespData `json:"data"`
 	}
 )
 

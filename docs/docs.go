@@ -69,12 +69,21 @@ const docTemplate = `{
                 "tags": [
                     "shop"
                 ],
-                "summary": "根据 id 获取商铺",
+                "summary": "根据 id 查询商铺信息",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "商铺 id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/go-dianping_api_v1.GetShopByIDResp"
+                            "$ref": "#/definitions/go-dianping_api_v1.QueryShopByIDResp"
                         }
                     }
                 }
@@ -88,7 +97,7 @@ const docTemplate = `{
                 "tags": [
                     "user"
                 ],
-                "summary": "发送验证码",
+                "summary": "发送短信验证码并保存验证码",
                 "parameters": [
                     {
                         "type": "string",
@@ -119,7 +128,7 @@ const docTemplate = `{
                 "tags": [
                     "user"
                 ],
-                "summary": "登录",
+                "summary": "实现登录功能",
                 "parameters": [
                     {
                         "description": "登录请求体",
@@ -154,12 +163,12 @@ const docTemplate = `{
                 "tags": [
                     "user"
                 ],
-                "summary": "获取当前登录的用户信息",
+                "summary": "获取当前登录的用户并返回",
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/go-dianping_api_v1.GetMeResp"
+                            "$ref": "#/definitions/go-dianping_api_v1.MeResp"
                         }
                     }
                 }
@@ -167,11 +176,32 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "go-dianping_api_v1.GetMeResp": {
+        "go-dianping_api_v1.LoginReq": {
+            "type": "object",
+            "required": [
+                "code",
+                "phone"
+            ],
+            "properties": {
+                "code": {
+                    "type": "string",
+                    "example": "123456"
+                },
+                "password": {
+                    "type": "string",
+                    "example": ""
+                },
+                "phone": {
+                    "type": "string",
+                    "example": "13456789001"
+                }
+            }
+        },
+        "go-dianping_api_v1.LoginResp": {
             "type": "object",
             "properties": {
                 "data": {
-                    "$ref": "#/definitions/go-dianping_api_v1.GetMeRespData"
+                    "$ref": "#/definitions/go-dianping_api_v1.LoginRespData"
                 },
                 "errorMsg": {
                     "type": "string"
@@ -184,7 +214,32 @@ const docTemplate = `{
                 }
             }
         },
-        "go-dianping_api_v1.GetMeRespData": {
+        "go-dianping_api_v1.LoginRespData": {
+            "type": "object",
+            "properties": {
+                "token": {
+                    "type": "string"
+                }
+            }
+        },
+        "go-dianping_api_v1.MeResp": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/go-dianping_api_v1.MeRespData"
+                },
+                "errorMsg": {
+                    "type": "string"
+                },
+                "success": {
+                    "type": "boolean"
+                },
+                "total": {
+                    "type": "integer"
+                }
+            }
+        },
+        "go-dianping_api_v1.MeRespData": {
             "type": "object",
             "properties": {
                 "icon": {
@@ -198,11 +253,11 @@ const docTemplate = `{
                 }
             }
         },
-        "go-dianping_api_v1.GetShopByIDResp": {
+        "go-dianping_api_v1.QueryShopByIDResp": {
             "type": "object",
             "properties": {
                 "data": {
-                    "$ref": "#/definitions/go-dianping_api_v1.GetShopByIDRespData"
+                    "$ref": "#/definitions/go-dianping_api_v1.QueryShopByIDRespData"
                 },
                 "errorMsg": {
                     "type": "string"
@@ -215,7 +270,7 @@ const docTemplate = `{
                 }
             }
         },
-        "go-dianping_api_v1.GetShopByIDRespData": {
+        "go-dianping_api_v1.QueryShopByIDRespData": {
             "type": "object",
             "properties": {
                 "address": {
@@ -277,52 +332,6 @@ const docTemplate = `{
                 "y": {
                     "description": "维度",
                     "type": "number"
-                }
-            }
-        },
-        "go-dianping_api_v1.LoginReq": {
-            "type": "object",
-            "required": [
-                "code",
-                "phone"
-            ],
-            "properties": {
-                "code": {
-                    "type": "string",
-                    "example": "123456"
-                },
-                "password": {
-                    "type": "string",
-                    "example": ""
-                },
-                "phone": {
-                    "type": "string",
-                    "example": "13456789001"
-                }
-            }
-        },
-        "go-dianping_api_v1.LoginResp": {
-            "type": "object",
-            "properties": {
-                "data": {
-                    "$ref": "#/definitions/go-dianping_api_v1.LoginRespData"
-                },
-                "errorMsg": {
-                    "type": "string"
-                },
-                "success": {
-                    "type": "boolean"
-                },
-                "total": {
-                    "type": "integer"
-                }
-            }
-        },
-        "go-dianping_api_v1.LoginRespData": {
-            "type": "object",
-            "properties": {
-                "token": {
-                    "type": "string"
                 }
             }
         },

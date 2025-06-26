@@ -22,23 +22,23 @@ func NewShopHandler(
 	}
 }
 
-// GetShopById godoc
-// @Summary 根据 id 获取商铺
+// QueryShopById godoc
+// @Summary 根据 id 查询商铺信息
 // @Schemes
 // @Description
 // @Tags shop
 // @Produce json
-// @Params id path string true "id"
-// @Success 200 {object} v1.GetShopByIDResp
+// @Param id path string true "商铺 id"
+// @Success 200 {object} v1.QueryShopByIDResp
 // @Router /shop/:id [get]
-func (h *ShopHandler) GetShopById(ctx *gin.Context) {
-	var params v1.GetShopByIDReq
-	if err := ctx.ShouldBindUri(&params); err != nil {
+func (h *ShopHandler) QueryShopById(ctx *gin.Context) {
+	var req v1.QueryShopByIDReq
+	if err := ctx.ShouldBindUri(&req); err != nil {
 		v1.HandleError(ctx, http.StatusBadRequest, err.Error(), nil)
 		return
 	}
 
-	data, err := h.shopService.QueryById(ctx.Request.Context(), &params)
+	data, err := h.shopService.QueryById(ctx.Request.Context(), &req)
 	if err != nil {
 		v1.HandleError(ctx, http.StatusBadRequest, err.Error(), nil)
 		return
