@@ -18,9 +18,9 @@ import (
 type CacheClient[ENTITY any] interface {
 	Set(ctx context.Context, key string, value any, expireTime time.Duration)
 	SetWithLogicExpire(ctx context.Context, key string, value *ENTITY, expireTime time.Duration)
-	QueryWithPassThrough(ctx context.Context, keyPrefix string, id int64, dbFallback func(context.Context, int64) (*ENTITY, error), expireTime time.Duration) (*ENTITY, error)
-	QueryWithMutex(ctx context.Context, keyPrefix string, id int64, dbFallback func(context.Context, int64) (*ENTITY, error), expireTime time.Duration) (*ENTITY, error)
-	QueryWithLogicalExpire(ctx context.Context, keyPrefix string, id int64, dbFallback func(context.Context, int64) (*ENTITY, error), expireTime time.Duration) (*ENTITY, error)
+	QueryWithPassThrough(ctx context.Context, keyPrefix string, id uint64, dbFallback func(context.Context, uint64) (*ENTITY, error), expireTime time.Duration) (*ENTITY, error)
+	QueryWithMutex(ctx context.Context, keyPrefix string, id uint64, dbFallback func(context.Context, uint64) (*ENTITY, error), expireTime time.Duration) (*ENTITY, error)
+	QueryWithLogicalExpire(ctx context.Context, keyPrefix string, id uint64, dbFallback func(context.Context, uint64) (*ENTITY, error), expireTime time.Duration) (*ENTITY, error)
 }
 type cacheClient[ENTITY any] struct {
 	rdb              *redis.Client
@@ -53,7 +53,7 @@ func (c *cacheClient[ENTITY]) SetWithLogicExpire(ctx context.Context, key string
 	c.rdb.Set(ctx, key, redisData, redis.KeepTTL)
 }
 
-func (c *cacheClient[ENTITY]) QueryWithPassThrough(ctx context.Context, keyPrefix string, id int64, dbFallback func(context.Context, int64) (*ENTITY, error), expireTime time.Duration) (*ENTITY, error) {
+func (c *cacheClient[ENTITY]) QueryWithPassThrough(ctx context.Context, keyPrefix string, id uint64, dbFallback func(context.Context, uint64) (*ENTITY, error), expireTime time.Duration) (*ENTITY, error) {
 	key := fmt.Sprintf("%s%d", keyPrefix, id)
 	// 1. 从 redis 查询店铺缓存
 	shopJson, err := c.rdb.Get(ctx, key).Result()
@@ -92,7 +92,7 @@ func (c *cacheClient[ENTITY]) QueryWithPassThrough(ctx context.Context, keyPrefi
 	return ret, nil
 }
 
-func (c *cacheClient[ENTITY]) QueryWithMutex(ctx context.Context, keyPrefix string, id int64, dbFallback func(context.Context, int64) (*ENTITY, error), expireTime time.Duration) (*ENTITY, error) {
+func (c *cacheClient[ENTITY]) QueryWithMutex(ctx context.Context, keyPrefix string, id uint64, dbFallback func(context.Context, uint64) (*ENTITY, error), expireTime time.Duration) (*ENTITY, error) {
 	key := fmt.Sprintf("%s%d", keyPrefix, id)
 	// 1. 从 redis 查询店铺缓存
 	shopJson, err := c.rdb.Get(ctx, key).Result()
@@ -172,7 +172,7 @@ func (c *cacheClient[ENTITY]) QueryWithMutex(ctx context.Context, keyPrefix stri
 	return shop, nil
 }
 
-func (c *cacheClient[ENTITY]) QueryWithLogicalExpire(ctx context.Context, keyPrefix string, id int64, dbFallback func(context.Context, int64) (*ENTITY, error), expireTime time.Duration) (*ENTITY, error) {
+func (c *cacheClient[ENTITY]) QueryWithLogicalExpire(ctx context.Context, keyPrefix string, id uint64, dbFallback func(context.Context, uint64) (*ENTITY, error), expireTime time.Duration) (*ENTITY, error) {
 	key := fmt.Sprintf("%s%d", keyPrefix, id)
 	// 1. 从 redis 查询商铺缓存
 	shopJson, err := c.rdb.Get(ctx, key).Result()

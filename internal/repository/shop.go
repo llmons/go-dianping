@@ -7,7 +7,7 @@ import (
 )
 
 type ShopRepository interface {
-	GetById(ctx context.Context, id int64) (*entity.Shop, error)
+	GetById(ctx context.Context, id uint64) (*entity.Shop, error)
 	Updates(ctx context.Context, shop *entity.Shop) (gen.ResultInfo, error)
 }
 
@@ -23,7 +23,7 @@ type shopRepository struct {
 	*Repository
 }
 
-func (r *shopRepository) GetById(ctx context.Context, id int64) (*entity.Shop, error) {
+func (r *shopRepository) GetById(ctx context.Context, id uint64) (*entity.Shop, error) {
 	return r.query.WithContext(ctx).Shop.Where(r.query.Shop.ID.Eq(id)).First()
 }
 
