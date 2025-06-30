@@ -7,6 +7,7 @@ package query
 import (
 	"context"
 	"database/sql"
+	"strings"
 
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -28,8 +29,8 @@ func newSign(db *gorm.DB, opts ...gen.DOOption) sign {
 
 	tableName := _sign.signDo.TableName()
 	_sign.ALL = field.NewAsterisk(tableName)
-	_sign.ID = field.NewInt64(tableName, "id")
-	_sign.UserID = field.NewInt64(tableName, "user_id")
+	_sign.ID = field.NewUint64(tableName, "id")
+	_sign.UserID = field.NewUint64(tableName, "user_id")
 	_sign.Year = field.NewInt32(tableName, "year")
 	_sign.Month = field.NewInt32(tableName, "month")
 	_sign.Date = field.NewTime(tableName, "date")
@@ -44,12 +45,12 @@ type sign struct {
 	signDo
 
 	ALL      field.Asterisk
-	ID       field.Int64 // 主键
-	UserID   field.Int64 // 用户id
-	Year     field.Int32 // 签到的年
-	Month    field.Int32 // 签到的月
-	Date     field.Time  // 签到的日期
-	IsBackup field.Bool  // 是否补签
+	ID       field.Uint64 // 主键
+	UserID   field.Uint64 // 用户id
+	Year     field.Int32  // 签到的年
+	Month    field.Int32  // 签到的月
+	Date     field.Time   // 签到的日期
+	IsBackup field.Bool   // 是否补签
 
 	fieldMap map[string]field.Expr
 }
@@ -66,8 +67,8 @@ func (s sign) As(alias string) *sign {
 
 func (s *sign) updateTableName(table string) *sign {
 	s.ALL = field.NewAsterisk(table)
-	s.ID = field.NewInt64(table, "id")
-	s.UserID = field.NewInt64(table, "user_id")
+	s.ID = field.NewUint64(table, "id")
+	s.UserID = field.NewUint64(table, "user_id")
 	s.Year = field.NewInt32(table, "year")
 	s.Month = field.NewInt32(table, "month")
 	s.Date = field.NewTime(table, "date")
@@ -170,6 +171,24 @@ type ISignDo interface {
 	Returning(value interface{}, columns ...string) ISignDo
 	UnderlyingDB() *gorm.DB
 	schema.Tabler
+
+	GetByID(id int) (result *entity.Sign, err error)
+}
+
+// GetByID query data by id and return it as *struct*
+// SELECT * FROM @@table WHERE id=@id
+func (s signDo) GetByID(id int) (result *entity.Sign, err error) {
+	var params []interface{}
+
+	var generateSQL strings.Builder
+	params = append(params, id)
+	generateSQL.WriteString("query data by id and return it as *struct* SELECT * FROM tb_sign WHERE id=? ")
+
+	var executeSQL *gorm.DB
+	executeSQL = s.UnderlyingDB().Raw(generateSQL.String(), params...).Take(&result) // ignore_security_alert
+	err = executeSQL.Error
+
+	return
 }
 
 func (s signDo) Debug() ISignDo {

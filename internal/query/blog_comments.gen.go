@@ -7,6 +7,7 @@ package query
 import (
 	"context"
 	"database/sql"
+	"strings"
 
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -28,13 +29,13 @@ func newBlogComments(db *gorm.DB, opts ...gen.DOOption) blogComments {
 
 	tableName := _blogComments.blogCommentsDo.TableName()
 	_blogComments.ALL = field.NewAsterisk(tableName)
-	_blogComments.ID = field.NewInt64(tableName, "id")
-	_blogComments.UserID = field.NewInt64(tableName, "user_id")
-	_blogComments.BlogID = field.NewInt64(tableName, "blog_id")
-	_blogComments.ParentID = field.NewInt64(tableName, "parent_id")
-	_blogComments.AnswerID = field.NewInt64(tableName, "answer_id")
+	_blogComments.ID = field.NewUint64(tableName, "id")
+	_blogComments.UserID = field.NewUint64(tableName, "user_id")
+	_blogComments.BlogID = field.NewUint64(tableName, "blog_id")
+	_blogComments.ParentID = field.NewUint64(tableName, "parent_id")
+	_blogComments.AnswerID = field.NewUint64(tableName, "answer_id")
 	_blogComments.Content = field.NewString(tableName, "content")
-	_blogComments.Liked = field.NewInt32(tableName, "liked")
+	_blogComments.Liked = field.NewUint32(tableName, "liked")
 	_blogComments.Status = field.NewBool(tableName, "status")
 	_blogComments.CreateTime = field.NewTime(tableName, "create_time")
 	_blogComments.UpdateTime = field.NewTime(tableName, "update_time")
@@ -48,13 +49,13 @@ type blogComments struct {
 	blogCommentsDo
 
 	ALL        field.Asterisk
-	ID         field.Int64  // 主键
-	UserID     field.Int64  // 用户id
-	BlogID     field.Int64  // 探店id
-	ParentID   field.Int64  // 关联的1级评论id，如果是一级评论，则值为0
-	AnswerID   field.Int64  // 回复的评论id
+	ID         field.Uint64 // 主键
+	UserID     field.Uint64 // 用户id
+	BlogID     field.Uint64 // 探店id
+	ParentID   field.Uint64 // 关联的1级评论id，如果是一级评论，则值为0
+	AnswerID   field.Uint64 // 回复的评论id
 	Content    field.String // 回复的内容
-	Liked      field.Int32  // 点赞数
+	Liked      field.Uint32 // 点赞数
 	Status     field.Bool   // 状态，0：正常，1：被举报，2：禁止查看
 	CreateTime field.Time   // 创建时间
 	UpdateTime field.Time   // 更新时间
@@ -74,13 +75,13 @@ func (b blogComments) As(alias string) *blogComments {
 
 func (b *blogComments) updateTableName(table string) *blogComments {
 	b.ALL = field.NewAsterisk(table)
-	b.ID = field.NewInt64(table, "id")
-	b.UserID = field.NewInt64(table, "user_id")
-	b.BlogID = field.NewInt64(table, "blog_id")
-	b.ParentID = field.NewInt64(table, "parent_id")
-	b.AnswerID = field.NewInt64(table, "answer_id")
+	b.ID = field.NewUint64(table, "id")
+	b.UserID = field.NewUint64(table, "user_id")
+	b.BlogID = field.NewUint64(table, "blog_id")
+	b.ParentID = field.NewUint64(table, "parent_id")
+	b.AnswerID = field.NewUint64(table, "answer_id")
 	b.Content = field.NewString(table, "content")
-	b.Liked = field.NewInt32(table, "liked")
+	b.Liked = field.NewUint32(table, "liked")
 	b.Status = field.NewBool(table, "status")
 	b.CreateTime = field.NewTime(table, "create_time")
 	b.UpdateTime = field.NewTime(table, "update_time")
@@ -186,6 +187,24 @@ type IBlogCommentsDo interface {
 	Returning(value interface{}, columns ...string) IBlogCommentsDo
 	UnderlyingDB() *gorm.DB
 	schema.Tabler
+
+	GetByID(id int) (result *entity.BlogComments, err error)
+}
+
+// GetByID query data by id and return it as *struct*
+// SELECT * FROM @@table WHERE id=@id
+func (b blogCommentsDo) GetByID(id int) (result *entity.BlogComments, err error) {
+	var params []interface{}
+
+	var generateSQL strings.Builder
+	params = append(params, id)
+	generateSQL.WriteString("query data by id and return it as *struct* SELECT * FROM tb_blog_comments WHERE id=? ")
+
+	var executeSQL *gorm.DB
+	executeSQL = b.UnderlyingDB().Raw(generateSQL.String(), params...).Take(&result) // ignore_security_alert
+	err = executeSQL.Error
+
+	return
 }
 
 func (b blogCommentsDo) Debug() IBlogCommentsDo {

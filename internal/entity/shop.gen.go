@@ -12,21 +12,21 @@ const TableNameShop = "tb_shop"
 
 // Shop mapped from table <tb_shop>
 type Shop struct {
-	ID         int64      `gorm:"column:id;primaryKey;autoIncrement:true;comment:主键" json:"id"`                                  // 主键
-	Name       string     `gorm:"column:name;not null;comment:商铺名称" json:"name"`                                                 // 商铺名称
-	TypeID     int64      `gorm:"column:type_id;not null;comment:商铺类型的id" json:"type_id"`                                        // 商铺类型的id
-	Images     string     `gorm:"column:images;not null;comment:商铺图片，多个图片以','隔开" json:"images"`                                  // 商铺图片，多个图片以','隔开
-	Area       *string    `gorm:"column:area;comment:商圈，例如陆家嘴" json:"area"`                                                      // 商圈，例如陆家嘴
-	Address    string     `gorm:"column:address;not null;comment:地址" json:"address"`                                             // 地址
-	X          float64    `gorm:"column:x;not null;comment:经度" json:"x"`                                                         // 经度
-	Y          float64    `gorm:"column:y;not null;comment:维度" json:"y"`                                                         // 维度
-	AvgPrice   *int64     `gorm:"column:avg_price;comment:均价，取整数" json:"avg_price"`                                              // 均价，取整数
-	Sold       int32      `gorm:"column:sold;not null;comment:销量" json:"sold"`                                                   // 销量
-	Comments   int32      `gorm:"column:comments;not null;comment:评论数量" json:"comments"`                                         // 评论数量
-	Score      int32      `gorm:"column:score;not null;comment:评分，1~5分，乘10保存，避免小数" json:"score"`                                 // 评分，1~5分，乘10保存，避免小数
-	OpenHours  *string    `gorm:"column:open_hours;comment:营业时间，例如 10:00-22:00" json:"open_hours"`                               // 营业时间，例如 10:00-22:00
-	CreateTime *time.Time `gorm:"column:create_time;default:current_timestamp();autoCreateTime;comment:创建时间" json:"create_time"` // 创建时间
-	UpdateTime *time.Time `gorm:"column:update_time;default:current_timestamp();autoUpdateTime;comment:更新时间" json:"update_time"` // 更新时间
+	ID         uint64     `gorm:"column:id;type:bigint(20) unsigned;primaryKey;autoIncrement:true;comment:主键" json:"id"`                        // 主键
+	Name       string     `gorm:"column:name;type:varchar(128);not null;comment:商铺名称" json:"name"`                                              // 商铺名称
+	TypeID     uint64     `gorm:"column:type_id;type:bigint(20) unsigned;not null;comment:商铺类型的id" json:"type_id"`                              // 商铺类型的id
+	Images     string     `gorm:"column:images;type:varchar(1024);not null;comment:商铺图片，多个图片以','隔开" json:"images"`                              // 商铺图片，多个图片以','隔开
+	Area       *string    `gorm:"column:area;type:varchar(128);comment:商圈，例如陆家嘴" json:"area"`                                                   // 商圈，例如陆家嘴
+	Address    string     `gorm:"column:address;type:varchar(255);not null;comment:地址" json:"address"`                                          // 地址
+	X          float64    `gorm:"column:x;type:double unsigned;not null;comment:经度" json:"x"`                                                   // 经度
+	Y          float64    `gorm:"column:y;type:double unsigned;not null;comment:维度" json:"y"`                                                   // 维度
+	AvgPrice   *uint64    `gorm:"column:avg_price;type:bigint(10) unsigned;comment:均价，取整数" json:"avg_price"`                                    // 均价，取整数
+	Sold       uint32     `gorm:"column:sold;type:int(10) unsigned zerofill;not null;comment:销量" json:"sold"`                                   // 销量
+	Comments   uint32     `gorm:"column:comments;type:int(10) unsigned zerofill;not null;comment:评论数量" json:"comments"`                         // 评论数量
+	Score      uint32     `gorm:"column:score;type:int(2) unsigned zerofill;not null;comment:评分，1~5分，乘10保存，避免小数" json:"score"`                  // 评分，1~5分，乘10保存，避免小数
+	OpenHours  *string    `gorm:"column:open_hours;type:varchar(32);comment:营业时间，例如 10:00-22:00" json:"open_hours"`                             // 营业时间，例如 10:00-22:00
+	CreateTime *time.Time `gorm:"column:create_time;type:timestamp;default:current_timestamp();autoCreateTime;comment:创建时间" json:"create_time"` // 创建时间
+	UpdateTime *time.Time `gorm:"column:update_time;type:timestamp;default:current_timestamp();autoUpdateTime;comment:更新时间" json:"update_time"` // 更新时间
 }
 
 // TableName Shop's table name

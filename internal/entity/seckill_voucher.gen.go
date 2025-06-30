@@ -12,12 +12,12 @@ const TableNameSeckillVoucher = "tb_seckill_voucher"
 
 // SeckillVoucher 秒杀优惠券表，与优惠券是一对一关系
 type SeckillVoucher struct {
-	VoucherID  int64     `gorm:"column:voucher_id;primaryKey;comment:关联的优惠券的id" json:"voucher_id"`                                       // 关联的优惠券的id
-	Stock      int32     `gorm:"column:stock;not null;comment:库存" json:"stock"`                                                          // 库存
-	CreateTime time.Time `gorm:"column:create_time;not null;default:current_timestamp();autoCreateTime;comment:创建时间" json:"create_time"` // 创建时间
-	BeginTime  time.Time `gorm:"column:begin_time;not null;default:current_timestamp();comment:生效时间" json:"begin_time"`                  // 生效时间
-	EndTime    time.Time `gorm:"column:end_time;not null;default:current_timestamp();comment:失效时间" json:"end_time"`                      // 失效时间
-	UpdateTime time.Time `gorm:"column:update_time;not null;default:current_timestamp();autoUpdateTime;comment:更新时间" json:"update_time"` // 更新时间
+	VoucherID  uint64     `gorm:"column:voucher_id;type:bigint(20) unsigned;primaryKey;comment:关联的优惠券的id" json:"voucher_id"`                             // 关联的优惠券的id
+	Stock      int32      `gorm:"column:stock;type:int(8);not null;comment:库存" json:"stock"`                                                             // 库存
+	CreateTime *time.Time `gorm:"column:create_time;type:timestamp;not null;default:current_timestamp();autoCreateTime;comment:创建时间" json:"create_time"` // 创建时间
+	BeginTime  *time.Time `gorm:"column:begin_time;type:timestamp;not null;default:current_timestamp();comment:生效时间" json:"begin_time"`                  // 生效时间
+	EndTime    *time.Time `gorm:"column:end_time;type:timestamp;not null;default:current_timestamp();comment:失效时间" json:"end_time"`                      // 失效时间
+	UpdateTime *time.Time `gorm:"column:update_time;type:timestamp;not null;default:current_timestamp();autoUpdateTime;comment:更新时间" json:"update_time"` // 更新时间
 }
 
 // TableName SeckillVoucher's table name

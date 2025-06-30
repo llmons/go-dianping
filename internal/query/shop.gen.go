@@ -7,6 +7,7 @@ package query
 import (
 	"context"
 	"database/sql"
+	"strings"
 
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -28,18 +29,18 @@ func newShop(db *gorm.DB, opts ...gen.DOOption) shop {
 
 	tableName := _shop.shopDo.TableName()
 	_shop.ALL = field.NewAsterisk(tableName)
-	_shop.ID = field.NewInt64(tableName, "id")
+	_shop.ID = field.NewUint64(tableName, "id")
 	_shop.Name = field.NewString(tableName, "name")
-	_shop.TypeID = field.NewInt64(tableName, "type_id")
+	_shop.TypeID = field.NewUint64(tableName, "type_id")
 	_shop.Images = field.NewString(tableName, "images")
 	_shop.Area = field.NewString(tableName, "area")
 	_shop.Address = field.NewString(tableName, "address")
 	_shop.X = field.NewFloat64(tableName, "x")
 	_shop.Y = field.NewFloat64(tableName, "y")
-	_shop.AvgPrice = field.NewInt64(tableName, "avg_price")
-	_shop.Sold = field.NewInt32(tableName, "sold")
-	_shop.Comments = field.NewInt32(tableName, "comments")
-	_shop.Score = field.NewInt32(tableName, "score")
+	_shop.AvgPrice = field.NewUint64(tableName, "avg_price")
+	_shop.Sold = field.NewUint32(tableName, "sold")
+	_shop.Comments = field.NewUint32(tableName, "comments")
+	_shop.Score = field.NewUint32(tableName, "score")
 	_shop.OpenHours = field.NewString(tableName, "open_hours")
 	_shop.CreateTime = field.NewTime(tableName, "create_time")
 	_shop.UpdateTime = field.NewTime(tableName, "update_time")
@@ -53,18 +54,18 @@ type shop struct {
 	shopDo
 
 	ALL        field.Asterisk
-	ID         field.Int64   // 主键
+	ID         field.Uint64  // 主键
 	Name       field.String  // 商铺名称
-	TypeID     field.Int64   // 商铺类型的id
+	TypeID     field.Uint64  // 商铺类型的id
 	Images     field.String  // 商铺图片，多个图片以','隔开
 	Area       field.String  // 商圈，例如陆家嘴
 	Address    field.String  // 地址
 	X          field.Float64 // 经度
 	Y          field.Float64 // 维度
-	AvgPrice   field.Int64   // 均价，取整数
-	Sold       field.Int32   // 销量
-	Comments   field.Int32   // 评论数量
-	Score      field.Int32   // 评分，1~5分，乘10保存，避免小数
+	AvgPrice   field.Uint64  // 均价，取整数
+	Sold       field.Uint32  // 销量
+	Comments   field.Uint32  // 评论数量
+	Score      field.Uint32  // 评分，1~5分，乘10保存，避免小数
 	OpenHours  field.String  // 营业时间，例如 10:00-22:00
 	CreateTime field.Time    // 创建时间
 	UpdateTime field.Time    // 更新时间
@@ -84,18 +85,18 @@ func (s shop) As(alias string) *shop {
 
 func (s *shop) updateTableName(table string) *shop {
 	s.ALL = field.NewAsterisk(table)
-	s.ID = field.NewInt64(table, "id")
+	s.ID = field.NewUint64(table, "id")
 	s.Name = field.NewString(table, "name")
-	s.TypeID = field.NewInt64(table, "type_id")
+	s.TypeID = field.NewUint64(table, "type_id")
 	s.Images = field.NewString(table, "images")
 	s.Area = field.NewString(table, "area")
 	s.Address = field.NewString(table, "address")
 	s.X = field.NewFloat64(table, "x")
 	s.Y = field.NewFloat64(table, "y")
-	s.AvgPrice = field.NewInt64(table, "avg_price")
-	s.Sold = field.NewInt32(table, "sold")
-	s.Comments = field.NewInt32(table, "comments")
-	s.Score = field.NewInt32(table, "score")
+	s.AvgPrice = field.NewUint64(table, "avg_price")
+	s.Sold = field.NewUint32(table, "sold")
+	s.Comments = field.NewUint32(table, "comments")
+	s.Score = field.NewUint32(table, "score")
 	s.OpenHours = field.NewString(table, "open_hours")
 	s.CreateTime = field.NewTime(table, "create_time")
 	s.UpdateTime = field.NewTime(table, "update_time")
@@ -206,6 +207,24 @@ type IShopDo interface {
 	Returning(value interface{}, columns ...string) IShopDo
 	UnderlyingDB() *gorm.DB
 	schema.Tabler
+
+	GetByID(id int) (result *entity.Shop, err error)
+}
+
+// GetByID query data by id and return it as *struct*
+// SELECT * FROM @@table WHERE id=@id
+func (s shopDo) GetByID(id int) (result *entity.Shop, err error) {
+	var params []interface{}
+
+	var generateSQL strings.Builder
+	params = append(params, id)
+	generateSQL.WriteString("query data by id and return it as *struct* SELECT * FROM tb_shop WHERE id=? ")
+
+	var executeSQL *gorm.DB
+	executeSQL = s.UnderlyingDB().Raw(generateSQL.String(), params...).Take(&result) // ignore_security_alert
+	err = executeSQL.Error
+
+	return
 }
 
 func (s shopDo) Debug() IShopDo {

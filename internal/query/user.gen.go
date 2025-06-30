@@ -7,6 +7,7 @@ package query
 import (
 	"context"
 	"database/sql"
+	"strings"
 
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -28,7 +29,7 @@ func newUser(db *gorm.DB, opts ...gen.DOOption) user {
 
 	tableName := _user.userDo.TableName()
 	_user.ALL = field.NewAsterisk(tableName)
-	_user.ID = field.NewInt64(tableName, "id")
+	_user.ID = field.NewUint64(tableName, "id")
 	_user.Phone = field.NewString(tableName, "phone")
 	_user.Password = field.NewString(tableName, "password")
 	_user.NickName = field.NewString(tableName, "nick_name")
@@ -45,7 +46,7 @@ type user struct {
 	userDo
 
 	ALL        field.Asterisk
-	ID         field.Int64  // 主键
+	ID         field.Uint64 // 主键
 	Phone      field.String // 手机号码
 	Password   field.String // 密码，加密存储
 	NickName   field.String // 昵称，默认是用户id
@@ -68,7 +69,7 @@ func (u user) As(alias string) *user {
 
 func (u *user) updateTableName(table string) *user {
 	u.ALL = field.NewAsterisk(table)
-	u.ID = field.NewInt64(table, "id")
+	u.ID = field.NewUint64(table, "id")
 	u.Phone = field.NewString(table, "phone")
 	u.Password = field.NewString(table, "password")
 	u.NickName = field.NewString(table, "nick_name")
@@ -174,6 +175,24 @@ type IUserDo interface {
 	Returning(value interface{}, columns ...string) IUserDo
 	UnderlyingDB() *gorm.DB
 	schema.Tabler
+
+	GetByID(id int) (result *entity.User, err error)
+}
+
+// GetByID query data by id and return it as *struct*
+// SELECT * FROM @@table WHERE id=@id
+func (u userDo) GetByID(id int) (result *entity.User, err error) {
+	var params []interface{}
+
+	var generateSQL strings.Builder
+	params = append(params, id)
+	generateSQL.WriteString("query data by id and return it as *struct* SELECT * FROM tb_user WHERE id=? ")
+
+	var executeSQL *gorm.DB
+	executeSQL = u.UnderlyingDB().Raw(generateSQL.String(), params...).Take(&result) // ignore_security_alert
+	err = executeSQL.Error
+
+	return
 }
 
 func (u userDo) Debug() IUserDo {

@@ -7,6 +7,7 @@ package query
 import (
 	"context"
 	"database/sql"
+	"strings"
 
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -28,12 +29,12 @@ func newVoucher(db *gorm.DB, opts ...gen.DOOption) voucher {
 
 	tableName := _voucher.voucherDo.TableName()
 	_voucher.ALL = field.NewAsterisk(tableName)
-	_voucher.ID = field.NewInt64(tableName, "id")
-	_voucher.ShopID = field.NewInt64(tableName, "shop_id")
+	_voucher.ID = field.NewUint64(tableName, "id")
+	_voucher.ShopID = field.NewUint64(tableName, "shop_id")
 	_voucher.Title = field.NewString(tableName, "title")
 	_voucher.SubTitle = field.NewString(tableName, "sub_title")
 	_voucher.Rules = field.NewString(tableName, "rules")
-	_voucher.PayValue = field.NewInt64(tableName, "pay_value")
+	_voucher.PayValue = field.NewUint64(tableName, "pay_value")
 	_voucher.ActualValue = field.NewInt64(tableName, "actual_value")
 	_voucher.Type = field.NewBool(tableName, "type")
 	_voucher.Status = field.NewBool(tableName, "status")
@@ -49,12 +50,12 @@ type voucher struct {
 	voucherDo
 
 	ALL         field.Asterisk
-	ID          field.Int64  // 主键
-	ShopID      field.Int64  // 商铺id
+	ID          field.Uint64 // 主键
+	ShopID      field.Uint64 // 商铺id
 	Title       field.String // 代金券标题
 	SubTitle    field.String // 副标题
 	Rules       field.String // 使用规则
-	PayValue    field.Int64  // 支付金额，单位是分。例如200代表2元
+	PayValue    field.Uint64 // 支付金额，单位是分。例如200代表2元
 	ActualValue field.Int64  // 抵扣金额，单位是分。例如200代表2元
 	Type        field.Bool   // 0,普通券；1,秒杀券
 	Status      field.Bool   // 1,上架; 2,下架; 3,过期
@@ -76,12 +77,12 @@ func (v voucher) As(alias string) *voucher {
 
 func (v *voucher) updateTableName(table string) *voucher {
 	v.ALL = field.NewAsterisk(table)
-	v.ID = field.NewInt64(table, "id")
-	v.ShopID = field.NewInt64(table, "shop_id")
+	v.ID = field.NewUint64(table, "id")
+	v.ShopID = field.NewUint64(table, "shop_id")
 	v.Title = field.NewString(table, "title")
 	v.SubTitle = field.NewString(table, "sub_title")
 	v.Rules = field.NewString(table, "rules")
-	v.PayValue = field.NewInt64(table, "pay_value")
+	v.PayValue = field.NewUint64(table, "pay_value")
 	v.ActualValue = field.NewInt64(table, "actual_value")
 	v.Type = field.NewBool(table, "type")
 	v.Status = field.NewBool(table, "status")
@@ -190,6 +191,24 @@ type IVoucherDo interface {
 	Returning(value interface{}, columns ...string) IVoucherDo
 	UnderlyingDB() *gorm.DB
 	schema.Tabler
+
+	GetByID(id int) (result *entity.Voucher, err error)
+}
+
+// GetByID query data by id and return it as *struct*
+// SELECT * FROM @@table WHERE id=@id
+func (v voucherDo) GetByID(id int) (result *entity.Voucher, err error) {
+	var params []interface{}
+
+	var generateSQL strings.Builder
+	params = append(params, id)
+	generateSQL.WriteString("query data by id and return it as *struct* SELECT * FROM tb_voucher WHERE id=? ")
+
+	var executeSQL *gorm.DB
+	executeSQL = v.UnderlyingDB().Raw(generateSQL.String(), params...).Take(&result) // ignore_security_alert
+	err = executeSQL.Error
+
+	return
 }
 
 func (v voucherDo) Debug() IVoucherDo {

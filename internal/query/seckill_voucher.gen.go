@@ -7,6 +7,7 @@ package query
 import (
 	"context"
 	"database/sql"
+	"strings"
 
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -28,7 +29,7 @@ func newSeckillVoucher(db *gorm.DB, opts ...gen.DOOption) seckillVoucher {
 
 	tableName := _seckillVoucher.seckillVoucherDo.TableName()
 	_seckillVoucher.ALL = field.NewAsterisk(tableName)
-	_seckillVoucher.VoucherID = field.NewInt64(tableName, "voucher_id")
+	_seckillVoucher.VoucherID = field.NewUint64(tableName, "voucher_id")
 	_seckillVoucher.Stock = field.NewInt32(tableName, "stock")
 	_seckillVoucher.CreateTime = field.NewTime(tableName, "create_time")
 	_seckillVoucher.BeginTime = field.NewTime(tableName, "begin_time")
@@ -45,12 +46,12 @@ type seckillVoucher struct {
 	seckillVoucherDo
 
 	ALL        field.Asterisk
-	VoucherID  field.Int64 // 关联的优惠券的id
-	Stock      field.Int32 // 库存
-	CreateTime field.Time  // 创建时间
-	BeginTime  field.Time  // 生效时间
-	EndTime    field.Time  // 失效时间
-	UpdateTime field.Time  // 更新时间
+	VoucherID  field.Uint64 // 关联的优惠券的id
+	Stock      field.Int32  // 库存
+	CreateTime field.Time   // 创建时间
+	BeginTime  field.Time   // 生效时间
+	EndTime    field.Time   // 失效时间
+	UpdateTime field.Time   // 更新时间
 
 	fieldMap map[string]field.Expr
 }
@@ -67,7 +68,7 @@ func (s seckillVoucher) As(alias string) *seckillVoucher {
 
 func (s *seckillVoucher) updateTableName(table string) *seckillVoucher {
 	s.ALL = field.NewAsterisk(table)
-	s.VoucherID = field.NewInt64(table, "voucher_id")
+	s.VoucherID = field.NewUint64(table, "voucher_id")
 	s.Stock = field.NewInt32(table, "stock")
 	s.CreateTime = field.NewTime(table, "create_time")
 	s.BeginTime = field.NewTime(table, "begin_time")
@@ -171,6 +172,24 @@ type ISeckillVoucherDo interface {
 	Returning(value interface{}, columns ...string) ISeckillVoucherDo
 	UnderlyingDB() *gorm.DB
 	schema.Tabler
+
+	GetByID(id int) (result *entity.SeckillVoucher, err error)
+}
+
+// GetByID query data by id and return it as *struct*
+// SELECT * FROM @@table WHERE id=@id
+func (s seckillVoucherDo) GetByID(id int) (result *entity.SeckillVoucher, err error) {
+	var params []interface{}
+
+	var generateSQL strings.Builder
+	params = append(params, id)
+	generateSQL.WriteString("query data by id and return it as *struct* SELECT * FROM tb_seckill_voucher WHERE id=? ")
+
+	var executeSQL *gorm.DB
+	executeSQL = s.UnderlyingDB().Raw(generateSQL.String(), params...).Take(&result) // ignore_security_alert
+	err = executeSQL.Error
+
+	return
 }
 
 func (s seckillVoucherDo) Debug() ISeckillVoucherDo {

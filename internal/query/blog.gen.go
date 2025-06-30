@@ -7,6 +7,7 @@ package query
 import (
 	"context"
 	"database/sql"
+	"strings"
 
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -28,14 +29,14 @@ func newBlog(db *gorm.DB, opts ...gen.DOOption) blog {
 
 	tableName := _blog.blogDo.TableName()
 	_blog.ALL = field.NewAsterisk(tableName)
-	_blog.ID = field.NewInt64(tableName, "id")
+	_blog.ID = field.NewUint64(tableName, "id")
 	_blog.ShopID = field.NewInt64(tableName, "shop_id")
-	_blog.UserID = field.NewInt64(tableName, "user_id")
+	_blog.UserID = field.NewUint64(tableName, "user_id")
 	_blog.Title = field.NewString(tableName, "title")
 	_blog.Images = field.NewString(tableName, "images")
 	_blog.Content = field.NewString(tableName, "content")
-	_blog.Liked = field.NewInt32(tableName, "liked")
-	_blog.Comments = field.NewInt32(tableName, "comments")
+	_blog.Liked = field.NewUint32(tableName, "liked")
+	_blog.Comments = field.NewUint32(tableName, "comments")
 	_blog.CreateTime = field.NewTime(tableName, "create_time")
 	_blog.UpdateTime = field.NewTime(tableName, "update_time")
 
@@ -48,14 +49,14 @@ type blog struct {
 	blogDo
 
 	ALL        field.Asterisk
-	ID         field.Int64  // 主键
+	ID         field.Uint64 // 主键
 	ShopID     field.Int64  // 商户id
-	UserID     field.Int64  // 用户id
+	UserID     field.Uint64 // 用户id
 	Title      field.String // 标题
 	Images     field.String // 探店的照片，最多9张，多张以","隔开
 	Content    field.String // 探店的文字描述
-	Liked      field.Int32  // 点赞数量
-	Comments   field.Int32  // 评论数量
+	Liked      field.Uint32 // 点赞数量
+	Comments   field.Uint32 // 评论数量
 	CreateTime field.Time   // 创建时间
 	UpdateTime field.Time   // 更新时间
 
@@ -74,14 +75,14 @@ func (b blog) As(alias string) *blog {
 
 func (b *blog) updateTableName(table string) *blog {
 	b.ALL = field.NewAsterisk(table)
-	b.ID = field.NewInt64(table, "id")
+	b.ID = field.NewUint64(table, "id")
 	b.ShopID = field.NewInt64(table, "shop_id")
-	b.UserID = field.NewInt64(table, "user_id")
+	b.UserID = field.NewUint64(table, "user_id")
 	b.Title = field.NewString(table, "title")
 	b.Images = field.NewString(table, "images")
 	b.Content = field.NewString(table, "content")
-	b.Liked = field.NewInt32(table, "liked")
-	b.Comments = field.NewInt32(table, "comments")
+	b.Liked = field.NewUint32(table, "liked")
+	b.Comments = field.NewUint32(table, "comments")
 	b.CreateTime = field.NewTime(table, "create_time")
 	b.UpdateTime = field.NewTime(table, "update_time")
 
@@ -186,6 +187,24 @@ type IBlogDo interface {
 	Returning(value interface{}, columns ...string) IBlogDo
 	UnderlyingDB() *gorm.DB
 	schema.Tabler
+
+	GetByID(id int) (result *entity.Blog, err error)
+}
+
+// GetByID query data by id and return it as *struct*
+// SELECT * FROM @@table WHERE id=@id
+func (b blogDo) GetByID(id int) (result *entity.Blog, err error) {
+	var params []interface{}
+
+	var generateSQL strings.Builder
+	params = append(params, id)
+	generateSQL.WriteString("query data by id and return it as *struct* SELECT * FROM tb_blog WHERE id=? ")
+
+	var executeSQL *gorm.DB
+	executeSQL = b.UnderlyingDB().Raw(generateSQL.String(), params...).Take(&result) // ignore_security_alert
+	err = executeSQL.Error
+
+	return
 }
 
 func (b blogDo) Debug() IBlogDo {

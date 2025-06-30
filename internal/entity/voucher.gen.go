@@ -12,17 +12,17 @@ const TableNameVoucher = "tb_voucher"
 
 // Voucher mapped from table <tb_voucher>
 type Voucher struct {
-	ID          int64     `gorm:"column:id;primaryKey;autoIncrement:true;comment:主键" json:"id"`                                           // 主键
-	ShopID      *int64    `gorm:"column:shop_id;comment:商铺id" json:"shop_id"`                                                             // 商铺id
-	Title       string    `gorm:"column:title;not null;comment:代金券标题" json:"title"`                                                       // 代金券标题
-	SubTitle    *string   `gorm:"column:sub_title;comment:副标题" json:"sub_title"`                                                          // 副标题
-	Rules       *string   `gorm:"column:rules;comment:使用规则" json:"rules"`                                                                 // 使用规则
-	PayValue    int64     `gorm:"column:pay_value;not null;comment:支付金额，单位是分。例如200代表2元" json:"pay_value"`                                 // 支付金额，单位是分。例如200代表2元
-	ActualValue int64     `gorm:"column:actual_value;not null;comment:抵扣金额，单位是分。例如200代表2元" json:"actual_value"`                           // 抵扣金额，单位是分。例如200代表2元
-	Type        bool      `gorm:"column:type;not null;comment:0,普通券；1,秒杀券" json:"type"`                                                   // 0,普通券；1,秒杀券
-	Status      bool      `gorm:"column:status;not null;default:1;comment:1,上架; 2,下架; 3,过期" json:"status"`                                // 1,上架; 2,下架; 3,过期
-	CreateTime  time.Time `gorm:"column:create_time;not null;default:current_timestamp();autoCreateTime;comment:创建时间" json:"create_time"` // 创建时间
-	UpdateTime  time.Time `gorm:"column:update_time;not null;default:current_timestamp();autoUpdateTime;comment:更新时间" json:"update_time"` // 更新时间
+	ID          uint64     `gorm:"column:id;type:bigint(20) unsigned;primaryKey;autoIncrement:true;comment:主键" json:"id"`                                 // 主键
+	ShopID      *uint64    `gorm:"column:shop_id;type:bigint(20) unsigned;comment:商铺id" json:"shop_id"`                                                   // 商铺id
+	Title       string     `gorm:"column:title;type:varchar(255);not null;comment:代金券标题" json:"title"`                                                    // 代金券标题
+	SubTitle    *string    `gorm:"column:sub_title;type:varchar(255);comment:副标题" json:"sub_title"`                                                       // 副标题
+	Rules       *string    `gorm:"column:rules;type:varchar(1024);comment:使用规则" json:"rules"`                                                             // 使用规则
+	PayValue    uint64     `gorm:"column:pay_value;type:bigint(10) unsigned;not null;comment:支付金额，单位是分。例如200代表2元" json:"pay_value"`                       // 支付金额，单位是分。例如200代表2元
+	ActualValue int64      `gorm:"column:actual_value;type:bigint(10);not null;comment:抵扣金额，单位是分。例如200代表2元" json:"actual_value"`                          // 抵扣金额，单位是分。例如200代表2元
+	Type        bool       `gorm:"column:type;type:tinyint(1) unsigned;not null;comment:0,普通券；1,秒杀券" json:"type"`                                         // 0,普通券；1,秒杀券
+	Status      *bool      `gorm:"column:status;type:tinyint(1) unsigned;not null;default:1;comment:1,上架; 2,下架; 3,过期" json:"status"`                      // 1,上架; 2,下架; 3,过期
+	CreateTime  *time.Time `gorm:"column:create_time;type:timestamp;not null;default:current_timestamp();autoCreateTime;comment:创建时间" json:"create_time"` // 创建时间
+	UpdateTime  *time.Time `gorm:"column:update_time;type:timestamp;not null;default:current_timestamp();autoUpdateTime;comment:更新时间" json:"update_time"` // 更新时间
 }
 
 // TableName Voucher's table name

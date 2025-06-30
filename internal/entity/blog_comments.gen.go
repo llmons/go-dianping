@@ -12,16 +12,16 @@ const TableNameBlogComments = "tb_blog_comments"
 
 // BlogComments mapped from table <tb_blog_comments>
 type BlogComments struct {
-	ID         int64     `gorm:"column:id;primaryKey;autoIncrement:true;comment:主键" json:"id"`                                           // 主键
-	UserID     int64     `gorm:"column:user_id;not null;comment:用户id" json:"user_id"`                                                    // 用户id
-	BlogID     int64     `gorm:"column:blog_id;not null;comment:探店id" json:"blog_id"`                                                    // 探店id
-	ParentID   int64     `gorm:"column:parent_id;not null;comment:关联的1级评论id，如果是一级评论，则值为0" json:"parent_id"`                              // 关联的1级评论id，如果是一级评论，则值为0
-	AnswerID   int64     `gorm:"column:answer_id;not null;comment:回复的评论id" json:"answer_id"`                                             // 回复的评论id
-	Content    string    `gorm:"column:content;not null;comment:回复的内容" json:"content"`                                                   // 回复的内容
-	Liked      *int32    `gorm:"column:liked;comment:点赞数" json:"liked"`                                                                  // 点赞数
-	Status     *bool     `gorm:"column:status;comment:状态，0：正常，1：被举报，2：禁止查看" json:"status"`                                               // 状态，0：正常，1：被举报，2：禁止查看
-	CreateTime time.Time `gorm:"column:create_time;not null;default:current_timestamp();autoCreateTime;comment:创建时间" json:"create_time"` // 创建时间
-	UpdateTime time.Time `gorm:"column:update_time;not null;default:current_timestamp();autoUpdateTime;comment:更新时间" json:"update_time"` // 更新时间
+	ID         uint64     `gorm:"column:id;type:bigint(20) unsigned;primaryKey;autoIncrement:true;comment:主键" json:"id"`                                 // 主键
+	UserID     uint64     `gorm:"column:user_id;type:bigint(20) unsigned;not null;comment:用户id" json:"user_id"`                                          // 用户id
+	BlogID     uint64     `gorm:"column:blog_id;type:bigint(20) unsigned;not null;comment:探店id" json:"blog_id"`                                          // 探店id
+	ParentID   uint64     `gorm:"column:parent_id;type:bigint(20) unsigned;not null;comment:关联的1级评论id，如果是一级评论，则值为0" json:"parent_id"`                    // 关联的1级评论id，如果是一级评论，则值为0
+	AnswerID   uint64     `gorm:"column:answer_id;type:bigint(20) unsigned;not null;comment:回复的评论id" json:"answer_id"`                                   // 回复的评论id
+	Content    string     `gorm:"column:content;type:varchar(255);not null;comment:回复的内容" json:"content"`                                                // 回复的内容
+	Liked      *uint32    `gorm:"column:liked;type:int(8) unsigned;comment:点赞数" json:"liked"`                                                            // 点赞数
+	Status     *bool      `gorm:"column:status;type:tinyint(1) unsigned;comment:状态，0：正常，1：被举报，2：禁止查看" json:"status"`                                     // 状态，0：正常，1：被举报，2：禁止查看
+	CreateTime *time.Time `gorm:"column:create_time;type:timestamp;not null;default:current_timestamp();autoCreateTime;comment:创建时间" json:"create_time"` // 创建时间
+	UpdateTime *time.Time `gorm:"column:update_time;type:timestamp;not null;default:current_timestamp();autoUpdateTime;comment:更新时间" json:"update_time"` // 更新时间
 }
 
 // TableName BlogComments's table name

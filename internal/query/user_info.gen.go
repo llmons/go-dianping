@@ -7,6 +7,7 @@ package query
 import (
 	"context"
 	"database/sql"
+	"strings"
 
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -28,14 +29,14 @@ func newUserInfo(db *gorm.DB, opts ...gen.DOOption) userInfo {
 
 	tableName := _userInfo.userInfoDo.TableName()
 	_userInfo.ALL = field.NewAsterisk(tableName)
-	_userInfo.UserID = field.NewInt64(tableName, "user_id")
+	_userInfo.UserID = field.NewUint64(tableName, "user_id")
 	_userInfo.City = field.NewString(tableName, "city")
 	_userInfo.Introduce = field.NewString(tableName, "introduce")
-	_userInfo.Fans = field.NewInt32(tableName, "fans")
-	_userInfo.Followee = field.NewInt32(tableName, "followee")
+	_userInfo.Fans = field.NewUint32(tableName, "fans")
+	_userInfo.Followee = field.NewUint32(tableName, "followee")
 	_userInfo.Gender = field.NewBool(tableName, "gender")
 	_userInfo.Birthday = field.NewTime(tableName, "birthday")
-	_userInfo.Credits = field.NewInt32(tableName, "credits")
+	_userInfo.Credits = field.NewUint32(tableName, "credits")
 	_userInfo.Level = field.NewBool(tableName, "level")
 	_userInfo.CreateTime = field.NewTime(tableName, "create_time")
 	_userInfo.UpdateTime = field.NewTime(tableName, "update_time")
@@ -49,14 +50,14 @@ type userInfo struct {
 	userInfoDo
 
 	ALL        field.Asterisk
-	UserID     field.Int64  // 主键，用户id
+	UserID     field.Uint64 // 主键，用户id
 	City       field.String // 城市名称
 	Introduce  field.String // 个人介绍，不要超过128个字符
-	Fans       field.Int32  // 粉丝数量
-	Followee   field.Int32  // 关注的人的数量
+	Fans       field.Uint32 // 粉丝数量
+	Followee   field.Uint32 // 关注的人的数量
 	Gender     field.Bool   // 性别，0：男，1：女
 	Birthday   field.Time   // 生日
-	Credits    field.Int32  // 积分
+	Credits    field.Uint32 // 积分
 	Level      field.Bool   // 会员级别，0~9级,0代表未开通会员
 	CreateTime field.Time   // 创建时间
 	UpdateTime field.Time   // 更新时间
@@ -76,14 +77,14 @@ func (u userInfo) As(alias string) *userInfo {
 
 func (u *userInfo) updateTableName(table string) *userInfo {
 	u.ALL = field.NewAsterisk(table)
-	u.UserID = field.NewInt64(table, "user_id")
+	u.UserID = field.NewUint64(table, "user_id")
 	u.City = field.NewString(table, "city")
 	u.Introduce = field.NewString(table, "introduce")
-	u.Fans = field.NewInt32(table, "fans")
-	u.Followee = field.NewInt32(table, "followee")
+	u.Fans = field.NewUint32(table, "fans")
+	u.Followee = field.NewUint32(table, "followee")
 	u.Gender = field.NewBool(table, "gender")
 	u.Birthday = field.NewTime(table, "birthday")
-	u.Credits = field.NewInt32(table, "credits")
+	u.Credits = field.NewUint32(table, "credits")
 	u.Level = field.NewBool(table, "level")
 	u.CreateTime = field.NewTime(table, "create_time")
 	u.UpdateTime = field.NewTime(table, "update_time")
@@ -190,6 +191,24 @@ type IUserInfoDo interface {
 	Returning(value interface{}, columns ...string) IUserInfoDo
 	UnderlyingDB() *gorm.DB
 	schema.Tabler
+
+	GetByID(id int) (result *entity.UserInfo, err error)
+}
+
+// GetByID query data by id and return it as *struct*
+// SELECT * FROM @@table WHERE id=@id
+func (u userInfoDo) GetByID(id int) (result *entity.UserInfo, err error) {
+	var params []interface{}
+
+	var generateSQL strings.Builder
+	params = append(params, id)
+	generateSQL.WriteString("query data by id and return it as *struct* SELECT * FROM tb_user_info WHERE id=? ")
+
+	var executeSQL *gorm.DB
+	executeSQL = u.UnderlyingDB().Raw(generateSQL.String(), params...).Take(&result) // ignore_security_alert
+	err = executeSQL.Error
+
+	return
 }
 
 func (u userInfoDo) Debug() IUserInfoDo {

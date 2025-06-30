@@ -12,12 +12,12 @@ const TableNameShopType = "tb_shop_type"
 
 // ShopType mapped from table <tb_shop_type>
 type ShopType struct {
-	ID         int64      `gorm:"column:id;primaryKey;autoIncrement:true;comment:主键" json:"id"`                                  // 主键
-	Name       *string    `gorm:"column:name;comment:类型名称" json:"name"`                                                          // 类型名称
-	Icon       *string    `gorm:"column:icon;comment:图标" json:"icon"`                                                            // 图标
-	Sort       *int32     `gorm:"column:sort;comment:顺序" json:"sort"`                                                            // 顺序
-	CreateTime *time.Time `gorm:"column:create_time;default:current_timestamp();autoCreateTime;comment:创建时间" json:"create_time"` // 创建时间
-	UpdateTime *time.Time `gorm:"column:update_time;default:current_timestamp();autoUpdateTime;comment:更新时间" json:"update_time"` // 更新时间
+	ID         uint64     `gorm:"column:id;type:bigint(20) unsigned;primaryKey;autoIncrement:true;comment:主键" json:"id"`                        // 主键
+	Name       *string    `gorm:"column:name;type:varchar(32);comment:类型名称" json:"name"`                                                        // 类型名称
+	Icon       *string    `gorm:"column:icon;type:varchar(255);comment:图标" json:"icon"`                                                         // 图标
+	Sort       *uint32    `gorm:"column:sort;type:int(3) unsigned;comment:顺序" json:"sort"`                                                      // 顺序
+	CreateTime *time.Time `gorm:"column:create_time;type:timestamp;default:current_timestamp();autoCreateTime;comment:创建时间" json:"create_time"` // 创建时间
+	UpdateTime *time.Time `gorm:"column:update_time;type:timestamp;default:current_timestamp();autoUpdateTime;comment:更新时间" json:"update_time"` // 更新时间
 }
 
 // TableName ShopType's table name

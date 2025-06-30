@@ -7,6 +7,7 @@ package query
 import (
 	"context"
 	"database/sql"
+	"strings"
 
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -29,8 +30,8 @@ func newFollow(db *gorm.DB, opts ...gen.DOOption) follow {
 	tableName := _follow.followDo.TableName()
 	_follow.ALL = field.NewAsterisk(tableName)
 	_follow.ID = field.NewInt64(tableName, "id")
-	_follow.UserID = field.NewInt64(tableName, "user_id")
-	_follow.FollowUserID = field.NewInt64(tableName, "follow_user_id")
+	_follow.UserID = field.NewUint64(tableName, "user_id")
+	_follow.FollowUserID = field.NewUint64(tableName, "follow_user_id")
 	_follow.CreateTime = field.NewTime(tableName, "create_time")
 
 	_follow.fillFieldMap()
@@ -42,10 +43,10 @@ type follow struct {
 	followDo
 
 	ALL          field.Asterisk
-	ID           field.Int64 // 主键
-	UserID       field.Int64 // 用户id
-	FollowUserID field.Int64 // 关联的用户id
-	CreateTime   field.Time  // 创建时间
+	ID           field.Int64  // 主键
+	UserID       field.Uint64 // 用户id
+	FollowUserID field.Uint64 // 关联的用户id
+	CreateTime   field.Time   // 创建时间
 
 	fieldMap map[string]field.Expr
 }
@@ -63,8 +64,8 @@ func (f follow) As(alias string) *follow {
 func (f *follow) updateTableName(table string) *follow {
 	f.ALL = field.NewAsterisk(table)
 	f.ID = field.NewInt64(table, "id")
-	f.UserID = field.NewInt64(table, "user_id")
-	f.FollowUserID = field.NewInt64(table, "follow_user_id")
+	f.UserID = field.NewUint64(table, "user_id")
+	f.FollowUserID = field.NewUint64(table, "follow_user_id")
 	f.CreateTime = field.NewTime(table, "create_time")
 
 	f.fillFieldMap()
@@ -162,6 +163,24 @@ type IFollowDo interface {
 	Returning(value interface{}, columns ...string) IFollowDo
 	UnderlyingDB() *gorm.DB
 	schema.Tabler
+
+	GetByID(id int) (result *entity.Follow, err error)
+}
+
+// GetByID query data by id and return it as *struct*
+// SELECT * FROM @@table WHERE id=@id
+func (f followDo) GetByID(id int) (result *entity.Follow, err error) {
+	var params []interface{}
+
+	var generateSQL strings.Builder
+	params = append(params, id)
+	generateSQL.WriteString("query data by id and return it as *struct* SELECT * FROM tb_follow WHERE id=? ")
+
+	var executeSQL *gorm.DB
+	executeSQL = f.UnderlyingDB().Raw(generateSQL.String(), params...).Take(&result) // ignore_security_alert
+	err = executeSQL.Error
+
+	return
 }
 
 func (f followDo) Debug() IFollowDo {

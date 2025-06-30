@@ -7,6 +7,7 @@ package query
 import (
 	"context"
 	"database/sql"
+	"strings"
 
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -29,8 +30,8 @@ func newVoucherOrder(db *gorm.DB, opts ...gen.DOOption) voucherOrder {
 	tableName := _voucherOrder.voucherOrderDo.TableName()
 	_voucherOrder.ALL = field.NewAsterisk(tableName)
 	_voucherOrder.ID = field.NewInt64(tableName, "id")
-	_voucherOrder.UserID = field.NewInt64(tableName, "user_id")
-	_voucherOrder.VoucherID = field.NewInt64(tableName, "voucher_id")
+	_voucherOrder.UserID = field.NewUint64(tableName, "user_id")
+	_voucherOrder.VoucherID = field.NewUint64(tableName, "voucher_id")
 	_voucherOrder.PayType = field.NewBool(tableName, "pay_type")
 	_voucherOrder.Status = field.NewBool(tableName, "status")
 	_voucherOrder.CreateTime = field.NewTime(tableName, "create_time")
@@ -48,16 +49,16 @@ type voucherOrder struct {
 	voucherOrderDo
 
 	ALL        field.Asterisk
-	ID         field.Int64 // 主键
-	UserID     field.Int64 // 下单的用户id
-	VoucherID  field.Int64 // 购买的代金券id
-	PayType    field.Bool  // 支付方式 1：余额支付；2：支付宝；3：微信
-	Status     field.Bool  // 订单状态，1：未支付；2：已支付；3：已核销；4：已取消；5：退款中；6：已退款
-	CreateTime field.Time  // 下单时间
-	PayTime    field.Time  // 支付时间
-	UseTime    field.Time  // 核销时间
-	RefundTime field.Time  // 退款时间
-	UpdateTime field.Time  // 更新时间
+	ID         field.Int64  // 主键
+	UserID     field.Uint64 // 下单的用户id
+	VoucherID  field.Uint64 // 购买的代金券id
+	PayType    field.Bool   // 支付方式 1：余额支付；2：支付宝；3：微信
+	Status     field.Bool   // 订单状态，1：未支付；2：已支付；3：已核销；4：已取消；5：退款中；6：已退款
+	CreateTime field.Time   // 下单时间
+	PayTime    field.Time   // 支付时间
+	UseTime    field.Time   // 核销时间
+	RefundTime field.Time   // 退款时间
+	UpdateTime field.Time   // 更新时间
 
 	fieldMap map[string]field.Expr
 }
@@ -75,8 +76,8 @@ func (v voucherOrder) As(alias string) *voucherOrder {
 func (v *voucherOrder) updateTableName(table string) *voucherOrder {
 	v.ALL = field.NewAsterisk(table)
 	v.ID = field.NewInt64(table, "id")
-	v.UserID = field.NewInt64(table, "user_id")
-	v.VoucherID = field.NewInt64(table, "voucher_id")
+	v.UserID = field.NewUint64(table, "user_id")
+	v.VoucherID = field.NewUint64(table, "voucher_id")
 	v.PayType = field.NewBool(table, "pay_type")
 	v.Status = field.NewBool(table, "status")
 	v.CreateTime = field.NewTime(table, "create_time")
@@ -186,6 +187,24 @@ type IVoucherOrderDo interface {
 	Returning(value interface{}, columns ...string) IVoucherOrderDo
 	UnderlyingDB() *gorm.DB
 	schema.Tabler
+
+	GetByID(id int) (result *entity.VoucherOrder, err error)
+}
+
+// GetByID query data by id and return it as *struct*
+// SELECT * FROM @@table WHERE id=@id
+func (v voucherOrderDo) GetByID(id int) (result *entity.VoucherOrder, err error) {
+	var params []interface{}
+
+	var generateSQL strings.Builder
+	params = append(params, id)
+	generateSQL.WriteString("query data by id and return it as *struct* SELECT * FROM tb_voucher_order WHERE id=? ")
+
+	var executeSQL *gorm.DB
+	executeSQL = v.UnderlyingDB().Raw(generateSQL.String(), params...).Take(&result) // ignore_security_alert
+	err = executeSQL.Error
+
+	return
 }
 
 func (v voucherOrderDo) Debug() IVoucherOrderDo {

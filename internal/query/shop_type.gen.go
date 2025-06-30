@@ -7,6 +7,7 @@ package query
 import (
 	"context"
 	"database/sql"
+	"strings"
 
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -28,10 +29,10 @@ func newShopType(db *gorm.DB, opts ...gen.DOOption) shopType {
 
 	tableName := _shopType.shopTypeDo.TableName()
 	_shopType.ALL = field.NewAsterisk(tableName)
-	_shopType.ID = field.NewInt64(tableName, "id")
+	_shopType.ID = field.NewUint64(tableName, "id")
 	_shopType.Name = field.NewString(tableName, "name")
 	_shopType.Icon = field.NewString(tableName, "icon")
-	_shopType.Sort = field.NewInt32(tableName, "sort")
+	_shopType.Sort = field.NewUint32(tableName, "sort")
 	_shopType.CreateTime = field.NewTime(tableName, "create_time")
 	_shopType.UpdateTime = field.NewTime(tableName, "update_time")
 
@@ -44,10 +45,10 @@ type shopType struct {
 	shopTypeDo
 
 	ALL        field.Asterisk
-	ID         field.Int64  // 主键
+	ID         field.Uint64 // 主键
 	Name       field.String // 类型名称
 	Icon       field.String // 图标
-	Sort       field.Int32  // 顺序
+	Sort       field.Uint32 // 顺序
 	CreateTime field.Time   // 创建时间
 	UpdateTime field.Time   // 更新时间
 
@@ -66,10 +67,10 @@ func (s shopType) As(alias string) *shopType {
 
 func (s *shopType) updateTableName(table string) *shopType {
 	s.ALL = field.NewAsterisk(table)
-	s.ID = field.NewInt64(table, "id")
+	s.ID = field.NewUint64(table, "id")
 	s.Name = field.NewString(table, "name")
 	s.Icon = field.NewString(table, "icon")
-	s.Sort = field.NewInt32(table, "sort")
+	s.Sort = field.NewUint32(table, "sort")
 	s.CreateTime = field.NewTime(table, "create_time")
 	s.UpdateTime = field.NewTime(table, "update_time")
 
@@ -170,6 +171,24 @@ type IShopTypeDo interface {
 	Returning(value interface{}, columns ...string) IShopTypeDo
 	UnderlyingDB() *gorm.DB
 	schema.Tabler
+
+	GetByID(id int) (result *entity.ShopType, err error)
+}
+
+// GetByID query data by id and return it as *struct*
+// SELECT * FROM @@table WHERE id=@id
+func (s shopTypeDo) GetByID(id int) (result *entity.ShopType, err error) {
+	var params []interface{}
+
+	var generateSQL strings.Builder
+	params = append(params, id)
+	generateSQL.WriteString("query data by id and return it as *struct* SELECT * FROM tb_shop_type WHERE id=? ")
+
+	var executeSQL *gorm.DB
+	executeSQL = s.UnderlyingDB().Raw(generateSQL.String(), params...).Take(&result) // ignore_security_alert
+	err = executeSQL.Error
+
+	return
 }
 
 func (s shopTypeDo) Debug() IShopTypeDo {
