@@ -23,8 +23,8 @@ import (
 // Injectors from wire.go:
 
 func NewWire(viperViper *viper.Viper, logger *log.Logger) (*app.App, func(), error) {
-	handlerHandler := handler.NewHandler(logger)
 	client := redis.NewRedis(viperViper)
+	handlerHandler := handler.NewHandler(logger)
 	serviceService := service.NewService(logger, viperViper, client)
 	db := repository.NewDB(viperViper, logger)
 	query := repository.NewQuery(db)
@@ -39,15 +39,13 @@ func NewWire(viperViper *viper.Viper, logger *log.Logger) (*app.App, func(), err
 	shopTypeRepository := repository.NewShopTypeRepository(repositoryRepository)
 	shopTypeService := service.NewShopTypeService(serviceService, shopTypeRepository)
 	shopTypeHandler := handler.NewShopTypeHandler(handlerHandler, shopTypeService)
-	httpServer := server.NewHTTPServer(logger, viperViper, userHandler, shopHandler, shopTypeHandler)
+	httpServer := server.NewHTTPServer(logger, viperViper, client, userHandler, shopHandler, shopTypeHandler)
 	appApp := newApp(httpServer)
 	return appApp, func() {
 	}, nil
 }
 
 // wire.go:
-
-var serverSet = wire.NewSet(redis.NewRedis, server.NewHTTPServer)
 
 var repositorySet = wire.NewSet(repository.NewDB, repository.NewQuery, repository.NewRepository, repository.NewUserRepository, repository.NewShopRepository, repository.NewShopTypeRepository)
 
@@ -56,6 +54,8 @@ var cacheClientSet = wire.NewSet(cache_client.NewCacheClientForShop)
 var serviceSet = wire.NewSet(service.NewService, service.NewUserService, service.NewShopService, service.NewShopTypeService)
 
 var handlerSet = wire.NewSet(handler.NewHandler, handler.NewUserHandler, handler.NewShopHandler, handler.NewShopTypeHandler)
+
+var serverSet = wire.NewSet(redis.NewRedis, server.NewHTTPServer)
 
 // build App
 func newApp(

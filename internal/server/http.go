@@ -2,6 +2,7 @@ package server
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/redis/go-redis/v9"
 	"github.com/spf13/viper"
 	swaggerfiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
@@ -16,6 +17,7 @@ import (
 func NewHTTPServer(
 	logger *log.Logger,
 	conf *viper.Viper,
+	rdb *redis.Client,
 	userHandler *handler.UserHandler,
 	shopHandler *handler.ShopHandler,
 	shopTypeHandler *handler.ShopTypeHandler,
@@ -43,7 +45,7 @@ func NewHTTPServer(
 		middleware.CORSMiddleware(),
 		middleware.ResponseLogMiddleware(logger),
 		middleware.RequestLogMiddleware(logger),
-		//middleware.SignMiddleware(log),
+		middleware.RefreshToken(rdb),
 	)
 
 	// ========== router ==========

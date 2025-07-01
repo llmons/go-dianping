@@ -17,11 +17,6 @@ import (
 	"go-dianping/pkg/server/http"
 )
 
-var serverSet = wire.NewSet(
-	redis.NewRedis,
-	server.NewHTTPServer,
-)
-
 var repositorySet = wire.NewSet(
 	repository.NewDB,
 	repository.NewQuery,
@@ -47,6 +42,11 @@ var handlerSet = wire.NewSet(
 	handler.NewUserHandler,
 	handler.NewShopHandler,
 	handler.NewShopTypeHandler,
+)
+
+var serverSet = wire.NewSet(
+	redis.NewRedis,
+	server.NewHTTPServer,
 )
 
 // build App
