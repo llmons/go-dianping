@@ -13,12 +13,12 @@ import (
 
 func main() {
 	workdir, err := os.Getwd()
+	fmt.Println("工作路径", workdir)
 	if err != nil {
-		fmt.Println(err)
-		return
+		panic(err)
 	}
-	modelPath := filepath.Join(workdir, "internal/entity")
-	queryPath := filepath.Join(workdir, "internal/query")
+	modelPath := filepath.Join(workdir, "internal", "entity")
+	queryPath := filepath.Join(workdir, "internal", "query")
 
 	g := gen.NewGenerator(gen.Config{
 		ModelPkgPath:     modelPath,
