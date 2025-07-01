@@ -2,50 +2,55 @@ package server
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/mattn/go-colorable"
-	"github.com/redis/go-redis/v9"
+	"github.com/spf13/viper"
 	swaggerfiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 	"go-dianping/docs"
 	"go-dianping/internal/handler"
 	"go-dianping/internal/middleware"
 	"go-dianping/pkg/log"
-	"net/http"
+	"go-dianping/pkg/server/http"
+	netHttp "net/http"
 )
 
-func NewHttpServer(
+func NewHTTPServer(
 	logger *log.Logger,
-	rdb *redis.Client,
+	conf *viper.Viper,
 	userHandler *handler.UserHandler,
 	shopHandler *handler.ShopHandler,
 	shopTypeHandler *handler.ShopTypeHandler,
-) *gin.Engine {
-	gin.SetMode(gin.ReleaseMode)
-	gin.ForceConsoleColor()
-	gin.DefaultWriter = colorable.NewColorableStdout()
-	r := gin.Default()
+) *http.Server {
+	if conf.GetString("env") == "prod" {
+		gin.SetMode(gin.ReleaseMode)
+	}
+	s := http.NewServer(
+		gin.Default(),
+		logger,
+		http.WithServerHost(conf.GetString("http.host")),
+		http.WithServerPort(conf.GetInt("http.port")),
+	)
 
-	// ========== swagger doc ==========
-	docs.SwaggerInfo.BasePath = "/api"
-	r.GET("/swagger/*any", ginSwagger.WrapHandler(
+	// swagger doc
+	docs.SwaggerInfo.BasePath = "/v1"
+	s.GET("/swagger/*any", ginSwagger.WrapHandler(
 		swaggerfiles.Handler,
+		//ginSwagger.URL(fmt.Sprintf("http://localhost:%d/swagger/doc.json", conf.GetInt("app.http.port"))),
 		ginSwagger.DefaultModelsExpandDepth(-1),
 		ginSwagger.PersistAuthorization(true),
 	))
 
-	// ========== middleware ==========
-	r.Use(
+	s.Use(
 		middleware.CORSMiddleware(),
-		middleware.RequestLogMiddleware(logger),
 		middleware.ResponseLogMiddleware(logger),
-		middleware.RefreshToken(rdb),
+		middleware.RequestLogMiddleware(logger),
+		//middleware.SignMiddleware(log),
 	)
 
 	// ========== router ==========
-	r.GET("/", func(ctx *gin.Context) {
-		ctx.String(http.StatusOK, "OK")
+	s.GET("/", func(ctx *gin.Context) {
+		ctx.String(netHttp.StatusOK, "OK")
 	})
-	api := r.Group("/api")
+	api := s.Group("/api")
 	{
 		blogRouter := api.Group("/blog")
 		{
@@ -86,5 +91,6 @@ func NewHttpServer(
 			voucherRouter.GET("/")
 		}
 	}
-	return r
+
+	return s
 }

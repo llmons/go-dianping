@@ -4,7 +4,6 @@
 package wire
 
 import (
-	"github.com/gin-gonic/gin"
 	"github.com/google/wire"
 	"github.com/spf13/viper"
 	"go-dianping/internal/base/cache_client"
@@ -12,16 +11,18 @@ import (
 	"go-dianping/internal/repository"
 	"go-dianping/internal/server"
 	"go-dianping/internal/service"
+	"go-dianping/pkg/app"
 	"go-dianping/pkg/log"
 	"go-dianping/pkg/redis"
+	"go-dianping/pkg/server/http"
 )
 
-var ServerSet = wire.NewSet(
+var serverSet = wire.NewSet(
 	redis.NewRedis,
-	server.NewHttpServer,
+	server.NewHTTPServer,
 )
 
-var RepositorySet = wire.NewSet(
+var repositorySet = wire.NewSet(
 	repository.NewDB,
 	repository.NewQuery,
 	repository.NewRepository,
@@ -30,30 +31,41 @@ var RepositorySet = wire.NewSet(
 	repository.NewShopTypeRepository,
 )
 
-var CacheClientSet = wire.NewSet(
+var cacheClientSet = wire.NewSet(
 	cache_client.NewCacheClientForShop,
 )
 
-var ServiceSet = wire.NewSet(
+var serviceSet = wire.NewSet(
 	service.NewService,
 	service.NewUserService,
 	service.NewShopService,
 	service.NewShopTypeService,
 )
 
-var HandlerSet = wire.NewSet(
+var handlerSet = wire.NewSet(
 	handler.NewHandler,
 	handler.NewUserHandler,
 	handler.NewShopHandler,
 	handler.NewShopTypeHandler,
 )
 
-func NewWire(*viper.Viper, *log.Logger) (*gin.Engine, func(), error) {
+// build App
+func newApp(
+	httpServer *http.Server,
+) *app.App {
+	return app.NewApp(
+		app.WithServer(httpServer),
+		app.WithName("go-dianping"),
+	)
+}
+
+func NewWire(*viper.Viper, *log.Logger) (*app.App, func(), error) {
 	panic(wire.Build(
-		ServerSet,
-		RepositorySet,
-		CacheClientSet,
-		ServiceSet,
-		HandlerSet,
+		serverSet,
+		repositorySet,
+		cacheClientSet,
+		serviceSet,
+		handlerSet,
+		newApp,
 	))
 }

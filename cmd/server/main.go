@@ -1,11 +1,12 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"fmt"
+
 	"go-dianping/cmd/server/wire"
 	"go-dianping/pkg/config"
-	"go-dianping/pkg/http"
 	"go-dianping/pkg/log"
 	"go.uber.org/zap"
 )
@@ -31,14 +32,14 @@ func main() {
 
 	logger := log.NewLog(conf)
 
-	logger.Info("server start", zap.String("host", fmt.Sprintf("http://%s:%d", conf.GetString("http.host"), conf.GetInt("http.port"))))
-	logger.Info("docs addr", zap.String("addr", fmt.Sprintf("http://%s:%d/swagger/index.html", conf.GetString("http.host"), conf.GetInt("http.port"))))
-
 	app, cleanup, err := wire.NewWire(conf, logger)
+	defer cleanup()
 	if err != nil {
 		panic(err)
 	}
-	defer cleanup()
-
-	http.Run(app, fmt.Sprintf(":%d", conf.GetInt("http.port")))
+	logger.Info("server start", zap.String("host", fmt.Sprintf("http://%s:%d", conf.GetString("http.host"), conf.GetInt("http.port"))))
+	logger.Info("docs addr", zap.String("addr", fmt.Sprintf("http://%s:%d/swagger/index.html", conf.GetString("http.host"), conf.GetInt("http.port"))))
+	if err = app.Run(context.Background()); err != nil {
+		panic(err)
+	}
 }

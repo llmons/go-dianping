@@ -7,7 +7,6 @@
 package wire
 
 import (
-	"github.com/gin-gonic/gin"
 	"github.com/google/wire"
 	"github.com/spf13/viper"
 	"go-dianping/internal/base/cache_client"
@@ -15,15 +14,17 @@ import (
 	"go-dianping/internal/repository"
 	"go-dianping/internal/server"
 	"go-dianping/internal/service"
+	"go-dianping/pkg/app"
 	"go-dianping/pkg/log"
 	"go-dianping/pkg/redis"
+	"go-dianping/pkg/server/http"
 )
 
 // Injectors from wire.go:
 
-func NewWire(viperViper *viper.Viper, logger *log.Logger) (*gin.Engine, func(), error) {
-	client := redis.NewRedis(viperViper)
+func NewWire(viperViper *viper.Viper, logger *log.Logger) (*app.App, func(), error) {
 	handlerHandler := handler.NewHandler(logger)
+	client := redis.NewRedis(viperViper)
 	serviceService := service.NewService(logger, viperViper, client)
 	db := repository.NewDB(viperViper, logger)
 	query := repository.NewQuery(db)
@@ -38,19 +39,27 @@ func NewWire(viperViper *viper.Viper, logger *log.Logger) (*gin.Engine, func(), 
 	shopTypeRepository := repository.NewShopTypeRepository(repositoryRepository)
 	shopTypeService := service.NewShopTypeService(serviceService, shopTypeRepository)
 	shopTypeHandler := handler.NewShopTypeHandler(handlerHandler, shopTypeService)
-	engine := server.NewHttpServer(logger, client, userHandler, shopHandler, shopTypeHandler)
-	return engine, func() {
+	httpServer := server.NewHTTPServer(logger, viperViper, userHandler, shopHandler, shopTypeHandler)
+	appApp := newApp(httpServer)
+	return appApp, func() {
 	}, nil
 }
 
 // wire.go:
 
-var ServerSet = wire.NewSet(redis.NewRedis, server.NewHttpServer)
+var serverSet = wire.NewSet(redis.NewRedis, server.NewHTTPServer)
 
-var RepositorySet = wire.NewSet(repository.NewDB, repository.NewQuery, repository.NewRepository, repository.NewUserRepository, repository.NewShopRepository, repository.NewShopTypeRepository)
+var repositorySet = wire.NewSet(repository.NewDB, repository.NewQuery, repository.NewRepository, repository.NewUserRepository, repository.NewShopRepository, repository.NewShopTypeRepository)
 
-var CacheClientSet = wire.NewSet(cache_client.NewCacheClientForShop)
+var cacheClientSet = wire.NewSet(cache_client.NewCacheClientForShop)
 
-var ServiceSet = wire.NewSet(service.NewService, service.NewUserService, service.NewShopService, service.NewShopTypeService)
+var serviceSet = wire.NewSet(service.NewService, service.NewUserService, service.NewShopService, service.NewShopTypeService)
 
-var HandlerSet = wire.NewSet(handler.NewHandler, handler.NewUserHandler, handler.NewShopHandler, handler.NewShopTypeHandler)
+var handlerSet = wire.NewSet(handler.NewHandler, handler.NewUserHandler, handler.NewShopHandler, handler.NewShopTypeHandler)
+
+// build App
+func newApp(
+	httpServer *http.Server,
+) *app.App {
+	return app.NewApp(app.WithServer(httpServer), app.WithName("go-dianping"))
+}

@@ -23,7 +23,7 @@ func NewRepository(query *query.Query, logger *log.Logger) *Repository {
 }
 
 func NewDB(conf *viper.Viper, l *log.Logger) *gorm.DB {
-	dsn := conf.GetString("data.mysql.dsn")
+	dsn := conf.GetString("data.db.hmdp.dsn")
 	logger := zapgorm2.New(l.Logger).LogMode(gormlogger.Info)
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{
 		Logger: logger,

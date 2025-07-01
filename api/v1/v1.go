@@ -1,6 +1,7 @@
 package v1
 
 import (
+	"errors"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
@@ -25,4 +26,20 @@ func HandleListSuccess(ctx *gin.Context, data any, total int) {
 func HandleError(ctx *gin.Context, httpCode int, message string, data any) {
 	resp := Response{Success: false, ErrorMsg: message, Data: data}
 	ctx.JSON(httpCode, resp)
+}
+
+type Error struct {
+	Code    int
+	Message string
+}
+
+var errorCodeMap = map[error]int{}
+
+func newError(code int, msg string) error {
+	err := errors.New(msg)
+	errorCodeMap[err] = code
+	return err
+}
+func (e Error) Error() string {
+	return e.Message
 }
