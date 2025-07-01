@@ -7,7 +7,6 @@ package query
 import (
 	"context"
 	"database/sql"
-	"strings"
 
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -191,24 +190,6 @@ type IUserInfoDo interface {
 	Returning(value interface{}, columns ...string) IUserInfoDo
 	UnderlyingDB() *gorm.DB
 	schema.Tabler
-
-	GetByID(id int) (result *entity.UserInfo, err error)
-}
-
-// GetByID query data by id and return it as *struct*
-// SELECT * FROM @@table WHERE id=@id
-func (u userInfoDo) GetByID(id int) (result *entity.UserInfo, err error) {
-	var params []interface{}
-
-	var generateSQL strings.Builder
-	params = append(params, id)
-	generateSQL.WriteString("query data by id and return it as *struct* SELECT * FROM tb_user_info WHERE id=? ")
-
-	var executeSQL *gorm.DB
-	executeSQL = u.UnderlyingDB().Raw(generateSQL.String(), params...).Take(&result) // ignore_security_alert
-	err = executeSQL.Error
-
-	return
 }
 
 func (u userInfoDo) Debug() IUserInfoDo {

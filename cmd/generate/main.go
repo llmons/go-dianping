@@ -11,23 +11,6 @@ import (
 	"strings"
 )
 
-type Querier interface {
-	// GetByID query data by id and return it as *struct*
-	// SELECT * FROM @@table WHERE id=@id
-	GetByID(id int) (*gen.T, error) // GetByID
-
-	// GetByRoles query data by roles and return it as *slice of pointer*
-	//   (The below blank line is required to comment for the generated method)
-	//
-	// SELECT * FROM @@table WHERE role IN @rolesName
-	//GetByRoles(rolesName ...string) ([]*gen.T, error)
-
-	// InsertValue insert value
-	//
-	// INSERT INTO @@table (name, age) VALUES (@name, @age)
-	//InsertValue(name string, age int) error
-}
-
 func main() {
 	workdir, err := os.Getwd()
 	if err != nil {
@@ -71,7 +54,7 @@ func main() {
 		return
 	}
 	g.UseDB(db)
-	g.ApplyInterface(func(Querier) {},
+	g.ApplyBasic(
 		g.GenerateModelAs("tb_blog", "Blog"),
 		g.GenerateModelAs("tb_blog_comments", "BlogComments"),
 		g.GenerateModelAs("tb_follow", "Follow"),

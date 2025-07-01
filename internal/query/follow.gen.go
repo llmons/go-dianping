@@ -7,7 +7,6 @@ package query
 import (
 	"context"
 	"database/sql"
-	"strings"
 
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -163,24 +162,6 @@ type IFollowDo interface {
 	Returning(value interface{}, columns ...string) IFollowDo
 	UnderlyingDB() *gorm.DB
 	schema.Tabler
-
-	GetByID(id int) (result *entity.Follow, err error)
-}
-
-// GetByID query data by id and return it as *struct*
-// SELECT * FROM @@table WHERE id=@id
-func (f followDo) GetByID(id int) (result *entity.Follow, err error) {
-	var params []interface{}
-
-	var generateSQL strings.Builder
-	params = append(params, id)
-	generateSQL.WriteString("query data by id and return it as *struct* SELECT * FROM tb_follow WHERE id=? ")
-
-	var executeSQL *gorm.DB
-	executeSQL = f.UnderlyingDB().Raw(generateSQL.String(), params...).Take(&result) // ignore_security_alert
-	err = executeSQL.Error
-
-	return
 }
 
 func (f followDo) Debug() IFollowDo {

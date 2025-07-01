@@ -45,7 +45,7 @@ func (s *shopTypeService) QueryTypeList(ctx context.Context) ([]v1.QueryTypeList
 		}), nil
 	}
 
-	list, err := s.query.ShopType.Order(s.query.ShopType.Sort.Asc()).Find()
+	list, err := s.shopTypeRepo.GetAll(ctx)
 	if err != nil {
 		return nil, err
 	}
