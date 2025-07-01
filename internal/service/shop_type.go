@@ -33,9 +33,15 @@ func NewShopTypeService(
 func (s *shopTypeService) QueryTypeList(ctx context.Context) ([]v1.QueryTypeListRespDataItem, error) {
 	// 使用 List 结构
 
-	exist := s.rdb.Exists(ctx, constants.RedisCacheShopTypeKey).Val()
+	exist, err := s.rdb.Exists(ctx, constants.RedisCacheShopTypeKey).Result()
+	if err != nil {
+		return nil, err
+	}
 	if exist == 1 {
-		strSlices := s.rdb.LRange(ctx, constants.RedisCacheShopTypeKey, 0, -1).Val()
+		strSlices, err := s.rdb.LRange(ctx, constants.RedisCacheShopTypeKey, 0, -1).Result()
+		if err != nil {
+			return nil, err
+		}
 		return lo.Map(strSlices, func(el string, idx int) v1.QueryTypeListRespDataItem {
 			var item v1.QueryTypeListRespDataItem
 			if err := json.Unmarshal([]byte(el), &item); err != nil {
@@ -60,7 +66,9 @@ func (s *shopTypeService) QueryTypeList(ctx context.Context) ([]v1.QueryTypeList
 		if err != nil {
 			return v1.QueryTypeListRespDataItem{}
 		}
-		s.rdb.RPush(ctx, constants.RedisCacheShopTypeKey, string(bytes))
+		if err := s.rdb.RPush(ctx, constants.RedisCacheShopTypeKey, string(bytes)).Err(); err != nil {
+			return v1.QueryTypeListRespDataItem{}
+		}
 
 		return item
 	})

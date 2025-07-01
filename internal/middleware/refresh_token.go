@@ -38,7 +38,9 @@ func RefreshToken(rdb *redis.Client) gin.HandlerFunc {
 		newCtx := user_holder.WithUser(ctx, &simpleUser)
 		ctx.Request = ctx.Request.WithContext(newCtx)
 		// 7. 刷新 token 有效期
-		rdb.Expire(ctx, key, constants.RedisLoginUserTTL)
+		if err := rdb.Expire(ctx, key, constants.RedisLoginUserTTL).Err(); err != nil {
+			return
+		}
 		// 8. 放行
 		ctx.Next()
 	}

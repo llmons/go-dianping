@@ -49,7 +49,9 @@ func (s *userService) SendCode(ctx context.Context, req *v1.SendCodeReq) error {
 
 	// 4. 保存验证码到 redis
 	key := constants.RedisLoginCodeKey + req.Phone
-	s.rdb.Set(ctx, key, code, constants.RedisLoginCodeTTL)
+	if err := s.rdb.Set(ctx, key, code, constants.RedisLoginCodeTTL).Err(); err != nil {
+		return err
+	}
 
 	// 5. 发送验证码
 	s.logger.Info("发送短信验证码成功", zap.String("验证码：", code))
@@ -104,9 +106,13 @@ func (s *userService) Login(ctx context.Context, req *v1.LoginReq) (*v1.LoginRes
 
 	// 7.3. 存储
 	key = constants.RedisLoginUserKey + token
-	s.rdb.HSet(ctx, key, simpleUser)
+	if err := s.rdb.HSet(ctx, key, simpleUser).Err(); err != nil {
+		return nil, err
+	}
 	// 7.4. 设置 token 有效期
-	s.rdb.Expire(ctx, key, constants.RedisLoginUserTTL)
+	if err := s.rdb.Expire(ctx, key, constants.RedisLoginUserTTL).Err(); err != nil {
+		return nil, err
+	}
 
 	// 8. 返回 token
 	return &v1.LoginRespData{

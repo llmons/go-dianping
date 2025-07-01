@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"github.com/jinzhu/copier"
 	"github.com/panjf2000/ants/v2"
@@ -11,7 +10,6 @@ import (
 	"go-dianping/internal/base/constants"
 	"go-dianping/internal/entity"
 	"go-dianping/internal/repository"
-	"go.uber.org/zap"
 )
 
 type ShopService interface {
@@ -67,7 +65,7 @@ func (s *shopService) QueryById(ctx context.Context, req *v1.QueryShopByIDReq) (
 
 func (s *shopService) UpdateShop(ctx context.Context, req *v1.UpdateShopReq) error {
 	if req.ID == nil {
-		return errors.New("商铺 id 不能为空")
+		return v1.ErrShopIDIsNull
 	}
 	// 1. 更新数据库
 	var shop entity.Shop
@@ -75,14 +73,9 @@ func (s *shopService) UpdateShop(ctx context.Context, req *v1.UpdateShopReq) err
 		return err
 	}
 
-	s.logger.Debug("req", zap.Any("req", req))
-	s.logger.Debug("shop", zap.Any("shop", shop))
-
 	if _, err := s.shopRepo.Updates(ctx, &shop); err != nil {
 		return err
 	}
 	// 2. 删除缓存
-	s.rdb.Del(ctx, fmt.Sprintf("%s%d", constants.RedisCacheShopKey, req.ID))
-
-	return nil
+	return s.rdb.Del(ctx, fmt.Sprintf("%s%d", constants.RedisCacheShopKey, req.ID)).Err()
 }
