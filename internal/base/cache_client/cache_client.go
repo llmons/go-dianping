@@ -90,7 +90,11 @@ func (c *cacheClient[ENTITY]) QueryWithPassThrough(ctx context.Context, keyPrefi
 	}
 
 	// 6. 存在，写入 redis
-	return ret, c.Set(ctx, key, ret, expireTime)
+	retJson, err := json.Marshal(ret)
+	if err != nil {
+		return nil, err
+	}
+	return ret, c.Set(ctx, key, retJson, expireTime)
 }
 
 func (c *cacheClient[ENTITY]) QueryWithMutex(ctx context.Context, keyPrefix string, id uint64, dbFallback func(context.Context, uint64) (*ENTITY, error), expireTime time.Duration) (ret *ENTITY, err error) {
