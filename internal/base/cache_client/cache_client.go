@@ -16,8 +16,8 @@ import (
 )
 
 type CacheClient[ENTITY any] interface {
-	Set(ctx context.Context, key string, value any, expireTime time.Duration)
-	SetWithLogicExpire(ctx context.Context, key string, value *ENTITY, expireTime time.Duration)
+	Set(ctx context.Context, key string, value any, expireTime time.Duration) error
+	SetWithLogicExpire(ctx context.Context, key string, value *ENTITY, expireTime time.Duration) error
 	QueryWithPassThrough(ctx context.Context, keyPrefix string, id uint64, dbFallback func(context.Context, uint64) (*ENTITY, error), expireTime time.Duration) (*ENTITY, error)
 	QueryWithMutex(ctx context.Context, keyPrefix string, id uint64, dbFallback func(context.Context, uint64) (*ENTITY, error), expireTime time.Duration) (*ENTITY, error)
 	QueryWithLogicalExpire(ctx context.Context, keyPrefix string, id uint64, dbFallback func(context.Context, uint64) (*ENTITY, error), expireTime time.Duration) (*ENTITY, error)
@@ -39,18 +39,18 @@ func NewCacheClient[ENTITY any](rdb *redis.Client) CacheClient[ENTITY] {
 	}
 }
 
-func (c *cacheClient[ENTITY]) Set(ctx context.Context, key string, value any, expireTime time.Duration) {
-	c.rdb.Set(ctx, key, value, expireTime)
+func (c *cacheClient[ENTITY]) Set(ctx context.Context, key string, value any, expireTime time.Duration) error {
+	return c.rdb.Set(ctx, key, value, expireTime).Err()
 }
 
-func (c *cacheClient[ENTITY]) SetWithLogicExpire(ctx context.Context, key string, value *ENTITY, expireTime time.Duration) {
+func (c *cacheClient[ENTITY]) SetWithLogicExpire(ctx context.Context, key string, value *ENTITY, expireTime time.Duration) error {
 	// 设置逻辑过期
 	redisData := redis_data.RedisData[*ENTITY]{
 		ExpireTime: time.Now().Add(expireTime),
 		Data:       value,
 	}
 	// 写入 redis
-	c.rdb.Set(ctx, key, redisData, redis.KeepTTL)
+	return c.rdb.Set(ctx, key, redisData, redis.KeepTTL).Err()
 }
 
 func (c *cacheClient[ENTITY]) QueryWithPassThrough(ctx context.Context, keyPrefix string, id uint64, dbFallback func(context.Context, uint64) (*ENTITY, error), expireTime time.Duration) (*ENTITY, error) {
@@ -81,18 +81,19 @@ func (c *cacheClient[ENTITY]) QueryWithPassThrough(ctx context.Context, keyPrefi
 		// 5. 不存在，返回错误
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			// 将空值写入 redis
-			c.rdb.Set(ctx, key, "", constants.RedisCacheNullTTL)
+			if err := c.rdb.Set(ctx, key, "", constants.RedisCacheNullTTL).Err(); err != nil {
+				return nil, err
+			}
 		}
 		// 返回错误信息
 		return nil, err
 	}
 
 	// 6. 存在，写入 redis
-	c.Set(ctx, key, ret, expireTime)
-	return ret, nil
+	return ret, c.Set(ctx, key, ret, expireTime)
 }
 
-func (c *cacheClient[ENTITY]) QueryWithMutex(ctx context.Context, keyPrefix string, id uint64, dbFallback func(context.Context, uint64) (*ENTITY, error), expireTime time.Duration) (*ENTITY, error) {
+func (c *cacheClient[ENTITY]) QueryWithMutex(ctx context.Context, keyPrefix string, id uint64, dbFallback func(context.Context, uint64) (*ENTITY, error), expireTime time.Duration) (ret *ENTITY, err error) {
 	key := fmt.Sprintf("%s%d", keyPrefix, id)
 	// 1. 从 redis 查询店铺缓存
 	shopJson, err := c.rdb.Get(ctx, key).Result()
@@ -102,11 +103,10 @@ func (c *cacheClient[ENTITY]) QueryWithMutex(ctx context.Context, keyPrefix stri
 	// 2. 判断是否存在
 	if shopJson != "" {
 		// 3. 存在，直接返回
-		var ret ENTITY
-		if err := json.Unmarshal([]byte(shopJson), &ret); err != nil {
+		if err := json.Unmarshal([]byte(shopJson), ret); err != nil {
 			return nil, err
 		}
-		return &ret, nil
+		return ret, nil
 	}
 	// 判断命中的是否是空值
 	if err == nil {
@@ -122,7 +122,11 @@ func (c *cacheClient[ENTITY]) QueryWithMutex(ctx context.Context, keyPrefix stri
 		return nil, err
 	}
 	// 等待释放锁
-	defer c.unlock(ctx, lockKey)
+	defer func(c *cacheClient[ENTITY], ctx context.Context, key string) {
+		if closureErr := c.unlock(ctx, key); closureErr != nil {
+			err = closureErr
+		}
+	}(c, ctx, lockKey)
 	if !isLock {
 		// 4.3. 获取锁失败，休眠并重试
 		time.Sleep(time.Millisecond * 50)
@@ -138,11 +142,10 @@ func (c *cacheClient[ENTITY]) QueryWithMutex(ctx context.Context, keyPrefix stri
 	// 2. 判断是否存在
 	if shopJson != "" {
 		// 3. 存在，直接返回
-		var ret ENTITY
-		if err := json.Unmarshal([]byte(shopJson), &ret); err != nil {
+		if err := json.Unmarshal([]byte(shopJson), ret); err != nil {
 			return nil, err
 		}
-		return &ret, nil
+		return ret, nil
 	}
 	// 判断命中的是否是空值
 	if err == nil {
@@ -163,16 +166,11 @@ func (c *cacheClient[ENTITY]) QueryWithMutex(ctx context.Context, keyPrefix stri
 	}
 
 	// 6. 存在，写入 redis
-	err = c.rdb.Set(ctx, key, shop, expireTime).Err()
-	if err != nil {
-		return nil, err
-	}
-
 	// 8. 返回
-	return shop, nil
+	return shop, c.rdb.Set(ctx, key, shop, expireTime).Err()
 }
 
-func (c *cacheClient[ENTITY]) QueryWithLogicalExpire(ctx context.Context, keyPrefix string, id uint64, dbFallback func(context.Context, uint64) (*ENTITY, error), expireTime time.Duration) (*ENTITY, error) {
+func (c *cacheClient[ENTITY]) QueryWithLogicalExpire(ctx context.Context, keyPrefix string, id uint64, dbFallback func(context.Context, uint64) (*ENTITY, error), expireTime time.Duration) (ret *ENTITY, err error) {
 	key := fmt.Sprintf("%s%d", keyPrefix, id)
 	// 1. 从 redis 查询商铺缓存
 	shopJson, err := c.rdb.Get(ctx, key).Result()
@@ -190,7 +188,6 @@ func (c *cacheClient[ENTITY]) QueryWithLogicalExpire(ctx context.Context, keyPre
 	if err := json.Unmarshal([]byte(shopJson), &redisData); err != nil {
 		return nil, err
 	}
-	var ret ENTITY
 	if err := copier.Copy(&ret, &redisData.Data); err != nil {
 		return nil, err
 	}
@@ -198,7 +195,7 @@ func (c *cacheClient[ENTITY]) QueryWithLogicalExpire(ctx context.Context, keyPre
 	// 5. 判断是否过期
 	if redisData.ExpireTime.After(time.Now()) {
 		// 5.1. 未过期，直接返回店铺信息
-		return &ret, nil
+		return ret, nil
 	}
 	// 5.2. 已过期，需要缓存重建
 	// 6. 缓存重建
@@ -222,7 +219,11 @@ func (c *cacheClient[ENTITY]) QueryWithLogicalExpire(ctx context.Context, keyPre
 		// 6.3. 成功，开启独立线程，实现缓存重建
 		if err := c.cacheRebuildPool.Submit(func() {
 			// 等待释放锁
-			defer c.unlock(ctx, lockKey)
+			defer func(c *cacheClient[ENTITY], ctx context.Context, key string) {
+				if closeErr := c.unlock(ctx, key); closeErr != nil {
+					err = closeErr
+				}
+			}(c, ctx, lockKey)
 			// 查询数据库
 			newCtx := context.Background()
 			retFromDB, err := dbFallback(newCtx, id)
@@ -230,27 +231,25 @@ func (c *cacheClient[ENTITY]) QueryWithLogicalExpire(ctx context.Context, keyPre
 				return
 			}
 			// 写入 redis
-			c.SetWithLogicExpire(newCtx, key, retFromDB, expireTime)
+			if err := c.SetWithLogicExpire(newCtx, key, retFromDB, expireTime); err != nil {
+				return
+			}
 		}); err != nil {
 			return nil, err
 		}
 		// 6.4. 返回过期的商铺信息
-		return &ret, nil
+		return ret, nil
 	}
 
-	return &ret, nil
+	return ret, nil
 }
 
 func (c *cacheClient[ENTITY]) tryLock(ctx context.Context, key string) (bool, error) {
-	flag, err := c.rdb.SetNX(ctx, key, "1", time.Second*10).Result()
-	if err != nil {
-		return false, err
-	}
-	return flag, nil
+	return c.rdb.SetNX(ctx, key, "1", time.Second*10).Result()
 }
 
-func (c *cacheClient[ENTITY]) unlock(ctx context.Context, key string) {
-	c.rdb.Del(ctx, key)
+func (c *cacheClient[ENTITY]) unlock(ctx context.Context, key string) error {
+	return c.rdb.Del(ctx, key).Err()
 }
 
 func NewCacheClientForShop(rdb *redis.Client) CacheClient[entity.Shop] {
