@@ -1,5 +1,6 @@
 package v1
 
 var (
-	ErrEmailAlreadyUse = newError(1001, "The email is already in use.")
+	ErrPhoneIsInvalid = newError(1001, "手机号格式错误")
+	ErrCodeIsInvalid  = newError(1002, "验证码错误")
 )

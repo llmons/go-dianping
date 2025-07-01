@@ -37,7 +37,7 @@ func (s *userService) SendCode(ctx context.Context, req *v1.SendCodeReq) error {
 	// 1. 校验手机号
 	if regex_utils.IsPhoneInvalid(req.Phone) {
 		// 2. 如果不符合，返回错误信息
-		return errors.New("手机号格式错误！")
+		return v1.ErrPhoneIsInvalid
 	}
 	// 3. 符合，生成验证码
 	var code string
@@ -61,7 +61,7 @@ func (s *userService) Login(ctx context.Context, req *v1.LoginReq) (*v1.LoginRes
 	// 1. 校验手机号
 	if regex_utils.IsPhoneInvalid(req.Phone) {
 		// 2. 如果不符合，返回错误信息
-		return nil, errors.New("手机号格式错误！")
+		return nil, v1.ErrPhoneIsInvalid
 	}
 
 	// 3. 从 redis 获取验证码并校验
@@ -72,7 +72,7 @@ func (s *userService) Login(ctx context.Context, req *v1.LoginReq) (*v1.LoginRes
 	}
 	if cacheCode != req.Code {
 		// 不一致，报错
-		return nil, errors.New("验证码错误")
+		return nil, v1.ErrCodeIsInvalid
 	}
 
 	// 4. 一致，根据手机号查询用户 select * from tb_user where phone = ?
