@@ -1,5 +1,5 @@
 definitions:
-  go-dianping_api_v1.LoginReq:
+  v1.LoginReq:
     properties:
       code:
         example: "123456"
@@ -14,10 +14,10 @@ definitions:
     - code
     - phone
     type: object
-  go-dianping_api_v1.LoginResp:
+  v1.LoginResp:
     properties:
       data:
-        $ref: '#/definitions/go-dianping_api_v1.LoginRespData'
+        $ref: '#/definitions/v1.LoginRespData'
       errorMsg:
         type: string
       success:
@@ -25,15 +25,15 @@ definitions:
       total:
         type: integer
     type: object
-  go-dianping_api_v1.LoginRespData:
+  v1.LoginRespData:
     properties:
       token:
         type: string
     type: object
-  go-dianping_api_v1.MeResp:
+  v1.MeResp:
     properties:
       data:
-        $ref: '#/definitions/go-dianping_api_v1.MeRespData'
+        $ref: '#/definitions/v1.MeRespData'
       errorMsg:
         type: string
       success:
@@ -41,7 +41,7 @@ definitions:
       total:
         type: integer
     type: object
-  go-dianping_api_v1.MeRespData:
+  v1.MeRespData:
     properties:
       icon:
         type: string
@@ -50,10 +50,10 @@ definitions:
       nickname:
         type: string
     type: object
-  go-dianping_api_v1.QueryShopByIDResp:
+  v1.QueryShopByIDResp:
     properties:
       data:
-        $ref: '#/definitions/go-dianping_api_v1.QueryShopByIDRespData'
+        $ref: '#/definitions/v1.QueryShopByIDRespData'
       errorMsg:
         type: string
       success:
@@ -61,7 +61,7 @@ definitions:
       total:
         type: integer
     type: object
-  go-dianping_api_v1.QueryShopByIDRespData:
+  v1.QueryShopByIDRespData:
     properties:
       address:
         description: 地址
@@ -109,11 +109,11 @@ definitions:
         description: 维度
         type: number
     type: object
-  go-dianping_api_v1.QueryTypeListResp:
+  v1.QueryTypeListResp:
     properties:
       data:
         items:
-          $ref: '#/definitions/go-dianping_api_v1.QueryTypeListRespDataItem'
+          $ref: '#/definitions/v1.QueryTypeListRespDataItem'
         type: array
       errorMsg:
         type: string
@@ -122,7 +122,7 @@ definitions:
       total:
         type: integer
     type: object
-  go-dianping_api_v1.QueryTypeListRespDataItem:
+  v1.QueryTypeListRespDataItem:
     properties:
       icon:
         type: string
@@ -133,7 +133,7 @@ definitions:
       sort:
         type: integer
     type: object
-  go-dianping_api_v1.Response:
+  v1.Response:
     properties:
       data: {}
       errorMsg:
@@ -143,7 +143,7 @@ definitions:
       total:
         type: integer
     type: object
-  go-dianping_api_v1.UpdateShopReq:
+  v1.UpdateShopReq:
     properties:
       address:
         example: 金华路锦昌文华苑29号
@@ -208,14 +208,14 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/go-dianping_api_v1.UpdateShopReq'
+          $ref: '#/definitions/v1.UpdateShopReq'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/go-dianping_api_v1.Response'
+            $ref: '#/definitions/v1.Response'
       summary: 更新商铺信息
       tags:
       - shop
@@ -227,7 +227,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/go-dianping_api_v1.QueryTypeListResp'
+            $ref: '#/definitions/v1.QueryTypeListResp'
       summary: 获取商品类别列表
       tags:
       - shop-type
@@ -245,7 +245,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/go-dianping_api_v1.QueryShopByIDResp'
+            $ref: '#/definitions/v1.QueryShopByIDResp'
       summary: 根据 id 查询商铺信息
       tags:
       - shop
@@ -263,7 +263,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/go-dianping_api_v1.Response'
+            $ref: '#/definitions/v1.Response'
       summary: 发送短信验证码并保存验证码
       tags:
       - user
@@ -277,14 +277,14 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/go-dianping_api_v1.LoginReq'
+          $ref: '#/definitions/v1.LoginReq'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/go-dianping_api_v1.LoginResp'
+            $ref: '#/definitions/v1.LoginResp'
       summary: 实现登录功能
       tags:
       - user
@@ -296,7 +296,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/go-dianping_api_v1.MeResp'
+            $ref: '#/definitions/v1.MeResp'
       security:
       - Bearer: []
       summary: 获取当前登录的用户并返回

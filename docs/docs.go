@@ -42,7 +42,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/go-dianping_api_v1.UpdateShopReq"
+                            "$ref": "#/definitions/v1.UpdateShopReq"
                         }
                     }
                 ],
@@ -50,7 +50,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/go-dianping_api_v1.Response"
+                            "$ref": "#/definitions/v1.Response"
                         }
                     }
                 }
@@ -69,7 +69,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/go-dianping_api_v1.QueryTypeListResp"
+                            "$ref": "#/definitions/v1.QueryTypeListResp"
                         }
                     }
                 }
@@ -97,7 +97,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/go-dianping_api_v1.QueryShopByIDResp"
+                            "$ref": "#/definitions/v1.QueryShopByIDResp"
                         }
                     }
                 }
@@ -125,7 +125,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/go-dianping_api_v1.Response"
+                            "$ref": "#/definitions/v1.Response"
                         }
                     }
                 }
@@ -150,7 +150,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/go-dianping_api_v1.LoginReq"
+                            "$ref": "#/definitions/v1.LoginReq"
                         }
                     }
                 ],
@@ -158,7 +158,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/go-dianping_api_v1.LoginResp"
+                            "$ref": "#/definitions/v1.LoginResp"
                         }
                     }
                 }
@@ -182,7 +182,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/go-dianping_api_v1.MeResp"
+                            "$ref": "#/definitions/v1.MeResp"
                         }
                     }
                 }
@@ -190,7 +190,7 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "go-dianping_api_v1.LoginReq": {
+        "v1.LoginReq": {
             "type": "object",
             "required": [
                 "code",
@@ -211,11 +211,11 @@ const docTemplate = `{
                 }
             }
         },
-        "go-dianping_api_v1.LoginResp": {
+        "v1.LoginResp": {
             "type": "object",
             "properties": {
                 "data": {
-                    "$ref": "#/definitions/go-dianping_api_v1.LoginRespData"
+                    "$ref": "#/definitions/v1.LoginRespData"
                 },
                 "errorMsg": {
                     "type": "string"
@@ -228,7 +228,7 @@ const docTemplate = `{
                 }
             }
         },
-        "go-dianping_api_v1.LoginRespData": {
+        "v1.LoginRespData": {
             "type": "object",
             "properties": {
                 "token": {
@@ -236,11 +236,11 @@ const docTemplate = `{
                 }
             }
         },
-        "go-dianping_api_v1.MeResp": {
+        "v1.MeResp": {
             "type": "object",
             "properties": {
                 "data": {
-                    "$ref": "#/definitions/go-dianping_api_v1.MeRespData"
+                    "$ref": "#/definitions/v1.MeRespData"
                 },
                 "errorMsg": {
                     "type": "string"
@@ -253,7 +253,7 @@ const docTemplate = `{
                 }
             }
         },
-        "go-dianping_api_v1.MeRespData": {
+        "v1.MeRespData": {
             "type": "object",
             "properties": {
                 "icon": {
@@ -267,11 +267,11 @@ const docTemplate = `{
                 }
             }
         },
-        "go-dianping_api_v1.QueryShopByIDResp": {
+        "v1.QueryShopByIDResp": {
             "type": "object",
             "properties": {
                 "data": {
-                    "$ref": "#/definitions/go-dianping_api_v1.QueryShopByIDRespData"
+                    "$ref": "#/definitions/v1.QueryShopByIDRespData"
                 },
                 "errorMsg": {
                     "type": "string"
@@ -284,7 +284,7 @@ const docTemplate = `{
                 }
             }
         },
-        "go-dianping_api_v1.QueryShopByIDRespData": {
+        "v1.QueryShopByIDRespData": {
             "type": "object",
             "properties": {
                 "address": {
@@ -349,13 +349,13 @@ const docTemplate = `{
                 }
             }
         },
-        "go-dianping_api_v1.QueryTypeListResp": {
+        "v1.QueryTypeListResp": {
             "type": "object",
             "properties": {
                 "data": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/go-dianping_api_v1.QueryTypeListRespDataItem"
+                        "$ref": "#/definitions/v1.QueryTypeListRespDataItem"
                     }
                 },
                 "errorMsg": {
@@ -369,7 +369,7 @@ const docTemplate = `{
                 }
             }
         },
-        "go-dianping_api_v1.QueryTypeListRespDataItem": {
+        "v1.QueryTypeListRespDataItem": {
             "type": "object",
             "properties": {
                 "icon": {
@@ -386,7 +386,7 @@ const docTemplate = `{
                 }
             }
         },
-        "go-dianping_api_v1.Response": {
+        "v1.Response": {
             "type": "object",
             "properties": {
                 "data": {},
@@ -401,7 +401,7 @@ const docTemplate = `{
                 }
             }
         },
-        "go-dianping_api_v1.UpdateShopReq": {
+        "v1.UpdateShopReq": {
             "type": "object",
             "properties": {
                 "address": {

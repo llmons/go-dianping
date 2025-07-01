@@ -40,7 +40,7 @@ func WithServerPort(port int) Option {
 	}
 }
 
-func (s *Server) Start(ctx context.Context) error {
+func (s *Server) Start(context.Context) error {
 	s.httpSrv = &http.Server{
 		Addr:    fmt.Sprintf("%s:%d", s.host, s.port),
 		Handler: s,
