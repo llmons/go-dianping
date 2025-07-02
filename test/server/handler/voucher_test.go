@@ -41,22 +41,13 @@ func TestVoucherHandler_AddSeckillVoucher(t *testing.T) {
 	voucherService := service.NewVoucherService(srv, voucherRepo, seckillRepo)
 
 	voucherHandler := handler.NewVoucherHandler(hdl, voucherService)
-	router.POST("/seckill", voucherHandler.AddSeckillVoucher)
-
-	fmt.Println("TEST IS STARTED")
+	router.POST("/api/voucher/seckill", voucherHandler.AddSeckillVoucher)
 
 	e := newHttpExcept(t, router)
 
-	//fmt.Println
-	fmt.Println(params)
-	//fmt.Println("POST /seckill with params:", params)
-	fmt.Println("TEST IS RUNNING")
-	fmt.Println("TEST IS RUNNING")
-	fmt.Println("TEST IS RUNNING")
-	fmt.Println("TEST IS RUNNING")
-	fmt.Println("TEST IS RUNNING")
+	fmt.Println(e)
 
-	obj := e.POST("/seckill").
+	obj := e.POST("/api/voucher/seckill").
 		WithHeader("Content-Type", "application/json").
 		WithJSON(params).
 		Expect().
@@ -67,5 +58,5 @@ func TestVoucherHandler_AddSeckillVoucher(t *testing.T) {
 	fmt.Println(obj)
 
 	obj.Value("success").IsEqual(true)
-	fmt.Println("TEST IS FINISHED")
+	obj.Value("data").IsNumber()
 }

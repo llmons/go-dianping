@@ -91,7 +91,7 @@ func NewHTTPServer(
 
 		voucherRouter := api.Group("/voucher")
 		{
-			voucherRouter.GET("/seckill", voucherHandler.AddSeckillVoucher)
+			voucherRouter.POST("/seckill", voucherHandler.AddSeckillVoucher)
 		}
 	}
 

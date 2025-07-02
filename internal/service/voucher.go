@@ -37,6 +37,7 @@ func (s *voucherService) AddSeckillVoucher(ctx context.Context, req *v1.AddSecki
 	}
 	// 保存秒杀信息
 	var seckillVoucher entity.SeckillVoucher
+	seckillVoucher.VoucherID = req.ID
 	if err := copier.Copy(&seckillVoucher, &req); err != nil {
 		return err
 	}
