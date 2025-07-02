@@ -35,7 +35,7 @@ func newBlogComments(db *gorm.DB, opts ...gen.DOOption) blogComments {
 	_blogComments.AnswerID = field.NewUint64(tableName, "answer_id")
 	_blogComments.Content = field.NewString(tableName, "content")
 	_blogComments.Liked = field.NewUint32(tableName, "liked")
-	_blogComments.Status = field.NewBool(tableName, "status")
+	_blogComments.Status = field.NewUint8(tableName, "status")
 	_blogComments.CreateTime = field.NewTime(tableName, "create_time")
 	_blogComments.UpdateTime = field.NewTime(tableName, "update_time")
 
@@ -55,7 +55,7 @@ type blogComments struct {
 	AnswerID   field.Uint64 // 回复的评论id
 	Content    field.String // 回复的内容
 	Liked      field.Uint32 // 点赞数
-	Status     field.Bool   // 状态，0：正常，1：被举报，2：禁止查看
+	Status     field.Uint8  // 状态，0：正常，1：被举报，2：禁止查看
 	CreateTime field.Time   // 创建时间
 	UpdateTime field.Time   // 更新时间
 
@@ -81,7 +81,7 @@ func (b *blogComments) updateTableName(table string) *blogComments {
 	b.AnswerID = field.NewUint64(table, "answer_id")
 	b.Content = field.NewString(table, "content")
 	b.Liked = field.NewUint32(table, "liked")
-	b.Status = field.NewBool(table, "status")
+	b.Status = field.NewUint8(table, "status")
 	b.CreateTime = field.NewTime(table, "create_time")
 	b.UpdateTime = field.NewTime(table, "update_time")
 

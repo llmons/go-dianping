@@ -17,10 +17,10 @@ type UserInfo struct {
 	Introduce  *string    `gorm:"column:introduce;type:varchar(128);comment:个人介绍，不要超过128个字符" json:"introduce"`                                           // 个人介绍，不要超过128个字符
 	Fans       *uint32    `gorm:"column:fans;type:int(8) unsigned;comment:粉丝数量" json:"fans"`                                                             // 粉丝数量
 	Followee   *uint32    `gorm:"column:followee;type:int(8) unsigned;comment:关注的人的数量" json:"followee"`                                                  // 关注的人的数量
-	Gender     *bool      `gorm:"column:gender;type:tinyint(1) unsigned;comment:性别，0：男，1：女" json:"gender"`                                               // 性别，0：男，1：女
+	Gender     *uint8     `gorm:"column:gender;type:tinyint(1) unsigned;comment:性别，0：男，1：女" json:"gender"`                                               // 性别，0：男，1：女
 	Birthday   *time.Time `gorm:"column:birthday;type:date;comment:生日" json:"birthday"`                                                                  // 生日
 	Credits    *uint32    `gorm:"column:credits;type:int(8) unsigned;comment:积分" json:"credits"`                                                         // 积分
-	Level      *bool      `gorm:"column:level;type:tinyint(1) unsigned;comment:会员级别，0~9级,0代表未开通会员" json:"level"`                                         // 会员级别，0~9级,0代表未开通会员
+	Level      *uint8     `gorm:"column:level;type:tinyint(1) unsigned;comment:会员级别，0~9级,0代表未开通会员" json:"level"`                                         // 会员级别，0~9级,0代表未开通会员
 	CreateTime *time.Time `gorm:"column:create_time;type:timestamp;not null;default:current_timestamp();autoCreateTime;comment:创建时间" json:"create_time"` // 创建时间
 	UpdateTime *time.Time `gorm:"column:update_time;type:timestamp;not null;default:current_timestamp();autoUpdateTime;comment:更新时间" json:"update_time"` // 更新时间
 }

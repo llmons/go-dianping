@@ -13,7 +13,6 @@ import (
 
 func main() {
 	workdir, err := os.Getwd()
-	fmt.Println("工作路径", workdir)
 	if err != nil {
 		panic(err)
 	}
@@ -47,6 +46,16 @@ func main() {
 		return strings.TrimPrefix(table, "tb_")
 	})
 
+	g.WithDataTypeMap(map[string]func(gorm.ColumnType) string{
+		"tinyint": func(column gorm.ColumnType) string {
+			detail, ok := column.ColumnType()
+			if ok && detail == "tinyint(1)" {
+				return "int8"
+			}
+			return "int8"
+		},
+	})
+
 	dia := mysql.Open("root:123@tcp(127.0.0.1:3306)/hmdp?charset=utf8mb4&parseTime=True&loc=Local")
 	db, err := gorm.Open(dia)
 	if err != nil {
@@ -64,7 +73,11 @@ func main() {
 		g.GenerateModelAs("tb_sign", "Sign"),
 		g.GenerateModelAs("tb_user", "User"),
 		g.GenerateModelAs("tb_user_info", "UserInfo"),
-		g.GenerateModelAs("tb_voucher", "Voucher"),
+		g.GenerateModelAs("tb_voucher", "Voucher",
+			gen.FieldNew("Stock", "int", field.Tag{"gorm": "-", "json": "stock"}),
+			gen.FieldNew("BeginTime", "time.Time", field.Tag{"gorm": "-", "json": "begin_time"}),
+			gen.FieldNew("EndTime", "time.Time", field.Tag{"gorm": "-", "json": "end_time"}),
+		),
 		g.GenerateModelAs("tb_voucher_order", "VoucherOrder"),
 	)
 	g.Execute()

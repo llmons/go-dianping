@@ -31,8 +31,8 @@ func newVoucherOrder(db *gorm.DB, opts ...gen.DOOption) voucherOrder {
 	_voucherOrder.ID = field.NewInt64(tableName, "id")
 	_voucherOrder.UserID = field.NewUint64(tableName, "user_id")
 	_voucherOrder.VoucherID = field.NewUint64(tableName, "voucher_id")
-	_voucherOrder.PayType = field.NewBool(tableName, "pay_type")
-	_voucherOrder.Status = field.NewBool(tableName, "status")
+	_voucherOrder.PayType = field.NewUint8(tableName, "pay_type")
+	_voucherOrder.Status = field.NewUint8(tableName, "status")
 	_voucherOrder.CreateTime = field.NewTime(tableName, "create_time")
 	_voucherOrder.PayTime = field.NewTime(tableName, "pay_time")
 	_voucherOrder.UseTime = field.NewTime(tableName, "use_time")
@@ -51,8 +51,8 @@ type voucherOrder struct {
 	ID         field.Int64  // 主键
 	UserID     field.Uint64 // 下单的用户id
 	VoucherID  field.Uint64 // 购买的代金券id
-	PayType    field.Bool   // 支付方式 1：余额支付；2：支付宝；3：微信
-	Status     field.Bool   // 订单状态，1：未支付；2：已支付；3：已核销；4：已取消；5：退款中；6：已退款
+	PayType    field.Uint8  // 支付方式 1：余额支付；2：支付宝；3：微信
+	Status     field.Uint8  // 订单状态，1：未支付；2：已支付；3：已核销；4：已取消；5：退款中；6：已退款
 	CreateTime field.Time   // 下单时间
 	PayTime    field.Time   // 支付时间
 	UseTime    field.Time   // 核销时间
@@ -77,8 +77,8 @@ func (v *voucherOrder) updateTableName(table string) *voucherOrder {
 	v.ID = field.NewInt64(table, "id")
 	v.UserID = field.NewUint64(table, "user_id")
 	v.VoucherID = field.NewUint64(table, "voucher_id")
-	v.PayType = field.NewBool(table, "pay_type")
-	v.Status = field.NewBool(table, "status")
+	v.PayType = field.NewUint8(table, "pay_type")
+	v.Status = field.NewUint8(table, "status")
 	v.CreateTime = field.NewTime(table, "create_time")
 	v.PayTime = field.NewTime(table, "pay_time")
 	v.UseTime = field.NewTime(table, "use_time")

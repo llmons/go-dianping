@@ -35,8 +35,8 @@ func newVoucher(db *gorm.DB, opts ...gen.DOOption) voucher {
 	_voucher.Rules = field.NewString(tableName, "rules")
 	_voucher.PayValue = field.NewUint64(tableName, "pay_value")
 	_voucher.ActualValue = field.NewInt64(tableName, "actual_value")
-	_voucher.Type = field.NewBool(tableName, "type")
-	_voucher.Status = field.NewBool(tableName, "status")
+	_voucher.Type = field.NewUint8(tableName, "type")
+	_voucher.Status = field.NewUint8(tableName, "status")
 	_voucher.CreateTime = field.NewTime(tableName, "create_time")
 	_voucher.UpdateTime = field.NewTime(tableName, "update_time")
 
@@ -56,8 +56,8 @@ type voucher struct {
 	Rules       field.String // 使用规则
 	PayValue    field.Uint64 // 支付金额，单位是分。例如200代表2元
 	ActualValue field.Int64  // 抵扣金额，单位是分。例如200代表2元
-	Type        field.Bool   // 0,普通券；1,秒杀券
-	Status      field.Bool   // 1,上架; 2,下架; 3,过期
+	Type        field.Uint8  // 0,普通券；1,秒杀券
+	Status      field.Uint8  // 1,上架; 2,下架; 3,过期
 	CreateTime  field.Time   // 创建时间
 	UpdateTime  field.Time   // 更新时间
 
@@ -83,8 +83,8 @@ func (v *voucher) updateTableName(table string) *voucher {
 	v.Rules = field.NewString(table, "rules")
 	v.PayValue = field.NewUint64(table, "pay_value")
 	v.ActualValue = field.NewInt64(table, "actual_value")
-	v.Type = field.NewBool(table, "type")
-	v.Status = field.NewBool(table, "status")
+	v.Type = field.NewUint8(table, "type")
+	v.Status = field.NewUint8(table, "status")
 	v.CreateTime = field.NewTime(table, "create_time")
 	v.UpdateTime = field.NewTime(table, "update_time")
 
@@ -103,7 +103,7 @@ func (v *voucher) GetFieldByName(fieldName string) (field.OrderExpr, bool) {
 }
 
 func (v *voucher) fillFieldMap() {
-	v.fieldMap = make(map[string]field.Expr, 11)
+	v.fieldMap = make(map[string]field.Expr, 14)
 	v.fieldMap["id"] = v.ID
 	v.fieldMap["shop_id"] = v.ShopID
 	v.fieldMap["title"] = v.Title
@@ -115,6 +115,7 @@ func (v *voucher) fillFieldMap() {
 	v.fieldMap["status"] = v.Status
 	v.fieldMap["create_time"] = v.CreateTime
 	v.fieldMap["update_time"] = v.UpdateTime
+
 }
 
 func (v voucher) clone(db *gorm.DB) voucher {

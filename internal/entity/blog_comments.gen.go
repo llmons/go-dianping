@@ -19,7 +19,7 @@ type BlogComments struct {
 	AnswerID   uint64     `gorm:"column:answer_id;type:bigint(20) unsigned;not null;comment:回复的评论id" json:"answer_id"`                                   // 回复的评论id
 	Content    string     `gorm:"column:content;type:varchar(255);not null;comment:回复的内容" json:"content"`                                                // 回复的内容
 	Liked      *uint32    `gorm:"column:liked;type:int(8) unsigned;comment:点赞数" json:"liked"`                                                            // 点赞数
-	Status     *bool      `gorm:"column:status;type:tinyint(1) unsigned;comment:状态，0：正常，1：被举报，2：禁止查看" json:"status"`                                     // 状态，0：正常，1：被举报，2：禁止查看
+	Status     *uint8     `gorm:"column:status;type:tinyint(1) unsigned;comment:状态，0：正常，1：被举报，2：禁止查看" json:"status"`                                     // 状态，0：正常，1：被举报，2：禁止查看
 	CreateTime *time.Time `gorm:"column:create_time;type:timestamp;not null;default:current_timestamp();autoCreateTime;comment:创建时间" json:"create_time"` // 创建时间
 	UpdateTime *time.Time `gorm:"column:update_time;type:timestamp;not null;default:current_timestamp();autoUpdateTime;comment:更新时间" json:"update_time"` // 更新时间
 }

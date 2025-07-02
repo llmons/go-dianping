@@ -19,10 +19,13 @@ type Voucher struct {
 	Rules       *string    `gorm:"column:rules;type:varchar(1024);comment:使用规则" json:"rules"`                                                             // 使用规则
 	PayValue    uint64     `gorm:"column:pay_value;type:bigint(10) unsigned;not null;comment:支付金额，单位是分。例如200代表2元" json:"pay_value"`                       // 支付金额，单位是分。例如200代表2元
 	ActualValue int64      `gorm:"column:actual_value;type:bigint(10);not null;comment:抵扣金额，单位是分。例如200代表2元" json:"actual_value"`                          // 抵扣金额，单位是分。例如200代表2元
-	Type        bool       `gorm:"column:type;type:tinyint(1) unsigned;not null;comment:0,普通券；1,秒杀券" json:"type"`                                         // 0,普通券；1,秒杀券
-	Status      *bool      `gorm:"column:status;type:tinyint(1) unsigned;not null;default:1;comment:1,上架; 2,下架; 3,过期" json:"status"`                      // 1,上架; 2,下架; 3,过期
+	Type        uint8      `gorm:"column:type;type:tinyint(1) unsigned;not null;comment:0,普通券；1,秒杀券" json:"type"`                                         // 0,普通券；1,秒杀券
+	Status      *uint8     `gorm:"column:status;type:tinyint(1) unsigned;not null;default:1;comment:1,上架; 2,下架; 3,过期" json:"status"`                      // 1,上架; 2,下架; 3,过期
 	CreateTime  *time.Time `gorm:"column:create_time;type:timestamp;not null;default:current_timestamp();autoCreateTime;comment:创建时间" json:"create_time"` // 创建时间
 	UpdateTime  *time.Time `gorm:"column:update_time;type:timestamp;not null;default:current_timestamp();autoUpdateTime;comment:更新时间" json:"update_time"` // 更新时间
+	Stock       int        `gorm:"-" json:"stock"`
+	BeginTime   time.Time  `gorm:"-" json:"begin_time"`
+	EndTime     time.Time  `gorm:"-" json:"end_time"`
 }
 
 // TableName Voucher's table name

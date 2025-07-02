@@ -31,9 +31,9 @@ func newSign(db *gorm.DB, opts ...gen.DOOption) sign {
 	_sign.ID = field.NewUint64(tableName, "id")
 	_sign.UserID = field.NewUint64(tableName, "user_id")
 	_sign.Year = field.NewInt32(tableName, "year")
-	_sign.Month = field.NewInt32(tableName, "month")
+	_sign.Month = field.NewInt8(tableName, "month")
 	_sign.Date = field.NewTime(tableName, "date")
-	_sign.IsBackup = field.NewBool(tableName, "is_backup")
+	_sign.IsBackup = field.NewUint8(tableName, "is_backup")
 
 	_sign.fillFieldMap()
 
@@ -47,9 +47,9 @@ type sign struct {
 	ID       field.Uint64 // 主键
 	UserID   field.Uint64 // 用户id
 	Year     field.Int32  // 签到的年
-	Month    field.Int32  // 签到的月
+	Month    field.Int8   // 签到的月
 	Date     field.Time   // 签到的日期
-	IsBackup field.Bool   // 是否补签
+	IsBackup field.Uint8  // 是否补签
 
 	fieldMap map[string]field.Expr
 }
@@ -69,9 +69,9 @@ func (s *sign) updateTableName(table string) *sign {
 	s.ID = field.NewUint64(table, "id")
 	s.UserID = field.NewUint64(table, "user_id")
 	s.Year = field.NewInt32(table, "year")
-	s.Month = field.NewInt32(table, "month")
+	s.Month = field.NewInt8(table, "month")
 	s.Date = field.NewTime(table, "date")
-	s.IsBackup = field.NewBool(table, "is_backup")
+	s.IsBackup = field.NewUint8(table, "is_backup")
 
 	s.fillFieldMap()
 

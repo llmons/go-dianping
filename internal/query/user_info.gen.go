@@ -33,10 +33,10 @@ func newUserInfo(db *gorm.DB, opts ...gen.DOOption) userInfo {
 	_userInfo.Introduce = field.NewString(tableName, "introduce")
 	_userInfo.Fans = field.NewUint32(tableName, "fans")
 	_userInfo.Followee = field.NewUint32(tableName, "followee")
-	_userInfo.Gender = field.NewBool(tableName, "gender")
+	_userInfo.Gender = field.NewUint8(tableName, "gender")
 	_userInfo.Birthday = field.NewTime(tableName, "birthday")
 	_userInfo.Credits = field.NewUint32(tableName, "credits")
-	_userInfo.Level = field.NewBool(tableName, "level")
+	_userInfo.Level = field.NewUint8(tableName, "level")
 	_userInfo.CreateTime = field.NewTime(tableName, "create_time")
 	_userInfo.UpdateTime = field.NewTime(tableName, "update_time")
 
@@ -54,10 +54,10 @@ type userInfo struct {
 	Introduce  field.String // 个人介绍，不要超过128个字符
 	Fans       field.Uint32 // 粉丝数量
 	Followee   field.Uint32 // 关注的人的数量
-	Gender     field.Bool   // 性别，0：男，1：女
+	Gender     field.Uint8  // 性别，0：男，1：女
 	Birthday   field.Time   // 生日
 	Credits    field.Uint32 // 积分
-	Level      field.Bool   // 会员级别，0~9级,0代表未开通会员
+	Level      field.Uint8  // 会员级别，0~9级,0代表未开通会员
 	CreateTime field.Time   // 创建时间
 	UpdateTime field.Time   // 更新时间
 
@@ -81,10 +81,10 @@ func (u *userInfo) updateTableName(table string) *userInfo {
 	u.Introduce = field.NewString(table, "introduce")
 	u.Fans = field.NewUint32(table, "fans")
 	u.Followee = field.NewUint32(table, "followee")
-	u.Gender = field.NewBool(table, "gender")
+	u.Gender = field.NewUint8(table, "gender")
 	u.Birthday = field.NewTime(table, "birthday")
 	u.Credits = field.NewUint32(table, "credits")
-	u.Level = field.NewBool(table, "level")
+	u.Level = field.NewUint8(table, "level")
 	u.CreateTime = field.NewTime(table, "create_time")
 	u.UpdateTime = field.NewTime(table, "update_time")
 
