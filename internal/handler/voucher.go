@@ -22,8 +22,6 @@ func NewVoucherHandler(
 	}
 }
 
-func (h *VoucherHandler) AddVoucher(ctx *gin.Context) {}
-
 func (h *VoucherHandler) AddSeckillVoucher(ctx *gin.Context) {
 	var req v1.AddSeckillVoucherReq
 	if err := ctx.ShouldBindJSON(&req); err != nil {
@@ -31,7 +29,7 @@ func (h *VoucherHandler) AddSeckillVoucher(ctx *gin.Context) {
 		return
 	}
 
-	if err := h.voucherService.AddSeckillVoucher(ctx, &req); err != nil {
+	if err := h.voucherService.AddSeckillVoucher(ctx.Request.Context(), &req); err != nil {
 		v1.HandleError(ctx, http.StatusInternalServerError, err.Error(), nil)
 		return
 	}

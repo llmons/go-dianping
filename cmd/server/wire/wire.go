@@ -7,6 +7,7 @@ import (
 	"github.com/google/wire"
 	"github.com/spf13/viper"
 	"go-dianping/internal/base/cache_client"
+	"go-dianping/internal/base/redis_worker"
 	"go-dianping/internal/handler"
 	"go-dianping/internal/repository"
 	"go-dianping/internal/server"
@@ -26,10 +27,15 @@ var repositorySet = wire.NewSet(
 	repository.NewShopTypeRepository,
 	repository.NewUserRepository,
 	repository.NewVoucherRepository,
+	repository.NewVoucherOrderRepository,
 )
 
 var cacheClientSet = wire.NewSet(
 	cache_client.NewCacheClientForShop,
+)
+
+var redisWorkerSet = wire.NewSet(
+	redis_worker.NewRedisWorker,
 )
 
 var serviceSet = wire.NewSet(
@@ -39,6 +45,7 @@ var serviceSet = wire.NewSet(
 	service.NewShopTypeService,
 	service.NewUserService,
 	service.NewVoucherService,
+	service.NewVoucherOrderService,
 )
 
 var handlerSet = wire.NewSet(
@@ -47,6 +54,7 @@ var handlerSet = wire.NewSet(
 	handler.NewShopTypeHandler,
 	handler.NewUserHandler,
 	handler.NewVoucherHandler,
+	handler.NewVoucherOrderHandler,
 )
 
 var serverSet = wire.NewSet(
@@ -69,6 +77,7 @@ func NewWire(*viper.Viper, *log.Logger) (*app.App, func(), error) {
 		serverSet,
 		repositorySet,
 		cacheClientSet,
+		redisWorkerSet,
 		serviceSet,
 		handlerSet,
 		newApp,

@@ -23,7 +23,7 @@ type (
 
 type (
 	SimpleUser struct {
-		ID       *int64  `json:"id" redis:"id"`
+		ID       *uint64 `json:"id" redis:"id"`
 		NickName *string `json:"nickname" redis:"nickname"`
 		Icon     *string `json:"icon" redis:"icon"`
 	}

@@ -10,6 +10,7 @@ import (
 	"github.com/google/wire"
 	"github.com/spf13/viper"
 	"go-dianping/internal/base/cache_client"
+	"go-dianping/internal/base/redis_worker"
 	"go-dianping/internal/handler"
 	"go-dianping/internal/repository"
 	"go-dianping/internal/server"
@@ -43,7 +44,11 @@ func NewWire(viperViper *viper.Viper, logger *log.Logger) (*app.App, func(), err
 	seckillVoucherRepository := repository.NewSeckillVoucherRepository(repositoryRepository)
 	voucherService := service.NewVoucherService(serviceService, voucherRepository, seckillVoucherRepository)
 	voucherHandler := handler.NewVoucherHandler(handlerHandler, voucherService)
-	httpServer := server.NewHTTPServer(logger, viperViper, client, shopHandler, shopTypeHandler, userHandler, voucherHandler)
+	voucherOrderRepository := repository.NewVoucherOrderRepository(repositoryRepository)
+	redisWorker := redis_worker.NewRedisWorker(client)
+	voucherOrderService := service.NewVoucherOrderService(serviceService, voucherOrderRepository, seckillVoucherRepository, redisWorker)
+	voucherOrderHandler := handler.NewVoucherOrderHandler(handlerHandler, voucherOrderService)
+	httpServer := server.NewHTTPServer(logger, viperViper, client, shopHandler, shopTypeHandler, userHandler, voucherHandler, voucherOrderHandler)
 	appApp := newApp(httpServer)
 	return appApp, func() {
 	}, nil
@@ -51,13 +56,15 @@ func NewWire(viperViper *viper.Viper, logger *log.Logger) (*app.App, func(), err
 
 // wire.go:
 
-var repositorySet = wire.NewSet(repository.NewDB, repository.NewQuery, repository.NewRepository, repository.NewSeckillVoucherRepository, repository.NewShopRepository, repository.NewShopTypeRepository, repository.NewUserRepository, repository.NewVoucherRepository)
+var repositorySet = wire.NewSet(repository.NewDB, repository.NewQuery, repository.NewRepository, repository.NewSeckillVoucherRepository, repository.NewShopRepository, repository.NewShopTypeRepository, repository.NewUserRepository, repository.NewVoucherRepository, repository.NewVoucherOrderRepository)
 
 var cacheClientSet = wire.NewSet(cache_client.NewCacheClientForShop)
 
-var serviceSet = wire.NewSet(service.NewService, service.NewSeckillVoucherService, service.NewShopService, service.NewShopTypeService, service.NewUserService, service.NewVoucherService)
+var redisWorkerSet = wire.NewSet(redis_worker.NewRedisWorker)
 
-var handlerSet = wire.NewSet(handler.NewHandler, handler.NewShopHandler, handler.NewShopTypeHandler, handler.NewUserHandler, handler.NewVoucherHandler)
+var serviceSet = wire.NewSet(service.NewService, service.NewSeckillVoucherService, service.NewShopService, service.NewShopTypeService, service.NewUserService, service.NewVoucherService, service.NewVoucherOrderService)
+
+var handlerSet = wire.NewSet(handler.NewHandler, handler.NewShopHandler, handler.NewShopTypeHandler, handler.NewUserHandler, handler.NewVoucherHandler, handler.NewVoucherOrderHandler)
 
 var serverSet = wire.NewSet(redis.NewRedis, server.NewHTTPServer)
 

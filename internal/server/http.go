@@ -22,6 +22,7 @@ func NewHTTPServer(
 	shopTypeHandler *handler.ShopTypeHandler,
 	userHandler *handler.UserHandler,
 	voucherHandler *handler.VoucherHandler,
+	voucherOrderHandler *handler.VoucherOrderHandler,
 ) *http.Server {
 	if conf.GetString("env") == "prod" {
 		gin.SetMode(gin.ReleaseMode)
@@ -92,6 +93,11 @@ func NewHTTPServer(
 		voucherRouter := api.Group("/voucher")
 		{
 			voucherRouter.POST("/seckill", voucherHandler.AddSeckillVoucher)
+		}
+
+		voucherOrderRouter := api.Group("/voucher-order")
+		{
+			voucherOrderRouter.POST("/seckill/:id", voucherOrderHandler.SeckillVoucher)
 		}
 	}
 
