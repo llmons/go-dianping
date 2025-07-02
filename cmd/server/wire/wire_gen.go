@@ -29,9 +29,6 @@ func NewWire(viperViper *viper.Viper, logger *log.Logger) (*app.App, func(), err
 	db := repository.NewDB(viperViper, logger)
 	query := repository.NewQuery(db)
 	repositoryRepository := repository.NewRepository(query, logger)
-	userRepository := repository.NewUserRepository(repositoryRepository)
-	userService := service.NewUserService(serviceService, userRepository)
-	userHandler := handler.NewUserHandler(handlerHandler, userService)
 	shopRepository := repository.NewShopRepository(repositoryRepository)
 	cacheClient := cache_client.NewCacheClientForShop(client)
 	shopService := service.NewShopService(serviceService, shopRepository, cacheClient)
@@ -39,7 +36,14 @@ func NewWire(viperViper *viper.Viper, logger *log.Logger) (*app.App, func(), err
 	shopTypeRepository := repository.NewShopTypeRepository(repositoryRepository)
 	shopTypeService := service.NewShopTypeService(serviceService, shopTypeRepository)
 	shopTypeHandler := handler.NewShopTypeHandler(handlerHandler, shopTypeService)
-	httpServer := server.NewHTTPServer(logger, viperViper, client, userHandler, shopHandler, shopTypeHandler)
+	userRepository := repository.NewUserRepository(repositoryRepository)
+	userService := service.NewUserService(serviceService, userRepository)
+	userHandler := handler.NewUserHandler(handlerHandler, userService)
+	voucherRepository := repository.NewVoucherRepository(repositoryRepository)
+	seckillVoucherRepository := repository.NewSeckillVoucherRepository(repositoryRepository)
+	voucherService := service.NewVoucherService(serviceService, voucherRepository, seckillVoucherRepository)
+	voucherHandler := handler.NewVoucherHandler(handlerHandler, voucherService)
+	httpServer := server.NewHTTPServer(logger, viperViper, client, shopHandler, shopTypeHandler, userHandler, voucherHandler)
 	appApp := newApp(httpServer)
 	return appApp, func() {
 	}, nil
@@ -47,13 +51,13 @@ func NewWire(viperViper *viper.Viper, logger *log.Logger) (*app.App, func(), err
 
 // wire.go:
 
-var repositorySet = wire.NewSet(repository.NewDB, repository.NewQuery, repository.NewRepository, repository.NewUserRepository, repository.NewShopRepository, repository.NewShopTypeRepository)
+var repositorySet = wire.NewSet(repository.NewDB, repository.NewQuery, repository.NewRepository, repository.NewSeckillVoucherRepository, repository.NewShopRepository, repository.NewShopTypeRepository, repository.NewUserRepository, repository.NewVoucherRepository)
 
 var cacheClientSet = wire.NewSet(cache_client.NewCacheClientForShop)
 
-var serviceSet = wire.NewSet(service.NewService, service.NewUserService, service.NewShopService, service.NewShopTypeService)
+var serviceSet = wire.NewSet(service.NewService, service.NewSeckillVoucherService, service.NewShopService, service.NewShopTypeService, service.NewUserService, service.NewVoucherService)
 
-var handlerSet = wire.NewSet(handler.NewHandler, handler.NewUserHandler, handler.NewShopHandler, handler.NewShopTypeHandler)
+var handlerSet = wire.NewSet(handler.NewHandler, handler.NewShopHandler, handler.NewShopTypeHandler, handler.NewUserHandler, handler.NewVoucherHandler)
 
 var serverSet = wire.NewSet(redis.NewRedis, server.NewHTTPServer)
 

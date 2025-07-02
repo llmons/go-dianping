@@ -18,9 +18,10 @@ func NewHTTPServer(
 	logger *log.Logger,
 	conf *viper.Viper,
 	rdb *redis.Client,
-	userHandler *handler.UserHandler,
 	shopHandler *handler.ShopHandler,
 	shopTypeHandler *handler.ShopTypeHandler,
+	userHandler *handler.UserHandler,
+	voucherHandler *handler.VoucherHandler,
 ) *http.Server {
 	if conf.GetString("env") == "prod" {
 		gin.SetMode(gin.ReleaseMode)
@@ -90,7 +91,7 @@ func NewHTTPServer(
 
 		voucherRouter := api.Group("/voucher")
 		{
-			voucherRouter.GET("/")
+			voucherRouter.GET("/seckill", voucherHandler.AddSeckillVoucher)
 		}
 	}
 

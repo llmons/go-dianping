@@ -21,9 +21,11 @@ var repositorySet = wire.NewSet(
 	repository.NewDB,
 	repository.NewQuery,
 	repository.NewRepository,
-	repository.NewUserRepository,
+	repository.NewSeckillVoucherRepository,
 	repository.NewShopRepository,
 	repository.NewShopTypeRepository,
+	repository.NewUserRepository,
+	repository.NewVoucherRepository,
 )
 
 var cacheClientSet = wire.NewSet(
@@ -32,16 +34,19 @@ var cacheClientSet = wire.NewSet(
 
 var serviceSet = wire.NewSet(
 	service.NewService,
-	service.NewUserService,
+	service.NewSeckillVoucherService,
 	service.NewShopService,
 	service.NewShopTypeService,
+	service.NewUserService,
+	service.NewVoucherService,
 )
 
 var handlerSet = wire.NewSet(
 	handler.NewHandler,
-	handler.NewUserHandler,
 	handler.NewShopHandler,
 	handler.NewShopTypeHandler,
+	handler.NewUserHandler,
+	handler.NewVoucherHandler,
 )
 
 var serverSet = wire.NewSet(
