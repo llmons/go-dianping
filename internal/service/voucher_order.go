@@ -5,7 +5,7 @@ import (
 	"go-dianping/api/v1"
 	"go-dianping/internal/base/redis_worker"
 	"go-dianping/internal/base/user_holder"
-	"go-dianping/internal/entity"
+	"go-dianping/internal/model"
 	"go-dianping/internal/repository"
 	"time"
 )
@@ -65,7 +65,7 @@ func (s *voucherOrderService) SeckillVoucher(ctx context.Context, req *v1.Seckil
 			return v1.ErrInsufficientStock
 		}
 		//	6. 创建订单
-		var voucherOrder entity.VoucherOrder
+		var voucherOrder model.VoucherOrder
 		// 6.1. 订单 id
 		orderId, err = s.redisWorker.NextId(ctx, "order")
 		if err != nil {

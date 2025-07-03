@@ -17,14 +17,14 @@ import (
 
 	"gorm.io/plugin/dbresolver"
 
-	"go-dianping/internal/entity"
+	"go-dianping/internal/model"
 )
 
 func newShop(db *gorm.DB, opts ...gen.DOOption) shop {
 	_shop := shop{}
 
 	_shop.shopDo.UseDB(db, opts...)
-	_shop.shopDo.UseModel(&entity.Shop{})
+	_shop.shopDo.UseModel(&model.Shop{})
 
 	tableName := _shop.shopDo.TableName()
 	_shop.ALL = field.NewAsterisk(tableName)
@@ -174,17 +174,17 @@ type IShopDo interface {
 	Count() (count int64, err error)
 	Scopes(funcs ...func(gen.Dao) gen.Dao) IShopDo
 	Unscoped() IShopDo
-	Create(values ...*entity.Shop) error
-	CreateInBatches(values []*entity.Shop, batchSize int) error
-	Save(values ...*entity.Shop) error
-	First() (*entity.Shop, error)
-	Take() (*entity.Shop, error)
-	Last() (*entity.Shop, error)
-	Find() ([]*entity.Shop, error)
-	FindInBatch(batchSize int, fc func(tx gen.Dao, batch int) error) (results []*entity.Shop, err error)
-	FindInBatches(result *[]*entity.Shop, batchSize int, fc func(tx gen.Dao, batch int) error) error
+	Create(values ...*model.Shop) error
+	CreateInBatches(values []*model.Shop, batchSize int) error
+	Save(values ...*model.Shop) error
+	First() (*model.Shop, error)
+	Take() (*model.Shop, error)
+	Last() (*model.Shop, error)
+	Find() ([]*model.Shop, error)
+	FindInBatch(batchSize int, fc func(tx gen.Dao, batch int) error) (results []*model.Shop, err error)
+	FindInBatches(result *[]*model.Shop, batchSize int, fc func(tx gen.Dao, batch int) error) error
 	Pluck(column field.Expr, dest interface{}) error
-	Delete(...*entity.Shop) (info gen.ResultInfo, err error)
+	Delete(...*model.Shop) (info gen.ResultInfo, err error)
 	Update(column field.Expr, value interface{}) (info gen.ResultInfo, err error)
 	UpdateSimple(columns ...field.AssignExpr) (info gen.ResultInfo, err error)
 	Updates(value interface{}) (info gen.ResultInfo, err error)
@@ -196,9 +196,9 @@ type IShopDo interface {
 	Assign(attrs ...field.AssignExpr) IShopDo
 	Joins(fields ...field.RelationField) IShopDo
 	Preload(fields ...field.RelationField) IShopDo
-	FirstOrInit() (*entity.Shop, error)
-	FirstOrCreate() (*entity.Shop, error)
-	FindByPage(offset int, limit int) (result []*entity.Shop, count int64, err error)
+	FirstOrInit() (*model.Shop, error)
+	FirstOrCreate() (*model.Shop, error)
+	FindByPage(offset int, limit int) (result []*model.Shop, count int64, err error)
 	ScanByPage(result interface{}, offset int, limit int) (count int64, err error)
 	Rows() (*sql.Rows, error)
 	Row() *sql.Row
@@ -300,57 +300,57 @@ func (s shopDo) Unscoped() IShopDo {
 	return s.withDO(s.DO.Unscoped())
 }
 
-func (s shopDo) Create(values ...*entity.Shop) error {
+func (s shopDo) Create(values ...*model.Shop) error {
 	if len(values) == 0 {
 		return nil
 	}
 	return s.DO.Create(values)
 }
 
-func (s shopDo) CreateInBatches(values []*entity.Shop, batchSize int) error {
+func (s shopDo) CreateInBatches(values []*model.Shop, batchSize int) error {
 	return s.DO.CreateInBatches(values, batchSize)
 }
 
 // Save : !!! underlying implementation is different with GORM
 // The method is equivalent to executing the statement: db.Clauses(clause.OnConflict{UpdateAll: true}).Create(values)
-func (s shopDo) Save(values ...*entity.Shop) error {
+func (s shopDo) Save(values ...*model.Shop) error {
 	if len(values) == 0 {
 		return nil
 	}
 	return s.DO.Save(values)
 }
 
-func (s shopDo) First() (*entity.Shop, error) {
+func (s shopDo) First() (*model.Shop, error) {
 	if result, err := s.DO.First(); err != nil {
 		return nil, err
 	} else {
-		return result.(*entity.Shop), nil
+		return result.(*model.Shop), nil
 	}
 }
 
-func (s shopDo) Take() (*entity.Shop, error) {
+func (s shopDo) Take() (*model.Shop, error) {
 	if result, err := s.DO.Take(); err != nil {
 		return nil, err
 	} else {
-		return result.(*entity.Shop), nil
+		return result.(*model.Shop), nil
 	}
 }
 
-func (s shopDo) Last() (*entity.Shop, error) {
+func (s shopDo) Last() (*model.Shop, error) {
 	if result, err := s.DO.Last(); err != nil {
 		return nil, err
 	} else {
-		return result.(*entity.Shop), nil
+		return result.(*model.Shop), nil
 	}
 }
 
-func (s shopDo) Find() ([]*entity.Shop, error) {
+func (s shopDo) Find() ([]*model.Shop, error) {
 	result, err := s.DO.Find()
-	return result.([]*entity.Shop), err
+	return result.([]*model.Shop), err
 }
 
-func (s shopDo) FindInBatch(batchSize int, fc func(tx gen.Dao, batch int) error) (results []*entity.Shop, err error) {
-	buf := make([]*entity.Shop, 0, batchSize)
+func (s shopDo) FindInBatch(batchSize int, fc func(tx gen.Dao, batch int) error) (results []*model.Shop, err error) {
+	buf := make([]*model.Shop, 0, batchSize)
 	err = s.DO.FindInBatches(&buf, batchSize, func(tx gen.Dao, batch int) error {
 		defer func() { results = append(results, buf...) }()
 		return fc(tx, batch)
@@ -358,7 +358,7 @@ func (s shopDo) FindInBatch(batchSize int, fc func(tx gen.Dao, batch int) error)
 	return results, err
 }
 
-func (s shopDo) FindInBatches(result *[]*entity.Shop, batchSize int, fc func(tx gen.Dao, batch int) error) error {
+func (s shopDo) FindInBatches(result *[]*model.Shop, batchSize int, fc func(tx gen.Dao, batch int) error) error {
 	return s.DO.FindInBatches(result, batchSize, fc)
 }
 
@@ -384,23 +384,23 @@ func (s shopDo) Preload(fields ...field.RelationField) IShopDo {
 	return &s
 }
 
-func (s shopDo) FirstOrInit() (*entity.Shop, error) {
+func (s shopDo) FirstOrInit() (*model.Shop, error) {
 	if result, err := s.DO.FirstOrInit(); err != nil {
 		return nil, err
 	} else {
-		return result.(*entity.Shop), nil
+		return result.(*model.Shop), nil
 	}
 }
 
-func (s shopDo) FirstOrCreate() (*entity.Shop, error) {
+func (s shopDo) FirstOrCreate() (*model.Shop, error) {
 	if result, err := s.DO.FirstOrCreate(); err != nil {
 		return nil, err
 	} else {
-		return result.(*entity.Shop), nil
+		return result.(*model.Shop), nil
 	}
 }
 
-func (s shopDo) FindByPage(offset int, limit int) (result []*entity.Shop, count int64, err error) {
+func (s shopDo) FindByPage(offset int, limit int) (result []*model.Shop, count int64, err error) {
 	result, err = s.Offset(offset).Limit(limit).Find()
 	if err != nil {
 		return
@@ -429,7 +429,7 @@ func (s shopDo) Scan(result interface{}) (err error) {
 	return s.DO.Scan(result)
 }
 
-func (s shopDo) Delete(models ...*entity.Shop) (result gen.ResultInfo, err error) {
+func (s shopDo) Delete(models ...*model.Shop) (result gen.ResultInfo, err error) {
 	return s.DO.Delete(models)
 }
 

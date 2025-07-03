@@ -8,7 +8,7 @@ import (
 	"go-dianping/api/v1"
 	"go-dianping/internal/base/cache_client"
 	"go-dianping/internal/base/constants"
-	"go-dianping/internal/entity"
+	"go-dianping/internal/model"
 	"go-dianping/internal/repository"
 )
 
@@ -20,14 +20,14 @@ type ShopService interface {
 type shopService struct {
 	*Service
 	shopRepo         repository.ShopRepository
-	cacheClient      cache_client.CacheClient[entity.Shop]
+	cacheClient      cache_client.CacheClient[model.Shop]
 	cacheRebuildPool *ants.Pool
 }
 
 func NewShopService(
 	service *Service,
 	shopRepository repository.ShopRepository,
-	cacheClient cache_client.CacheClient[entity.Shop],
+	cacheClient cache_client.CacheClient[model.Shop],
 ) ShopService {
 	return &shopService{
 		Service:     service,
@@ -68,7 +68,7 @@ func (s *shopService) UpdateShop(ctx context.Context, req *v1.UpdateShopReq) err
 		return v1.ErrShopIDIsNull
 	}
 	// 1. 更新数据库
-	var shop entity.Shop
+	var shop model.Shop
 	if err := copier.Copy(&shop, &req); err != nil {
 		return err
 	}

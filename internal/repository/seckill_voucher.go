@@ -2,13 +2,13 @@ package repository
 
 import (
 	"context"
-	"go-dianping/internal/entity"
+	"go-dianping/internal/model"
 	"gorm.io/gen"
 )
 
 type SeckillVoucherRepository interface {
-	GetByID(ctx context.Context, id uint64) (*entity.SeckillVoucher, error)
-	Save(ctx context.Context, seckillVoucher *entity.SeckillVoucher) error
+	GetByID(ctx context.Context, id uint64) (*model.SeckillVoucher, error)
+	Save(ctx context.Context, seckillVoucher *model.SeckillVoucher) error
 	DecStock(ctx context.Context, id uint64) (gen.ResultInfo, error)
 }
 
@@ -24,11 +24,11 @@ type seckillVoucherRepository struct {
 	*Repository
 }
 
-func (r *seckillVoucherRepository) GetByID(ctx context.Context, id uint64) (*entity.SeckillVoucher, error) {
+func (r *seckillVoucherRepository) GetByID(ctx context.Context, id uint64) (*model.SeckillVoucher, error) {
 	return r.query.WithContext(ctx).SeckillVoucher.Where(r.query.SeckillVoucher.VoucherID.Eq(id)).First()
 }
 
-func (r *seckillVoucherRepository) Save(ctx context.Context, seckillVoucher *entity.SeckillVoucher) error {
+func (r *seckillVoucherRepository) Save(ctx context.Context, seckillVoucher *model.SeckillVoucher) error {
 	return r.query.WithContext(ctx).SeckillVoucher.Save(seckillVoucher)
 }
 

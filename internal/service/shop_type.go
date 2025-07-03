@@ -7,7 +7,7 @@ import (
 	"github.com/samber/lo"
 	"go-dianping/api/v1"
 	"go-dianping/internal/base/constants"
-	"go-dianping/internal/entity"
+	"go-dianping/internal/model"
 	"go-dianping/internal/repository"
 )
 
@@ -56,7 +56,7 @@ func (s *shopTypeService) QueryTypeList(ctx context.Context) ([]v1.QueryTypeList
 		return nil, err
 	}
 
-	data := lo.Map(list, func(el *entity.ShopType, idx int) v1.QueryTypeListRespDataItem {
+	data := lo.Map(list, func(el *model.ShopType, idx int) v1.QueryTypeListRespDataItem {
 		var item v1.QueryTypeListRespDataItem
 		if err := copier.Copy(&item, el); err != nil {
 			return item

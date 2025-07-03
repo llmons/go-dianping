@@ -2,11 +2,11 @@ package repository
 
 import (
 	"context"
-	"go-dianping/internal/entity"
+	"go-dianping/internal/model"
 )
 
 type VoucherRepository interface {
-	Save(ctx context.Context, voucher *entity.Voucher) error
+	Save(ctx context.Context, voucher *model.Voucher) error
 }
 
 func NewVoucherRepository(
@@ -21,6 +21,6 @@ type voucherRepository struct {
 	*Repository
 }
 
-func (r *voucherRepository) Save(ctx context.Context, voucher *entity.Voucher) error {
+func (r *voucherRepository) Save(ctx context.Context, voucher *model.Voucher) error {
 	return r.query.WithContext(ctx).Voucher.Save(voucher)
 }

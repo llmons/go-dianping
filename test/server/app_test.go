@@ -12,7 +12,7 @@ import (
 	"go-dianping/internal/base/cache_client"
 	"go-dianping/internal/base/constants"
 	"go-dianping/internal/base/redis_worker"
-	"go-dianping/internal/entity"
+	"go-dianping/internal/model"
 	"go-dianping/internal/repository"
 	"go-dianping/pkg/config"
 	"go-dianping/pkg/log"
@@ -99,7 +99,7 @@ func TestSaveSHop(t *testing.T) {
 	query := repository.NewQuery(db)
 	repo := repository.NewRepository(query, logger)
 	shopRepo := repository.NewShopRepository(repo)
-	cacheClient := cache_client.NewCacheClient[entity.Shop](rdb)
+	cacheClient := cache_client.NewCacheClient[model.Shop](rdb)
 
 	ctx := context.Background()
 	shop, err := shopRepo.GetById(ctx, 1)

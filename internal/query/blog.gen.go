@@ -17,14 +17,14 @@ import (
 
 	"gorm.io/plugin/dbresolver"
 
-	"go-dianping/internal/entity"
+	"go-dianping/internal/model"
 )
 
 func newBlog(db *gorm.DB, opts ...gen.DOOption) blog {
 	_blog := blog{}
 
 	_blog.blogDo.UseDB(db, opts...)
-	_blog.blogDo.UseModel(&entity.Blog{})
+	_blog.blogDo.UseModel(&model.Blog{})
 
 	tableName := _blog.blogDo.TableName()
 	_blog.ALL = field.NewAsterisk(tableName)
@@ -154,17 +154,17 @@ type IBlogDo interface {
 	Count() (count int64, err error)
 	Scopes(funcs ...func(gen.Dao) gen.Dao) IBlogDo
 	Unscoped() IBlogDo
-	Create(values ...*entity.Blog) error
-	CreateInBatches(values []*entity.Blog, batchSize int) error
-	Save(values ...*entity.Blog) error
-	First() (*entity.Blog, error)
-	Take() (*entity.Blog, error)
-	Last() (*entity.Blog, error)
-	Find() ([]*entity.Blog, error)
-	FindInBatch(batchSize int, fc func(tx gen.Dao, batch int) error) (results []*entity.Blog, err error)
-	FindInBatches(result *[]*entity.Blog, batchSize int, fc func(tx gen.Dao, batch int) error) error
+	Create(values ...*model.Blog) error
+	CreateInBatches(values []*model.Blog, batchSize int) error
+	Save(values ...*model.Blog) error
+	First() (*model.Blog, error)
+	Take() (*model.Blog, error)
+	Last() (*model.Blog, error)
+	Find() ([]*model.Blog, error)
+	FindInBatch(batchSize int, fc func(tx gen.Dao, batch int) error) (results []*model.Blog, err error)
+	FindInBatches(result *[]*model.Blog, batchSize int, fc func(tx gen.Dao, batch int) error) error
 	Pluck(column field.Expr, dest interface{}) error
-	Delete(...*entity.Blog) (info gen.ResultInfo, err error)
+	Delete(...*model.Blog) (info gen.ResultInfo, err error)
 	Update(column field.Expr, value interface{}) (info gen.ResultInfo, err error)
 	UpdateSimple(columns ...field.AssignExpr) (info gen.ResultInfo, err error)
 	Updates(value interface{}) (info gen.ResultInfo, err error)
@@ -176,9 +176,9 @@ type IBlogDo interface {
 	Assign(attrs ...field.AssignExpr) IBlogDo
 	Joins(fields ...field.RelationField) IBlogDo
 	Preload(fields ...field.RelationField) IBlogDo
-	FirstOrInit() (*entity.Blog, error)
-	FirstOrCreate() (*entity.Blog, error)
-	FindByPage(offset int, limit int) (result []*entity.Blog, count int64, err error)
+	FirstOrInit() (*model.Blog, error)
+	FirstOrCreate() (*model.Blog, error)
+	FindByPage(offset int, limit int) (result []*model.Blog, count int64, err error)
 	ScanByPage(result interface{}, offset int, limit int) (count int64, err error)
 	Rows() (*sql.Rows, error)
 	Row() *sql.Row
@@ -280,57 +280,57 @@ func (b blogDo) Unscoped() IBlogDo {
 	return b.withDO(b.DO.Unscoped())
 }
 
-func (b blogDo) Create(values ...*entity.Blog) error {
+func (b blogDo) Create(values ...*model.Blog) error {
 	if len(values) == 0 {
 		return nil
 	}
 	return b.DO.Create(values)
 }
 
-func (b blogDo) CreateInBatches(values []*entity.Blog, batchSize int) error {
+func (b blogDo) CreateInBatches(values []*model.Blog, batchSize int) error {
 	return b.DO.CreateInBatches(values, batchSize)
 }
 
 // Save : !!! underlying implementation is different with GORM
 // The method is equivalent to executing the statement: db.Clauses(clause.OnConflict{UpdateAll: true}).Create(values)
-func (b blogDo) Save(values ...*entity.Blog) error {
+func (b blogDo) Save(values ...*model.Blog) error {
 	if len(values) == 0 {
 		return nil
 	}
 	return b.DO.Save(values)
 }
 
-func (b blogDo) First() (*entity.Blog, error) {
+func (b blogDo) First() (*model.Blog, error) {
 	if result, err := b.DO.First(); err != nil {
 		return nil, err
 	} else {
-		return result.(*entity.Blog), nil
+		return result.(*model.Blog), nil
 	}
 }
 
-func (b blogDo) Take() (*entity.Blog, error) {
+func (b blogDo) Take() (*model.Blog, error) {
 	if result, err := b.DO.Take(); err != nil {
 		return nil, err
 	} else {
-		return result.(*entity.Blog), nil
+		return result.(*model.Blog), nil
 	}
 }
 
-func (b blogDo) Last() (*entity.Blog, error) {
+func (b blogDo) Last() (*model.Blog, error) {
 	if result, err := b.DO.Last(); err != nil {
 		return nil, err
 	} else {
-		return result.(*entity.Blog), nil
+		return result.(*model.Blog), nil
 	}
 }
 
-func (b blogDo) Find() ([]*entity.Blog, error) {
+func (b blogDo) Find() ([]*model.Blog, error) {
 	result, err := b.DO.Find()
-	return result.([]*entity.Blog), err
+	return result.([]*model.Blog), err
 }
 
-func (b blogDo) FindInBatch(batchSize int, fc func(tx gen.Dao, batch int) error) (results []*entity.Blog, err error) {
-	buf := make([]*entity.Blog, 0, batchSize)
+func (b blogDo) FindInBatch(batchSize int, fc func(tx gen.Dao, batch int) error) (results []*model.Blog, err error) {
+	buf := make([]*model.Blog, 0, batchSize)
 	err = b.DO.FindInBatches(&buf, batchSize, func(tx gen.Dao, batch int) error {
 		defer func() { results = append(results, buf...) }()
 		return fc(tx, batch)
@@ -338,7 +338,7 @@ func (b blogDo) FindInBatch(batchSize int, fc func(tx gen.Dao, batch int) error)
 	return results, err
 }
 
-func (b blogDo) FindInBatches(result *[]*entity.Blog, batchSize int, fc func(tx gen.Dao, batch int) error) error {
+func (b blogDo) FindInBatches(result *[]*model.Blog, batchSize int, fc func(tx gen.Dao, batch int) error) error {
 	return b.DO.FindInBatches(result, batchSize, fc)
 }
 
@@ -364,23 +364,23 @@ func (b blogDo) Preload(fields ...field.RelationField) IBlogDo {
 	return &b
 }
 
-func (b blogDo) FirstOrInit() (*entity.Blog, error) {
+func (b blogDo) FirstOrInit() (*model.Blog, error) {
 	if result, err := b.DO.FirstOrInit(); err != nil {
 		return nil, err
 	} else {
-		return result.(*entity.Blog), nil
+		return result.(*model.Blog), nil
 	}
 }
 
-func (b blogDo) FirstOrCreate() (*entity.Blog, error) {
+func (b blogDo) FirstOrCreate() (*model.Blog, error) {
 	if result, err := b.DO.FirstOrCreate(); err != nil {
 		return nil, err
 	} else {
-		return result.(*entity.Blog), nil
+		return result.(*model.Blog), nil
 	}
 }
 
-func (b blogDo) FindByPage(offset int, limit int) (result []*entity.Blog, count int64, err error) {
+func (b blogDo) FindByPage(offset int, limit int) (result []*model.Blog, count int64, err error) {
 	result, err = b.Offset(offset).Limit(limit).Find()
 	if err != nil {
 		return
@@ -409,7 +409,7 @@ func (b blogDo) Scan(result interface{}) (err error) {
 	return b.DO.Scan(result)
 }
 
-func (b blogDo) Delete(models ...*entity.Blog) (result gen.ResultInfo, err error) {
+func (b blogDo) Delete(models ...*model.Blog) (result gen.ResultInfo, err error) {
 	return b.DO.Delete(models)
 }
 

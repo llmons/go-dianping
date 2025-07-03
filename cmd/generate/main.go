@@ -16,7 +16,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	modelPath := filepath.Join(workdir, "internal", "entity")
+	modelPath := filepath.Join(workdir, "internal", "model")
 	queryPath := filepath.Join(workdir, "internal", "query")
 
 	g := gen.NewGenerator(gen.Config{

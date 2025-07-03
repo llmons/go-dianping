@@ -10,7 +10,7 @@ import (
 	"github.com/redis/go-redis/v9"
 	"go-dianping/internal/base/constants"
 	"go-dianping/internal/base/redis_data"
-	"go-dianping/internal/entity"
+	"go-dianping/internal/model"
 	"gorm.io/gorm"
 	"time"
 )
@@ -256,6 +256,6 @@ func (c *cacheClient[ENTITY]) unlock(ctx context.Context, key string) error {
 	return c.rdb.Del(ctx, key).Err()
 }
 
-func NewCacheClientForShop(rdb *redis.Client) CacheClient[entity.Shop] {
-	return NewCacheClient[entity.Shop](rdb)
+func NewCacheClientForShop(rdb *redis.Client) CacheClient[model.Shop] {
+	return NewCacheClient[model.Shop](rdb)
 }

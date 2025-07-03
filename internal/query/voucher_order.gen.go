@@ -17,14 +17,14 @@ import (
 
 	"gorm.io/plugin/dbresolver"
 
-	"go-dianping/internal/entity"
+	"go-dianping/internal/model"
 )
 
 func newVoucherOrder(db *gorm.DB, opts ...gen.DOOption) voucherOrder {
 	_voucherOrder := voucherOrder{}
 
 	_voucherOrder.voucherOrderDo.UseDB(db, opts...)
-	_voucherOrder.voucherOrderDo.UseModel(&entity.VoucherOrder{})
+	_voucherOrder.voucherOrderDo.UseModel(&model.VoucherOrder{})
 
 	tableName := _voucherOrder.voucherOrderDo.TableName()
 	_voucherOrder.ALL = field.NewAsterisk(tableName)
@@ -154,17 +154,17 @@ type IVoucherOrderDo interface {
 	Count() (count int64, err error)
 	Scopes(funcs ...func(gen.Dao) gen.Dao) IVoucherOrderDo
 	Unscoped() IVoucherOrderDo
-	Create(values ...*entity.VoucherOrder) error
-	CreateInBatches(values []*entity.VoucherOrder, batchSize int) error
-	Save(values ...*entity.VoucherOrder) error
-	First() (*entity.VoucherOrder, error)
-	Take() (*entity.VoucherOrder, error)
-	Last() (*entity.VoucherOrder, error)
-	Find() ([]*entity.VoucherOrder, error)
-	FindInBatch(batchSize int, fc func(tx gen.Dao, batch int) error) (results []*entity.VoucherOrder, err error)
-	FindInBatches(result *[]*entity.VoucherOrder, batchSize int, fc func(tx gen.Dao, batch int) error) error
+	Create(values ...*model.VoucherOrder) error
+	CreateInBatches(values []*model.VoucherOrder, batchSize int) error
+	Save(values ...*model.VoucherOrder) error
+	First() (*model.VoucherOrder, error)
+	Take() (*model.VoucherOrder, error)
+	Last() (*model.VoucherOrder, error)
+	Find() ([]*model.VoucherOrder, error)
+	FindInBatch(batchSize int, fc func(tx gen.Dao, batch int) error) (results []*model.VoucherOrder, err error)
+	FindInBatches(result *[]*model.VoucherOrder, batchSize int, fc func(tx gen.Dao, batch int) error) error
 	Pluck(column field.Expr, dest interface{}) error
-	Delete(...*entity.VoucherOrder) (info gen.ResultInfo, err error)
+	Delete(...*model.VoucherOrder) (info gen.ResultInfo, err error)
 	Update(column field.Expr, value interface{}) (info gen.ResultInfo, err error)
 	UpdateSimple(columns ...field.AssignExpr) (info gen.ResultInfo, err error)
 	Updates(value interface{}) (info gen.ResultInfo, err error)
@@ -176,9 +176,9 @@ type IVoucherOrderDo interface {
 	Assign(attrs ...field.AssignExpr) IVoucherOrderDo
 	Joins(fields ...field.RelationField) IVoucherOrderDo
 	Preload(fields ...field.RelationField) IVoucherOrderDo
-	FirstOrInit() (*entity.VoucherOrder, error)
-	FirstOrCreate() (*entity.VoucherOrder, error)
-	FindByPage(offset int, limit int) (result []*entity.VoucherOrder, count int64, err error)
+	FirstOrInit() (*model.VoucherOrder, error)
+	FirstOrCreate() (*model.VoucherOrder, error)
+	FindByPage(offset int, limit int) (result []*model.VoucherOrder, count int64, err error)
 	ScanByPage(result interface{}, offset int, limit int) (count int64, err error)
 	Rows() (*sql.Rows, error)
 	Row() *sql.Row
@@ -280,57 +280,57 @@ func (v voucherOrderDo) Unscoped() IVoucherOrderDo {
 	return v.withDO(v.DO.Unscoped())
 }
 
-func (v voucherOrderDo) Create(values ...*entity.VoucherOrder) error {
+func (v voucherOrderDo) Create(values ...*model.VoucherOrder) error {
 	if len(values) == 0 {
 		return nil
 	}
 	return v.DO.Create(values)
 }
 
-func (v voucherOrderDo) CreateInBatches(values []*entity.VoucherOrder, batchSize int) error {
+func (v voucherOrderDo) CreateInBatches(values []*model.VoucherOrder, batchSize int) error {
 	return v.DO.CreateInBatches(values, batchSize)
 }
 
 // Save : !!! underlying implementation is different with GORM
 // The method is equivalent to executing the statement: db.Clauses(clause.OnConflict{UpdateAll: true}).Create(values)
-func (v voucherOrderDo) Save(values ...*entity.VoucherOrder) error {
+func (v voucherOrderDo) Save(values ...*model.VoucherOrder) error {
 	if len(values) == 0 {
 		return nil
 	}
 	return v.DO.Save(values)
 }
 
-func (v voucherOrderDo) First() (*entity.VoucherOrder, error) {
+func (v voucherOrderDo) First() (*model.VoucherOrder, error) {
 	if result, err := v.DO.First(); err != nil {
 		return nil, err
 	} else {
-		return result.(*entity.VoucherOrder), nil
+		return result.(*model.VoucherOrder), nil
 	}
 }
 
-func (v voucherOrderDo) Take() (*entity.VoucherOrder, error) {
+func (v voucherOrderDo) Take() (*model.VoucherOrder, error) {
 	if result, err := v.DO.Take(); err != nil {
 		return nil, err
 	} else {
-		return result.(*entity.VoucherOrder), nil
+		return result.(*model.VoucherOrder), nil
 	}
 }
 
-func (v voucherOrderDo) Last() (*entity.VoucherOrder, error) {
+func (v voucherOrderDo) Last() (*model.VoucherOrder, error) {
 	if result, err := v.DO.Last(); err != nil {
 		return nil, err
 	} else {
-		return result.(*entity.VoucherOrder), nil
+		return result.(*model.VoucherOrder), nil
 	}
 }
 
-func (v voucherOrderDo) Find() ([]*entity.VoucherOrder, error) {
+func (v voucherOrderDo) Find() ([]*model.VoucherOrder, error) {
 	result, err := v.DO.Find()
-	return result.([]*entity.VoucherOrder), err
+	return result.([]*model.VoucherOrder), err
 }
 
-func (v voucherOrderDo) FindInBatch(batchSize int, fc func(tx gen.Dao, batch int) error) (results []*entity.VoucherOrder, err error) {
-	buf := make([]*entity.VoucherOrder, 0, batchSize)
+func (v voucherOrderDo) FindInBatch(batchSize int, fc func(tx gen.Dao, batch int) error) (results []*model.VoucherOrder, err error) {
+	buf := make([]*model.VoucherOrder, 0, batchSize)
 	err = v.DO.FindInBatches(&buf, batchSize, func(tx gen.Dao, batch int) error {
 		defer func() { results = append(results, buf...) }()
 		return fc(tx, batch)
@@ -338,7 +338,7 @@ func (v voucherOrderDo) FindInBatch(batchSize int, fc func(tx gen.Dao, batch int
 	return results, err
 }
 
-func (v voucherOrderDo) FindInBatches(result *[]*entity.VoucherOrder, batchSize int, fc func(tx gen.Dao, batch int) error) error {
+func (v voucherOrderDo) FindInBatches(result *[]*model.VoucherOrder, batchSize int, fc func(tx gen.Dao, batch int) error) error {
 	return v.DO.FindInBatches(result, batchSize, fc)
 }
 
@@ -364,23 +364,23 @@ func (v voucherOrderDo) Preload(fields ...field.RelationField) IVoucherOrderDo {
 	return &v
 }
 
-func (v voucherOrderDo) FirstOrInit() (*entity.VoucherOrder, error) {
+func (v voucherOrderDo) FirstOrInit() (*model.VoucherOrder, error) {
 	if result, err := v.DO.FirstOrInit(); err != nil {
 		return nil, err
 	} else {
-		return result.(*entity.VoucherOrder), nil
+		return result.(*model.VoucherOrder), nil
 	}
 }
 
-func (v voucherOrderDo) FirstOrCreate() (*entity.VoucherOrder, error) {
+func (v voucherOrderDo) FirstOrCreate() (*model.VoucherOrder, error) {
 	if result, err := v.DO.FirstOrCreate(); err != nil {
 		return nil, err
 	} else {
-		return result.(*entity.VoucherOrder), nil
+		return result.(*model.VoucherOrder), nil
 	}
 }
 
-func (v voucherOrderDo) FindByPage(offset int, limit int) (result []*entity.VoucherOrder, count int64, err error) {
+func (v voucherOrderDo) FindByPage(offset int, limit int) (result []*model.VoucherOrder, count int64, err error) {
 	result, err = v.Offset(offset).Limit(limit).Find()
 	if err != nil {
 		return
@@ -409,7 +409,7 @@ func (v voucherOrderDo) Scan(result interface{}) (err error) {
 	return v.DO.Scan(result)
 }
 
-func (v voucherOrderDo) Delete(models ...*entity.VoucherOrder) (result gen.ResultInfo, err error) {
+func (v voucherOrderDo) Delete(models ...*model.VoucherOrder) (result gen.ResultInfo, err error) {
 	return v.DO.Delete(models)
 }
 

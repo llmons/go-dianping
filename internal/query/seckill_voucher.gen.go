@@ -17,14 +17,14 @@ import (
 
 	"gorm.io/plugin/dbresolver"
 
-	"go-dianping/internal/entity"
+	"go-dianping/internal/model"
 )
 
 func newSeckillVoucher(db *gorm.DB, opts ...gen.DOOption) seckillVoucher {
 	_seckillVoucher := seckillVoucher{}
 
 	_seckillVoucher.seckillVoucherDo.UseDB(db, opts...)
-	_seckillVoucher.seckillVoucherDo.UseModel(&entity.SeckillVoucher{})
+	_seckillVoucher.seckillVoucherDo.UseModel(&model.SeckillVoucher{})
 
 	tableName := _seckillVoucher.seckillVoucherDo.TableName()
 	_seckillVoucher.ALL = field.NewAsterisk(tableName)
@@ -139,17 +139,17 @@ type ISeckillVoucherDo interface {
 	Count() (count int64, err error)
 	Scopes(funcs ...func(gen.Dao) gen.Dao) ISeckillVoucherDo
 	Unscoped() ISeckillVoucherDo
-	Create(values ...*entity.SeckillVoucher) error
-	CreateInBatches(values []*entity.SeckillVoucher, batchSize int) error
-	Save(values ...*entity.SeckillVoucher) error
-	First() (*entity.SeckillVoucher, error)
-	Take() (*entity.SeckillVoucher, error)
-	Last() (*entity.SeckillVoucher, error)
-	Find() ([]*entity.SeckillVoucher, error)
-	FindInBatch(batchSize int, fc func(tx gen.Dao, batch int) error) (results []*entity.SeckillVoucher, err error)
-	FindInBatches(result *[]*entity.SeckillVoucher, batchSize int, fc func(tx gen.Dao, batch int) error) error
+	Create(values ...*model.SeckillVoucher) error
+	CreateInBatches(values []*model.SeckillVoucher, batchSize int) error
+	Save(values ...*model.SeckillVoucher) error
+	First() (*model.SeckillVoucher, error)
+	Take() (*model.SeckillVoucher, error)
+	Last() (*model.SeckillVoucher, error)
+	Find() ([]*model.SeckillVoucher, error)
+	FindInBatch(batchSize int, fc func(tx gen.Dao, batch int) error) (results []*model.SeckillVoucher, err error)
+	FindInBatches(result *[]*model.SeckillVoucher, batchSize int, fc func(tx gen.Dao, batch int) error) error
 	Pluck(column field.Expr, dest interface{}) error
-	Delete(...*entity.SeckillVoucher) (info gen.ResultInfo, err error)
+	Delete(...*model.SeckillVoucher) (info gen.ResultInfo, err error)
 	Update(column field.Expr, value interface{}) (info gen.ResultInfo, err error)
 	UpdateSimple(columns ...field.AssignExpr) (info gen.ResultInfo, err error)
 	Updates(value interface{}) (info gen.ResultInfo, err error)
@@ -161,9 +161,9 @@ type ISeckillVoucherDo interface {
 	Assign(attrs ...field.AssignExpr) ISeckillVoucherDo
 	Joins(fields ...field.RelationField) ISeckillVoucherDo
 	Preload(fields ...field.RelationField) ISeckillVoucherDo
-	FirstOrInit() (*entity.SeckillVoucher, error)
-	FirstOrCreate() (*entity.SeckillVoucher, error)
-	FindByPage(offset int, limit int) (result []*entity.SeckillVoucher, count int64, err error)
+	FirstOrInit() (*model.SeckillVoucher, error)
+	FirstOrCreate() (*model.SeckillVoucher, error)
+	FindByPage(offset int, limit int) (result []*model.SeckillVoucher, count int64, err error)
 	ScanByPage(result interface{}, offset int, limit int) (count int64, err error)
 	Rows() (*sql.Rows, error)
 	Row() *sql.Row
@@ -265,57 +265,57 @@ func (s seckillVoucherDo) Unscoped() ISeckillVoucherDo {
 	return s.withDO(s.DO.Unscoped())
 }
 
-func (s seckillVoucherDo) Create(values ...*entity.SeckillVoucher) error {
+func (s seckillVoucherDo) Create(values ...*model.SeckillVoucher) error {
 	if len(values) == 0 {
 		return nil
 	}
 	return s.DO.Create(values)
 }
 
-func (s seckillVoucherDo) CreateInBatches(values []*entity.SeckillVoucher, batchSize int) error {
+func (s seckillVoucherDo) CreateInBatches(values []*model.SeckillVoucher, batchSize int) error {
 	return s.DO.CreateInBatches(values, batchSize)
 }
 
 // Save : !!! underlying implementation is different with GORM
 // The method is equivalent to executing the statement: db.Clauses(clause.OnConflict{UpdateAll: true}).Create(values)
-func (s seckillVoucherDo) Save(values ...*entity.SeckillVoucher) error {
+func (s seckillVoucherDo) Save(values ...*model.SeckillVoucher) error {
 	if len(values) == 0 {
 		return nil
 	}
 	return s.DO.Save(values)
 }
 
-func (s seckillVoucherDo) First() (*entity.SeckillVoucher, error) {
+func (s seckillVoucherDo) First() (*model.SeckillVoucher, error) {
 	if result, err := s.DO.First(); err != nil {
 		return nil, err
 	} else {
-		return result.(*entity.SeckillVoucher), nil
+		return result.(*model.SeckillVoucher), nil
 	}
 }
 
-func (s seckillVoucherDo) Take() (*entity.SeckillVoucher, error) {
+func (s seckillVoucherDo) Take() (*model.SeckillVoucher, error) {
 	if result, err := s.DO.Take(); err != nil {
 		return nil, err
 	} else {
-		return result.(*entity.SeckillVoucher), nil
+		return result.(*model.SeckillVoucher), nil
 	}
 }
 
-func (s seckillVoucherDo) Last() (*entity.SeckillVoucher, error) {
+func (s seckillVoucherDo) Last() (*model.SeckillVoucher, error) {
 	if result, err := s.DO.Last(); err != nil {
 		return nil, err
 	} else {
-		return result.(*entity.SeckillVoucher), nil
+		return result.(*model.SeckillVoucher), nil
 	}
 }
 
-func (s seckillVoucherDo) Find() ([]*entity.SeckillVoucher, error) {
+func (s seckillVoucherDo) Find() ([]*model.SeckillVoucher, error) {
 	result, err := s.DO.Find()
-	return result.([]*entity.SeckillVoucher), err
+	return result.([]*model.SeckillVoucher), err
 }
 
-func (s seckillVoucherDo) FindInBatch(batchSize int, fc func(tx gen.Dao, batch int) error) (results []*entity.SeckillVoucher, err error) {
-	buf := make([]*entity.SeckillVoucher, 0, batchSize)
+func (s seckillVoucherDo) FindInBatch(batchSize int, fc func(tx gen.Dao, batch int) error) (results []*model.SeckillVoucher, err error) {
+	buf := make([]*model.SeckillVoucher, 0, batchSize)
 	err = s.DO.FindInBatches(&buf, batchSize, func(tx gen.Dao, batch int) error {
 		defer func() { results = append(results, buf...) }()
 		return fc(tx, batch)
@@ -323,7 +323,7 @@ func (s seckillVoucherDo) FindInBatch(batchSize int, fc func(tx gen.Dao, batch i
 	return results, err
 }
 
-func (s seckillVoucherDo) FindInBatches(result *[]*entity.SeckillVoucher, batchSize int, fc func(tx gen.Dao, batch int) error) error {
+func (s seckillVoucherDo) FindInBatches(result *[]*model.SeckillVoucher, batchSize int, fc func(tx gen.Dao, batch int) error) error {
 	return s.DO.FindInBatches(result, batchSize, fc)
 }
 
@@ -349,23 +349,23 @@ func (s seckillVoucherDo) Preload(fields ...field.RelationField) ISeckillVoucher
 	return &s
 }
 
-func (s seckillVoucherDo) FirstOrInit() (*entity.SeckillVoucher, error) {
+func (s seckillVoucherDo) FirstOrInit() (*model.SeckillVoucher, error) {
 	if result, err := s.DO.FirstOrInit(); err != nil {
 		return nil, err
 	} else {
-		return result.(*entity.SeckillVoucher), nil
+		return result.(*model.SeckillVoucher), nil
 	}
 }
 
-func (s seckillVoucherDo) FirstOrCreate() (*entity.SeckillVoucher, error) {
+func (s seckillVoucherDo) FirstOrCreate() (*model.SeckillVoucher, error) {
 	if result, err := s.DO.FirstOrCreate(); err != nil {
 		return nil, err
 	} else {
-		return result.(*entity.SeckillVoucher), nil
+		return result.(*model.SeckillVoucher), nil
 	}
 }
 
-func (s seckillVoucherDo) FindByPage(offset int, limit int) (result []*entity.SeckillVoucher, count int64, err error) {
+func (s seckillVoucherDo) FindByPage(offset int, limit int) (result []*model.SeckillVoucher, count int64, err error) {
 	result, err = s.Offset(offset).Limit(limit).Find()
 	if err != nil {
 		return
@@ -394,7 +394,7 @@ func (s seckillVoucherDo) Scan(result interface{}) (err error) {
 	return s.DO.Scan(result)
 }
 
-func (s seckillVoucherDo) Delete(models ...*entity.SeckillVoucher) (result gen.ResultInfo, err error) {
+func (s seckillVoucherDo) Delete(models ...*model.SeckillVoucher) (result gen.ResultInfo, err error) {
 	return s.DO.Delete(models)
 }
 

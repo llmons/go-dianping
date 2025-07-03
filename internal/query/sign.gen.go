@@ -17,14 +17,14 @@ import (
 
 	"gorm.io/plugin/dbresolver"
 
-	"go-dianping/internal/entity"
+	"go-dianping/internal/model"
 )
 
 func newSign(db *gorm.DB, opts ...gen.DOOption) sign {
 	_sign := sign{}
 
 	_sign.signDo.UseDB(db, opts...)
-	_sign.signDo.UseModel(&entity.Sign{})
+	_sign.signDo.UseModel(&model.Sign{})
 
 	tableName := _sign.signDo.TableName()
 	_sign.ALL = field.NewAsterisk(tableName)
@@ -138,17 +138,17 @@ type ISignDo interface {
 	Count() (count int64, err error)
 	Scopes(funcs ...func(gen.Dao) gen.Dao) ISignDo
 	Unscoped() ISignDo
-	Create(values ...*entity.Sign) error
-	CreateInBatches(values []*entity.Sign, batchSize int) error
-	Save(values ...*entity.Sign) error
-	First() (*entity.Sign, error)
-	Take() (*entity.Sign, error)
-	Last() (*entity.Sign, error)
-	Find() ([]*entity.Sign, error)
-	FindInBatch(batchSize int, fc func(tx gen.Dao, batch int) error) (results []*entity.Sign, err error)
-	FindInBatches(result *[]*entity.Sign, batchSize int, fc func(tx gen.Dao, batch int) error) error
+	Create(values ...*model.Sign) error
+	CreateInBatches(values []*model.Sign, batchSize int) error
+	Save(values ...*model.Sign) error
+	First() (*model.Sign, error)
+	Take() (*model.Sign, error)
+	Last() (*model.Sign, error)
+	Find() ([]*model.Sign, error)
+	FindInBatch(batchSize int, fc func(tx gen.Dao, batch int) error) (results []*model.Sign, err error)
+	FindInBatches(result *[]*model.Sign, batchSize int, fc func(tx gen.Dao, batch int) error) error
 	Pluck(column field.Expr, dest interface{}) error
-	Delete(...*entity.Sign) (info gen.ResultInfo, err error)
+	Delete(...*model.Sign) (info gen.ResultInfo, err error)
 	Update(column field.Expr, value interface{}) (info gen.ResultInfo, err error)
 	UpdateSimple(columns ...field.AssignExpr) (info gen.ResultInfo, err error)
 	Updates(value interface{}) (info gen.ResultInfo, err error)
@@ -160,9 +160,9 @@ type ISignDo interface {
 	Assign(attrs ...field.AssignExpr) ISignDo
 	Joins(fields ...field.RelationField) ISignDo
 	Preload(fields ...field.RelationField) ISignDo
-	FirstOrInit() (*entity.Sign, error)
-	FirstOrCreate() (*entity.Sign, error)
-	FindByPage(offset int, limit int) (result []*entity.Sign, count int64, err error)
+	FirstOrInit() (*model.Sign, error)
+	FirstOrCreate() (*model.Sign, error)
+	FindByPage(offset int, limit int) (result []*model.Sign, count int64, err error)
 	ScanByPage(result interface{}, offset int, limit int) (count int64, err error)
 	Rows() (*sql.Rows, error)
 	Row() *sql.Row
@@ -264,57 +264,57 @@ func (s signDo) Unscoped() ISignDo {
 	return s.withDO(s.DO.Unscoped())
 }
 
-func (s signDo) Create(values ...*entity.Sign) error {
+func (s signDo) Create(values ...*model.Sign) error {
 	if len(values) == 0 {
 		return nil
 	}
 	return s.DO.Create(values)
 }
 
-func (s signDo) CreateInBatches(values []*entity.Sign, batchSize int) error {
+func (s signDo) CreateInBatches(values []*model.Sign, batchSize int) error {
 	return s.DO.CreateInBatches(values, batchSize)
 }
 
 // Save : !!! underlying implementation is different with GORM
 // The method is equivalent to executing the statement: db.Clauses(clause.OnConflict{UpdateAll: true}).Create(values)
-func (s signDo) Save(values ...*entity.Sign) error {
+func (s signDo) Save(values ...*model.Sign) error {
 	if len(values) == 0 {
 		return nil
 	}
 	return s.DO.Save(values)
 }
 
-func (s signDo) First() (*entity.Sign, error) {
+func (s signDo) First() (*model.Sign, error) {
 	if result, err := s.DO.First(); err != nil {
 		return nil, err
 	} else {
-		return result.(*entity.Sign), nil
+		return result.(*model.Sign), nil
 	}
 }
 
-func (s signDo) Take() (*entity.Sign, error) {
+func (s signDo) Take() (*model.Sign, error) {
 	if result, err := s.DO.Take(); err != nil {
 		return nil, err
 	} else {
-		return result.(*entity.Sign), nil
+		return result.(*model.Sign), nil
 	}
 }
 
-func (s signDo) Last() (*entity.Sign, error) {
+func (s signDo) Last() (*model.Sign, error) {
 	if result, err := s.DO.Last(); err != nil {
 		return nil, err
 	} else {
-		return result.(*entity.Sign), nil
+		return result.(*model.Sign), nil
 	}
 }
 
-func (s signDo) Find() ([]*entity.Sign, error) {
+func (s signDo) Find() ([]*model.Sign, error) {
 	result, err := s.DO.Find()
-	return result.([]*entity.Sign), err
+	return result.([]*model.Sign), err
 }
 
-func (s signDo) FindInBatch(batchSize int, fc func(tx gen.Dao, batch int) error) (results []*entity.Sign, err error) {
-	buf := make([]*entity.Sign, 0, batchSize)
+func (s signDo) FindInBatch(batchSize int, fc func(tx gen.Dao, batch int) error) (results []*model.Sign, err error) {
+	buf := make([]*model.Sign, 0, batchSize)
 	err = s.DO.FindInBatches(&buf, batchSize, func(tx gen.Dao, batch int) error {
 		defer func() { results = append(results, buf...) }()
 		return fc(tx, batch)
@@ -322,7 +322,7 @@ func (s signDo) FindInBatch(batchSize int, fc func(tx gen.Dao, batch int) error)
 	return results, err
 }
 
-func (s signDo) FindInBatches(result *[]*entity.Sign, batchSize int, fc func(tx gen.Dao, batch int) error) error {
+func (s signDo) FindInBatches(result *[]*model.Sign, batchSize int, fc func(tx gen.Dao, batch int) error) error {
 	return s.DO.FindInBatches(result, batchSize, fc)
 }
 
@@ -348,23 +348,23 @@ func (s signDo) Preload(fields ...field.RelationField) ISignDo {
 	return &s
 }
 
-func (s signDo) FirstOrInit() (*entity.Sign, error) {
+func (s signDo) FirstOrInit() (*model.Sign, error) {
 	if result, err := s.DO.FirstOrInit(); err != nil {
 		return nil, err
 	} else {
-		return result.(*entity.Sign), nil
+		return result.(*model.Sign), nil
 	}
 }
 
-func (s signDo) FirstOrCreate() (*entity.Sign, error) {
+func (s signDo) FirstOrCreate() (*model.Sign, error) {
 	if result, err := s.DO.FirstOrCreate(); err != nil {
 		return nil, err
 	} else {
-		return result.(*entity.Sign), nil
+		return result.(*model.Sign), nil
 	}
 }
 
-func (s signDo) FindByPage(offset int, limit int) (result []*entity.Sign, count int64, err error) {
+func (s signDo) FindByPage(offset int, limit int) (result []*model.Sign, count int64, err error) {
 	result, err = s.Offset(offset).Limit(limit).Find()
 	if err != nil {
 		return
@@ -393,7 +393,7 @@ func (s signDo) Scan(result interface{}) (err error) {
 	return s.DO.Scan(result)
 }
 
-func (s signDo) Delete(models ...*entity.Sign) (result gen.ResultInfo, err error) {
+func (s signDo) Delete(models ...*model.Sign) (result gen.ResultInfo, err error) {
 	return s.DO.Delete(models)
 }
 

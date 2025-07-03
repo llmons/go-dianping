@@ -2,11 +2,11 @@ package repository
 
 import (
 	"context"
-	"go-dianping/internal/entity"
+	"go-dianping/internal/model"
 )
 
 type ShopTypeRepository interface {
-	GetAll(ctx context.Context) ([]*entity.ShopType, error)
+	GetAll(ctx context.Context) ([]*model.ShopType, error)
 }
 
 func NewShopTypeRepository(
@@ -21,6 +21,6 @@ type shopTypeRepository struct {
 	*Repository
 }
 
-func (r *shopTypeRepository) GetAll(ctx context.Context) ([]*entity.ShopType, error) {
+func (r *shopTypeRepository) GetAll(ctx context.Context) ([]*model.ShopType, error) {
 	return r.query.WithContext(ctx).ShopType.Order(r.query.ShopType.Sort.Asc()).Find()
 }

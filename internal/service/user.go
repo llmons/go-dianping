@@ -9,7 +9,7 @@ import (
 	"go-dianping/internal/base/constants"
 	"go-dianping/internal/base/regex_utils"
 	"go-dianping/internal/base/user_holder"
-	"go-dianping/internal/entity"
+	"go-dianping/internal/model"
 	"go-dianping/internal/repository"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
@@ -128,10 +128,10 @@ func (s *userService) Me(ctx context.Context) (*v1.MeRespData, error) {
 	return (*v1.MeRespData)(user), nil
 }
 
-func (s *userService) createUserWithPhone(ctx context.Context, phone string) (*entity.User, error) {
+func (s *userService) createUserWithPhone(ctx context.Context, phone string) (*model.User, error) {
 	// 1. 创建用户
 	nickname := constants.UserNickNamePrefix + random.RandString(10)
-	user := entity.User{
+	user := model.User{
 		Phone:    phone,
 		NickName: &nickname,
 	}
