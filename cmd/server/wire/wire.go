@@ -21,6 +21,7 @@ import (
 var repositorySet = wire.NewSet(
 	repository.NewDB,
 	repository.NewQuery,
+	repository.NewTransaction,
 	repository.NewRepository,
 	repository.NewSeckillVoucherRepository,
 	repository.NewShopRepository,

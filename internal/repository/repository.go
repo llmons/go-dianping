@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"context"
 	"github.com/spf13/viper"
 	"go-dianping/internal/query"
 	"go-dianping/pkg/log"
@@ -9,6 +10,8 @@ import (
 	"gorm.io/gorm"
 	gormlogger "gorm.io/gorm/logger"
 )
+
+const ctxTxKey = "TxKey"
 
 type Repository struct {
 	query  *query.Query
@@ -36,4 +39,19 @@ func NewDB(conf *viper.Viper, l *log.Logger) *gorm.DB {
 
 func NewQuery(db *gorm.DB) *query.Query {
 	return query.Use(db)
+}
+
+type Transaction interface {
+	Transaction(ctx context.Context, fn func(ctx context.Context) error) error
+}
+
+func NewTransaction(r *Repository) Transaction {
+	return r
+}
+
+func (r *Repository) Transaction(ctx context.Context, fn func(ctx context.Context) error) error {
+	return r.query.Transaction(func(tx *query.Query) error {
+		ctx = context.WithValue(ctx, ctxTxKey, tx)
+		return fn(ctx)
+	})
 }

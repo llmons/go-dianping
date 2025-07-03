@@ -26,10 +26,11 @@ import (
 func NewWire(viperViper *viper.Viper, logger *log.Logger) (*app.App, func(), error) {
 	client := redis.NewRedis(viperViper)
 	handlerHandler := handler.NewHandler(logger)
-	serviceService := service.NewService(logger, viperViper, client)
 	db := repository.NewDB(viperViper, logger)
 	query := repository.NewQuery(db)
 	repositoryRepository := repository.NewRepository(query, logger)
+	transaction := repository.NewTransaction(repositoryRepository)
+	serviceService := service.NewService(logger, viperViper, client, transaction)
 	shopRepository := repository.NewShopRepository(repositoryRepository)
 	cacheClient := cache_client.NewCacheClientForShop(client)
 	shopService := service.NewShopService(serviceService, shopRepository, cacheClient)
@@ -56,7 +57,7 @@ func NewWire(viperViper *viper.Viper, logger *log.Logger) (*app.App, func(), err
 
 // wire.go:
 
-var repositorySet = wire.NewSet(repository.NewDB, repository.NewQuery, repository.NewRepository, repository.NewSeckillVoucherRepository, repository.NewShopRepository, repository.NewShopTypeRepository, repository.NewUserRepository, repository.NewVoucherRepository, repository.NewVoucherOrderRepository)
+var repositorySet = wire.NewSet(repository.NewDB, repository.NewQuery, repository.NewTransaction, repository.NewRepository, repository.NewSeckillVoucherRepository, repository.NewShopRepository, repository.NewShopTypeRepository, repository.NewUserRepository, repository.NewVoucherRepository, repository.NewVoucherOrderRepository)
 
 var cacheClientSet = wire.NewSet(cache_client.NewCacheClientForShop)
 

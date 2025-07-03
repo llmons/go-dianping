@@ -73,5 +73,9 @@ func (s *shopTypeService) QueryTypeList(ctx context.Context) ([]v1.QueryTypeList
 		return item
 	})
 
+	if err := s.rdb.Expire(ctx, constants.RedisCacheShopTypeKey, constants.RedisCacheShopTypeTTL).Err(); err != nil {
+		return nil, err
+	}
+
 	return data, nil
 }

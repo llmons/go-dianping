@@ -27,6 +27,6 @@ func (r *shopRepository) GetById(ctx context.Context, id uint64) (*entity.Shop, 
 	return r.query.WithContext(ctx).Shop.Where(r.query.Shop.ID.Eq(id)).First()
 }
 
-func (r Repository) Updates(ctx context.Context, shop *entity.Shop) (gen.ResultInfo, error) {
+func (r *shopRepository) Updates(ctx context.Context, shop *entity.Shop) (gen.ResultInfo, error) {
 	return r.query.WithContext(ctx).Shop.Where(r.query.Shop.ID.Eq(shop.ID)).Updates(shop)
 }
