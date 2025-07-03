@@ -6,7 +6,7 @@ import (
 	"go-dianping/internal/base/redis_worker"
 	"go-dianping/internal/base/user_holder"
 	"go-dianping/internal/model"
-	"go-dianping/internal/repository"
+	"go-dianping/internal/query"
 	"time"
 )
 
@@ -16,28 +16,22 @@ type VoucherOrderService interface {
 
 func NewVoucherOrderService(
 	service *Service,
-	voucherOrderRepository repository.VoucherOrderRepository,
-	seckillVoucherRepository repository.SeckillVoucherRepository,
 	redisWorker redis_worker.RedisWorker,
 ) VoucherOrderService {
 	return &voucherOrderService{
-		Service:            service,
-		voucherOrderRepo:   voucherOrderRepository,
-		seckillVoucherRepo: seckillVoucherRepository,
-		redisWorker:        redisWorker,
+		Service:     service,
+		redisWorker: redisWorker,
 	}
 }
 
 type voucherOrderService struct {
 	*Service
-	voucherOrderRepo   repository.VoucherOrderRepository
-	seckillVoucherRepo repository.SeckillVoucherRepository
-	redisWorker        redis_worker.RedisWorker
+	redisWorker redis_worker.RedisWorker
 }
 
 func (s *voucherOrderService) SeckillVoucher(ctx context.Context, req *v1.SeckillVoucherReq) (int64, error) {
 	//	1. 查询优惠券
-	voucher, err := s.seckillVoucherRepo.GetByID(ctx, req.ID)
+	voucher, err := s.query.SeckillVoucher.Where(s.query.SeckillVoucher.VoucherID.Eq(req.ID)).First()
 	if err != nil {
 		return 0, err
 	}
@@ -55,8 +49,11 @@ func (s *voucherOrderService) SeckillVoucher(ctx context.Context, req *v1.Seckil
 	}
 	//	5. 扣减库存，返回订单 id
 	var orderId int64
-	return orderId, s.tm.Transaction(ctx, func(ctx context.Context) error {
-		info, err := s.seckillVoucherRepo.DecStock(ctx, voucher.VoucherID)
+	return orderId, s.query.Transaction(func(tx *query.Query) error {
+		info, err := s.query.WithContext(ctx).SeckillVoucher.
+			Where(s.query.SeckillVoucher.VoucherID.Eq(voucher.VoucherID)).
+			Where(s.query.SeckillVoucher.Stock.Gt(0)).
+			Update(s.query.SeckillVoucher.Stock, s.query.SeckillVoucher.Stock.Sub(1))
 		if err != nil {
 			return err
 		}
@@ -77,7 +74,7 @@ func (s *voucherOrderService) SeckillVoucher(ctx context.Context, req *v1.Seckil
 		voucherOrder.UserID = *userId
 		// 6.3. 代金券 id
 		voucherOrder.VoucherID = voucher.VoucherID
-		if err := s.voucherOrderRepo.Save(ctx, &voucherOrder); err != nil {
+		if err := s.query.VoucherOrder.Save(&voucherOrder); err != nil {
 			return err
 		}
 

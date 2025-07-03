@@ -7,6 +7,7 @@ package query
 import (
 	"context"
 	"database/sql"
+	"strings"
 
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -170,6 +171,24 @@ type IShopTypeDo interface {
 	Returning(value interface{}, columns ...string) IShopTypeDo
 	UnderlyingDB() *gorm.DB
 	schema.Tabler
+
+	GetByID(id int) (result *model.ShopType, err error)
+}
+
+// GetByID
+// SELECT * FROM @@table WHERE id=@id
+func (s shopTypeDo) GetByID(id int) (result *model.ShopType, err error) {
+	var params []interface{}
+
+	var generateSQL strings.Builder
+	params = append(params, id)
+	generateSQL.WriteString("SELECT * FROM tb_shop_type WHERE id=? ")
+
+	var executeSQL *gorm.DB
+	executeSQL = s.UnderlyingDB().Raw(generateSQL.String(), params...).Take(&result) // ignore_security_alert
+	err = executeSQL.Error
+
+	return
 }
 
 func (s shopTypeDo) Debug() IShopTypeDo {

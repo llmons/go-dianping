@@ -7,6 +7,7 @@ package query
 import (
 	"context"
 	"database/sql"
+	"strings"
 
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -186,6 +187,24 @@ type IVoucherOrderDo interface {
 	Returning(value interface{}, columns ...string) IVoucherOrderDo
 	UnderlyingDB() *gorm.DB
 	schema.Tabler
+
+	GetByID(id int) (result *model.VoucherOrder, err error)
+}
+
+// GetByID
+// SELECT * FROM @@table WHERE id=@id
+func (v voucherOrderDo) GetByID(id int) (result *model.VoucherOrder, err error) {
+	var params []interface{}
+
+	var generateSQL strings.Builder
+	params = append(params, id)
+	generateSQL.WriteString("SELECT * FROM tb_voucher_order WHERE id=? ")
+
+	var executeSQL *gorm.DB
+	executeSQL = v.UnderlyingDB().Raw(generateSQL.String(), params...).Take(&result) // ignore_security_alert
+	err = executeSQL.Error
+
+	return
 }
 
 func (v voucherOrderDo) Debug() IVoucherOrderDo {

@@ -7,6 +7,7 @@ package query
 import (
 	"context"
 	"database/sql"
+	"strings"
 
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -186,6 +187,24 @@ type IBlogDo interface {
 	Returning(value interface{}, columns ...string) IBlogDo
 	UnderlyingDB() *gorm.DB
 	schema.Tabler
+
+	GetByID(id int) (result *model.Blog, err error)
+}
+
+// GetByID
+// SELECT * FROM @@table WHERE id=@id
+func (b blogDo) GetByID(id int) (result *model.Blog, err error) {
+	var params []interface{}
+
+	var generateSQL strings.Builder
+	params = append(params, id)
+	generateSQL.WriteString("SELECT * FROM tb_blog WHERE id=? ")
+
+	var executeSQL *gorm.DB
+	executeSQL = b.UnderlyingDB().Raw(generateSQL.String(), params...).Take(&result) // ignore_security_alert
+	err = executeSQL.Error
+
+	return
 }
 
 func (b blogDo) Debug() IBlogDo {

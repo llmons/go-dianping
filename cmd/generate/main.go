@@ -11,6 +11,12 @@ import (
 	"strings"
 )
 
+type Querier interface {
+	// GetByID
+	// SELECT * FROM @@table WHERE id=@id
+	GetByID(id int) (*gen.T, error)
+}
+
 func main() {
 	workdir, err := os.Getwd()
 	if err != nil {
@@ -63,7 +69,7 @@ func main() {
 		return
 	}
 	g.UseDB(db)
-	g.ApplyBasic(
+	g.ApplyInterface(func(Querier) {},
 		g.GenerateModelAs("tb_blog", "Blog"),
 		g.GenerateModelAs("tb_blog_comments", "BlogComments"),
 		g.GenerateModelAs("tb_follow", "Follow"),
