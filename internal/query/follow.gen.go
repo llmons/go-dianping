@@ -164,12 +164,12 @@ type IFollowDo interface {
 	UnderlyingDB() *gorm.DB
 	schema.Tabler
 
-	GetByID(id int) (result *model.Follow, err error)
+	GetByID(id uint64) (result *model.Follow, err error)
 }
 
 // GetByID
 // SELECT * FROM @@table WHERE id=@id
-func (f followDo) GetByID(id int) (result *model.Follow, err error) {
+func (f followDo) GetByID(id uint64) (result *model.Follow, err error) {
 	var params []interface{}
 
 	var generateSQL strings.Builder

@@ -14,7 +14,7 @@ import (
 type Querier interface {
 	// GetByID
 	// SELECT * FROM @@table WHERE id=@id
-	GetByID(id int) (*gen.T, error)
+	GetByID(id uint64) (*gen.T, error)
 }
 
 func main() {

@@ -208,12 +208,12 @@ type IShopDo interface {
 	UnderlyingDB() *gorm.DB
 	schema.Tabler
 
-	GetByID(id int) (result *model.Shop, err error)
+	GetByID(id uint64) (result *model.Shop, err error)
 }
 
 // GetByID
 // SELECT * FROM @@table WHERE id=@id
-func (s shopDo) GetByID(id int) (result *model.Shop, err error) {
+func (s shopDo) GetByID(id uint64) (result *model.Shop, err error) {
 	var params []interface{}
 
 	var generateSQL strings.Builder

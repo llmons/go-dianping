@@ -173,12 +173,12 @@ type ISeckillVoucherDo interface {
 	UnderlyingDB() *gorm.DB
 	schema.Tabler
 
-	GetByID(id int) (result *model.SeckillVoucher, err error)
+	GetByID(id uint64) (result *model.SeckillVoucher, err error)
 }
 
 // GetByID
 // SELECT * FROM @@table WHERE id=@id
-func (s seckillVoucherDo) GetByID(id int) (result *model.SeckillVoucher, err error) {
+func (s seckillVoucherDo) GetByID(id uint64) (result *model.SeckillVoucher, err error) {
 	var params []interface{}
 
 	var generateSQL strings.Builder

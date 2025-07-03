@@ -188,12 +188,12 @@ type IBlogCommentsDo interface {
 	UnderlyingDB() *gorm.DB
 	schema.Tabler
 
-	GetByID(id int) (result *model.BlogComments, err error)
+	GetByID(id uint64) (result *model.BlogComments, err error)
 }
 
 // GetByID
 // SELECT * FROM @@table WHERE id=@id
-func (b blogCommentsDo) GetByID(id int) (result *model.BlogComments, err error) {
+func (b blogCommentsDo) GetByID(id uint64) (result *model.BlogComments, err error) {
 	var params []interface{}
 
 	var generateSQL strings.Builder

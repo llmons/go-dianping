@@ -9,26 +9,12 @@ import (
 	"go-dianping/internal/base/cache_client"
 	"go-dianping/internal/base/redis_worker"
 	"go-dianping/internal/handler"
-	"go-dianping/internal/repository"
 	"go-dianping/internal/server"
 	"go-dianping/internal/service"
 	"go-dianping/pkg/app"
 	"go-dianping/pkg/log"
 	"go-dianping/pkg/redis"
 	"go-dianping/pkg/server/http"
-)
-
-var repositorySet = wire.NewSet(
-	repository.NewDB,
-	repository.NewQuery,
-	repository.NewTransaction,
-	repository.NewRepository,
-	repository.NewSeckillVoucherRepository,
-	repository.NewShopRepository,
-	repository.NewShopTypeRepository,
-	repository.NewUserRepository,
-	repository.NewVoucherRepository,
-	repository.NewVoucherOrderRepository,
 )
 
 var cacheClientSet = wire.NewSet(
@@ -40,6 +26,8 @@ var redisWorkerSet = wire.NewSet(
 )
 
 var serviceSet = wire.NewSet(
+	service.NewDB,
+	service.NewQuery,
 	service.NewService,
 	service.NewSeckillVoucherService,
 	service.NewShopService,
@@ -76,7 +64,6 @@ func newApp(
 func NewWire(*viper.Viper, *log.Logger) (*app.App, func(), error) {
 	panic(wire.Build(
 		serverSet,
-		repositorySet,
 		cacheClientSet,
 		redisWorkerSet,
 		serviceSet,

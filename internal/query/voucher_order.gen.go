@@ -188,12 +188,12 @@ type IVoucherOrderDo interface {
 	UnderlyingDB() *gorm.DB
 	schema.Tabler
 
-	GetByID(id int) (result *model.VoucherOrder, err error)
+	GetByID(id uint64) (result *model.VoucherOrder, err error)
 }
 
 // GetByID
 // SELECT * FROM @@table WHERE id=@id
-func (v voucherOrderDo) GetByID(id int) (result *model.VoucherOrder, err error) {
+func (v voucherOrderDo) GetByID(id uint64) (result *model.VoucherOrder, err error) {
 	var params []interface{}
 
 	var generateSQL strings.Builder

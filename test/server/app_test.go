@@ -97,12 +97,10 @@ func TestSaveSHop(t *testing.T) {
 
 	db := repository.NewDB(conf, logger)
 	query := repository.NewQuery(db)
-	repo := repository.NewRepository(query, logger)
-	shopRepo := repository.NewShopRepository(repo)
 	cacheClient := cache_client.NewCacheClient[model.Shop](rdb)
 
 	ctx := context.Background()
-	shop, err := shopRepo.GetById(ctx, 1)
+	shop, err := query.Shop.GetByID(1)
 	if err != nil {
 		return
 	}

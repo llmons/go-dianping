@@ -15,7 +15,7 @@ type (
 
 type (
 	UpdateShopReq struct {
-		ID        *int64   `json:"id" example:"1"`
+		ID        *uint64  `json:"id" example:"1"`
 		Name      *string  `json:"name" example:"120茶餐厅"`
 		TypeId    *int64   `json:"typeId" example:"1"`
 		Images    *string  `json:"images" example:""`

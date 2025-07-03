@@ -176,12 +176,12 @@ type IUserDo interface {
 	UnderlyingDB() *gorm.DB
 	schema.Tabler
 
-	GetByID(id int) (result *model.User, err error)
+	GetByID(id uint64) (result *model.User, err error)
 }
 
 // GetByID
 // SELECT * FROM @@table WHERE id=@id
-func (u userDo) GetByID(id int) (result *model.User, err error) {
+func (u userDo) GetByID(id uint64) (result *model.User, err error) {
 	var params []interface{}
 
 	var generateSQL strings.Builder

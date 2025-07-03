@@ -8,7 +8,6 @@ import (
 	"go-dianping/api/v1"
 	"go-dianping/internal/base/constants"
 	"go-dianping/internal/model"
-	"go-dianping/internal/repository"
 )
 
 type ShopTypeService interface {
@@ -17,16 +16,13 @@ type ShopTypeService interface {
 
 type shopTypeService struct {
 	*Service
-	shopTypeRepo repository.ShopTypeRepository
 }
 
 func NewShopTypeService(
 	service *Service,
-	shopTypeRepository repository.ShopTypeRepository,
 ) ShopTypeService {
 	return &shopTypeService{
-		Service:      service,
-		shopTypeRepo: shopTypeRepository,
+		Service: service,
 	}
 }
 
@@ -51,7 +47,7 @@ func (s *shopTypeService) QueryTypeList(ctx context.Context) ([]v1.QueryTypeList
 		}), nil
 	}
 
-	list, err := s.shopTypeRepo.GetAll(ctx)
+	list, err := s.query.ShopType.Order(s.query.ShopType.Sort.Asc()).Find()
 	if err != nil {
 		return nil, err
 	}

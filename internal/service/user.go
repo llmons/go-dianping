@@ -10,7 +10,6 @@ import (
 	"go-dianping/internal/base/regex_utils"
 	"go-dianping/internal/base/user_holder"
 	"go-dianping/internal/model"
-	"go-dianping/internal/repository"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
 )
@@ -23,13 +22,11 @@ type UserService interface {
 
 type userService struct {
 	*Service
-	userRepo repository.UserRepository
 }
 
-func NewUserService(service *Service, userRepository repository.UserRepository) UserService {
+func NewUserService(service *Service) UserService {
 	return &userService{
-		Service:  service,
-		userRepo: userRepository,
+		Service: service,
 	}
 }
 
@@ -78,7 +75,7 @@ func (s *userService) Login(ctx context.Context, req *v1.LoginReq) (*v1.LoginRes
 	}
 
 	// 4. 一致，根据手机号查询用户 select * from tb_user where phone = ?
-	user, err := s.userRepo.GetByPhone(ctx, req.Phone)
+	user, err := s.query.User.Where(s.query.User.Phone.Eq(req.Phone)).First()
 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, err
 	}
@@ -136,7 +133,7 @@ func (s *userService) createUserWithPhone(ctx context.Context, phone string) (*m
 		NickName: &nickname,
 	}
 	// 2. 保存用户
-	if err := s.userRepo.Save(ctx, &user); err != nil {
+	if err := s.query.User.Save(&user); err != nil {
 		return nil, err
 	}
 	return &user, nil

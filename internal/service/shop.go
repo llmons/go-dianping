@@ -9,7 +9,6 @@ import (
 	"go-dianping/internal/base/cache_client"
 	"go-dianping/internal/base/constants"
 	"go-dianping/internal/model"
-	"go-dianping/internal/repository"
 )
 
 type ShopService interface {
@@ -19,26 +18,23 @@ type ShopService interface {
 
 type shopService struct {
 	*Service
-	shopRepo         repository.ShopRepository
 	cacheClient      cache_client.CacheClient[model.Shop]
 	cacheRebuildPool *ants.Pool
 }
 
 func NewShopService(
 	service *Service,
-	shopRepository repository.ShopRepository,
 	cacheClient cache_client.CacheClient[model.Shop],
 ) ShopService {
 	return &shopService{
 		Service:     service,
-		shopRepo:    shopRepository,
 		cacheClient: cacheClient,
 	}
 }
 
 func (s *shopService) QueryById(ctx context.Context, req *v1.QueryShopByIDReq) (*v1.QueryShopByIDRespData, error) {
 	// 解决缓存穿透
-	shop, err := s.cacheClient.QueryWithPassThrough(ctx, constants.RedisCacheShopKey, *req.ID, s.shopRepo.GetById, constants.RedisCacheShopTTL)
+	shop, err := s.cacheClient.QueryWithPassThrough(ctx, constants.RedisCacheShopKey, *req.ID, s.query.Shop.GetByID, constants.RedisCacheShopTTL)
 	if err != nil {
 		return nil, err
 	}
@@ -73,7 +69,7 @@ func (s *shopService) UpdateShop(ctx context.Context, req *v1.UpdateShopReq) err
 		return err
 	}
 
-	if _, err := s.shopRepo.Updates(ctx, &shop); err != nil {
+	if _, err := s.query.Shop.Where(s.query.Shop.ID.Eq(*req.ID)).Updates(&shop); err != nil {
 		return err
 	}
 	// 2. 删除缓存
