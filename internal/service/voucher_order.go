@@ -47,7 +47,26 @@ func (s *voucherOrderService) SeckillVoucher(ctx context.Context, req *v1.Seckil
 	if voucher.Stock < 1 {
 		return 0, v1.ErrInsufficientStock
 	}
-	//	5. 扣减库存，返回订单 id
+
+	return s.createVoucherOrder(ctx, err, voucher)
+}
+
+func (s *voucherOrderService) createVoucherOrder(ctx context.Context, err error, voucher *model.SeckillVoucher) (int64, error) {
+	// 5. 一人一单
+	userId := user_holder.GetUser(ctx).ID
+	// 5.1. 查询订单
+	count, err := s.query.VoucherOrder.Where(s.query.VoucherOrder.UserID.Eq(*userId)).
+		Where(s.query.VoucherOrder.VoucherID.Eq(voucher.VoucherID)).Count()
+	if err != nil {
+		return 0, err
+	}
+	// 5.2. 判断是否存在
+	if count > 0 {
+		// 用户已经购买过了
+		return 0, v1.ErrAlreadySeckill
+	}
+
+	//	6. 扣减库存，返回订单 id
 	var orderId int64
 	return orderId, s.query.Transaction(func(tx *query.Query) error {
 		info, err := s.query.WithContext(ctx).SeckillVoucher.
@@ -61,18 +80,17 @@ func (s *voucherOrderService) SeckillVoucher(ctx context.Context, req *v1.Seckil
 			// 扣减失败
 			return v1.ErrInsufficientStock
 		}
-		//	6. 创建订单
+		//	7. 创建订单
 		var voucherOrder model.VoucherOrder
-		// 6.1. 订单 id
+		// 7.1. 订单 id
 		orderId, err = s.redisWorker.NextId(ctx, "order")
 		if err != nil {
 			return err
 		}
 		voucherOrder.ID = orderId
-		// 6.2. 用户 id
-		userId := user_holder.GetUser(ctx).ID
+		// 7.2. 用户 id
 		voucherOrder.UserID = *userId
-		// 6.3. 代金券 id
+		// 7.3. 代金券 id
 		voucherOrder.VoucherID = voucher.VoucherID
 		if err := s.query.VoucherOrder.Save(&voucherOrder); err != nil {
 			return err

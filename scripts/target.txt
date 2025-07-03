@@ -1,3 +1,3 @@
 POST http://localhost:8081/api/voucher-order/seckill/15
-Authorization: Bearer 25fb3571-f97c-40ed-b08c-72be81d1c52f
+Authorization: Bearer 80a2f517-119a-482d-af90-043880fa3f7e
 Content-Type: application/json
