@@ -3,6 +3,7 @@ package handler
 import (
 	"github.com/gin-gonic/gin"
 	v1 "go-dianping/api/v1"
+	"go-dianping/internal/model"
 	"go-dianping/internal/service"
 	"net/http"
 )
@@ -23,7 +24,7 @@ func NewVoucherHandler(
 }
 
 func (h *VoucherHandler) AddSeckillVoucher(ctx *gin.Context) {
-	var req v1.AddSeckillVoucherReq
+	var req model.Voucher
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		v1.HandleError(ctx, http.StatusBadRequest, err.Error(), nil)
 		return

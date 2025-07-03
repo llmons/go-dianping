@@ -3,6 +3,7 @@ package handler
 import (
 	"github.com/gin-gonic/gin"
 	"go-dianping/api/v1"
+	"go-dianping/internal/model"
 	"go-dianping/internal/service"
 	"net/http"
 )
@@ -53,11 +54,11 @@ func (h *ShopHandler) QueryShopById(ctx *gin.Context) {
 // @Tags shop
 // @Accept json
 // @Produce json
-// @Param request body v1.UpdateShopReq true "商铺数据"
+// @Param request body model.Shop true "商铺数据"
 // @Success 200 {object} v1.Response
 // @Router /shop [put]
 func (h *ShopHandler) UpdateShop(ctx *gin.Context) {
-	var req v1.UpdateShopReq
+	var req model.Shop
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		v1.HandleError(ctx, http.StatusBadRequest, err.Error(), nil)
 		return

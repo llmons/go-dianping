@@ -16,14 +16,13 @@ import (
 	"go-dianping/internal/service"
 	"go-dianping/pkg/app"
 	"go-dianping/pkg/log"
-	"go-dianping/pkg/redis"
 	"go-dianping/pkg/server/http"
 )
 
 // Injectors from wire.go:
 
 func NewWire(viperViper *viper.Viper, logger *log.Logger) (*app.App, func(), error) {
-	client := redis.NewRedis(viperViper)
+	client := service.NewRedis(viperViper)
 	handlerHandler := handler.NewHandler(logger)
 	db := service.NewDB(viperViper, logger)
 	query := service.NewQuery(db)
@@ -52,11 +51,11 @@ var cacheClientSet = wire.NewSet(cache_client.NewCacheClientForShop)
 
 var redisWorkerSet = wire.NewSet(redis_worker.NewRedisWorker)
 
-var serviceSet = wire.NewSet(service.NewDB, service.NewQuery, service.NewService, service.NewSeckillVoucherService, service.NewShopService, service.NewShopTypeService, service.NewUserService, service.NewVoucherService, service.NewVoucherOrderService)
+var serviceSet = wire.NewSet(service.NewDB, service.NewRedis, service.NewQuery, service.NewService, service.NewSeckillVoucherService, service.NewShopService, service.NewShopTypeService, service.NewUserService, service.NewVoucherService, service.NewVoucherOrderService)
 
 var handlerSet = wire.NewSet(handler.NewHandler, handler.NewShopHandler, handler.NewShopTypeHandler, handler.NewUserHandler, handler.NewVoucherHandler, handler.NewVoucherOrderHandler)
 
-var serverSet = wire.NewSet(redis.NewRedis, server.NewHTTPServer)
+var serverSet = wire.NewSet(server.NewHTTPServer)
 
 // build App
 func newApp(

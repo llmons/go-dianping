@@ -17,7 +17,7 @@ import (
 type UserService interface {
 	SendCode(ctx context.Context, req *v1.SendCodeReq) error
 	Login(ctx context.Context, req *v1.LoginReq) (*v1.LoginRespData, error)
-	Me(ctx context.Context) (*v1.MeRespData, error)
+	Me(ctx context.Context) (*v1.SimpleUser, error)
 }
 
 type userService struct {
@@ -83,7 +83,7 @@ func (s *userService) Login(ctx context.Context, req *v1.LoginReq) (*v1.LoginRes
 	// 5. 判断用户是否存在
 	if user == nil {
 		// 6. 不存在，创建新用户并保存
-		user, err = s.createUserWithPhone(ctx, req.Phone)
+		user, err = s.createUserWithPhone(req.Phone)
 		if err != nil {
 			return nil, err
 		}
@@ -117,15 +117,15 @@ func (s *userService) Login(ctx context.Context, req *v1.LoginReq) (*v1.LoginRes
 	}, nil
 }
 
-func (s *userService) Me(ctx context.Context) (*v1.MeRespData, error) {
+func (s *userService) Me(ctx context.Context) (*v1.SimpleUser, error) {
 	user := user_holder.GetUser(ctx)
 	if user == nil {
-		return nil, errors.New("获取当前用户失败")
+		return nil, v1.ErrCanNotGetUser
 	}
-	return (*v1.MeRespData)(user), nil
+	return user, nil
 }
 
-func (s *userService) createUserWithPhone(ctx context.Context, phone string) (*model.User, error) {
+func (s *userService) createUserWithPhone(phone string) (*model.User, error) {
 	// 1. 创建用户
 	nickname := constants.UserNickNamePrefix + random.RandString(10)
 	user := model.User{

@@ -13,7 +13,7 @@ import (
 	"go-dianping/internal/base/constants"
 	"go-dianping/internal/base/redis_worker"
 	"go-dianping/internal/model"
-	"go-dianping/internal/repository"
+	"go-dianping/internal/service"
 	"go-dianping/pkg/config"
 	"go-dianping/pkg/log"
 	"go-dianping/pkg/redis"
@@ -95,8 +95,8 @@ func TestSaveSHop(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	db := repository.NewDB(conf, logger)
-	query := repository.NewQuery(db)
+	db := service.NewDB(conf, logger)
+	query := service.NewQuery(db)
 	cacheClient := cache_client.NewCacheClient[model.Shop](rdb)
 
 	ctx := context.Background()

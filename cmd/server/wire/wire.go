@@ -13,7 +13,6 @@ import (
 	"go-dianping/internal/service"
 	"go-dianping/pkg/app"
 	"go-dianping/pkg/log"
-	"go-dianping/pkg/redis"
 	"go-dianping/pkg/server/http"
 )
 
@@ -27,6 +26,7 @@ var redisWorkerSet = wire.NewSet(
 
 var serviceSet = wire.NewSet(
 	service.NewDB,
+	service.NewRedis,
 	service.NewQuery,
 	service.NewService,
 	service.NewSeckillVoucherService,
@@ -47,7 +47,6 @@ var handlerSet = wire.NewSet(
 )
 
 var serverSet = wire.NewSet(
-	redis.NewRedis,
 	server.NewHTTPServer,
 )
 

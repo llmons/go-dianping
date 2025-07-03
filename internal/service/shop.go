@@ -12,8 +12,8 @@ import (
 )
 
 type ShopService interface {
-	QueryById(ctx context.Context, req *v1.QueryShopByIDReq) (*v1.QueryShopByIDRespData, error)
-	UpdateShop(ctx context.Context, req *v1.UpdateShopReq) error
+	QueryById(ctx context.Context, req *v1.QueryShopByIDReq) (*model.Shop, error)
+	UpdateShop(ctx context.Context, req *model.Shop) error
 }
 
 type shopService struct {
@@ -32,7 +32,7 @@ func NewShopService(
 	}
 }
 
-func (s *shopService) QueryById(ctx context.Context, req *v1.QueryShopByIDReq) (*v1.QueryShopByIDRespData, error) {
+func (s *shopService) QueryById(ctx context.Context, req *v1.QueryShopByIDReq) (*model.Shop, error) {
 	// 解决缓存穿透
 	shop, err := s.cacheClient.QueryWithPassThrough(ctx, constants.RedisCacheShopKey, *req.ID, s.query.Shop.GetByID, constants.RedisCacheShopTTL)
 	if err != nil {
@@ -52,24 +52,17 @@ func (s *shopService) QueryById(ctx context.Context, req *v1.QueryShopByIDReq) (
 	//}
 
 	// 返回
-	var data v1.QueryShopByIDRespData
-	if err := copier.Copy(&data, shop); err != nil {
-		return nil, err
-	}
-	return &data, nil
+	return shop, nil
 }
 
-func (s *shopService) UpdateShop(ctx context.Context, req *v1.UpdateShopReq) error {
-	if req.ID == nil {
-		return v1.ErrShopIDIsNull
-	}
+func (s *shopService) UpdateShop(ctx context.Context, req *model.Shop) error {
 	// 1. 更新数据库
 	var shop model.Shop
 	if err := copier.Copy(&shop, &req); err != nil {
 		return err
 	}
 
-	if _, err := s.query.Shop.Where(s.query.Shop.ID.Eq(*req.ID)).Updates(&shop); err != nil {
+	if _, err := s.query.Shop.Where(s.query.Shop.ID.Eq(req.ID)).Updates(&shop); err != nil {
 		return err
 	}
 	// 2. 删除缓存
