@@ -57,7 +57,6 @@ func (s *voucherOrderService) SeckillVoucher(ctx context.Context, req *v1.Seckil
 	var orderId int64
 	// 7. 返回订单 id
 	return orderId, s.tm.Transaction(ctx, func(ctx context.Context) error {
-
 		info, err := s.seckillVoucherRepository.DecStock(ctx, voucher.VoucherID)
 		if err != nil {
 			return err

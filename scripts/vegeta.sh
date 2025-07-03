@@ -1,0 +1,1 @@
+vegeta attack -rate=1000 -duration=1s -targets=target.txt | vegeta report
