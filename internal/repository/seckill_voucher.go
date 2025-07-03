@@ -35,5 +35,6 @@ func (r *seckillVoucherRepository) Save(ctx context.Context, seckillVoucher *ent
 func (r *seckillVoucherRepository) DecStock(ctx context.Context, id uint64) (gen.ResultInfo, error) {
 	return r.query.WithContext(ctx).SeckillVoucher.
 		Where(r.query.SeckillVoucher.VoucherID.Eq(id)).
+		Where(r.query.SeckillVoucher.Stock.Gt(0)).
 		Update(r.query.SeckillVoucher.Stock, r.query.SeckillVoucher.Stock.Sub(1))
 }

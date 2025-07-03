@@ -21,23 +21,23 @@ func NewVoucherOrderService(
 	redisWorker redis_worker.RedisWorker,
 ) VoucherOrderService {
 	return &voucherOrderService{
-		Service:                  service,
-		voucherOrderRepository:   voucherOrderRepository,
-		seckillVoucherRepository: seckillVoucherRepository,
-		redisWorker:              redisWorker,
+		Service:            service,
+		voucherOrderRepo:   voucherOrderRepository,
+		seckillVoucherRepo: seckillVoucherRepository,
+		redisWorker:        redisWorker,
 	}
 }
 
 type voucherOrderService struct {
 	*Service
-	voucherOrderRepository   repository.VoucherOrderRepository
-	seckillVoucherRepository repository.SeckillVoucherRepository
-	redisWorker              redis_worker.RedisWorker
+	voucherOrderRepo   repository.VoucherOrderRepository
+	seckillVoucherRepo repository.SeckillVoucherRepository
+	redisWorker        redis_worker.RedisWorker
 }
 
 func (s *voucherOrderService) SeckillVoucher(ctx context.Context, req *v1.SeckillVoucherReq) (int64, error) {
 	//	1. 查询优惠券
-	voucher, err := s.seckillVoucherRepository.GetByID(ctx, req.ID)
+	voucher, err := s.seckillVoucherRepo.GetByID(ctx, req.ID)
 	if err != nil {
 		return 0, err
 	}
@@ -49,15 +49,14 @@ func (s *voucherOrderService) SeckillVoucher(ctx context.Context, req *v1.Seckil
 	if voucher.EndTime.Before(time.Now()) {
 		return 0, v1.ErrSeckillIsEnd
 	}
-	//	4.
+	//	4. 判断库存是否充足
 	if voucher.Stock < 1 {
 		return 0, v1.ErrInsufficientStock
 	}
-	//	5. 扣减库存
+	//	5. 扣减库存，返回订单 id
 	var orderId int64
-	// 7. 返回订单 id
 	return orderId, s.tm.Transaction(ctx, func(ctx context.Context) error {
-		info, err := s.seckillVoucherRepository.DecStock(ctx, voucher.VoucherID)
+		info, err := s.seckillVoucherRepo.DecStock(ctx, voucher.VoucherID)
 		if err != nil {
 			return err
 		}
@@ -78,7 +77,7 @@ func (s *voucherOrderService) SeckillVoucher(ctx context.Context, req *v1.Seckil
 		voucherOrder.UserID = *userId
 		// 6.3. 代金券 id
 		voucherOrder.VoucherID = voucher.VoucherID
-		if err := s.voucherOrderRepository.Save(ctx, &voucherOrder); err != nil {
+		if err := s.voucherOrderRepo.Save(ctx, &voucherOrder); err != nil {
 			return err
 		}
 
