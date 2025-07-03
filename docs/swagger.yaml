@@ -1,4 +1,64 @@
 definitions:
+  model.Shop:
+    properties:
+      address:
+        description: 地址
+        type: string
+      area:
+        description: 商圈，例如陆家嘴
+        type: string
+      avgPrice:
+        description: 均价，取整数
+        type: integer
+      comments:
+        description: 评论数量
+        type: integer
+      id:
+        description: 主键
+        type: integer
+      images:
+        description: 商铺图片，多个图片以','隔开
+        type: string
+      name:
+        description: 商铺名称
+        type: string
+      openHours:
+        description: 营业时间，例如 10:00-22:00
+        type: string
+      score:
+        description: 评分，1~5分，乘10保存，避免小数
+        type: integer
+      sold:
+        description: 销量
+        type: integer
+      typeId:
+        description: 商铺类型的id
+        type: integer
+      x:
+        description: 经度
+        type: number
+      "y":
+        description: 维度
+        type: number
+    type: object
+  model.User:
+    properties:
+      icon:
+        description: 人物头像
+        type: string
+      id:
+        description: 主键
+        type: integer
+      nickName:
+        description: 昵称，默认是用户id
+        type: string
+      password:
+        description: 密码，加密存储
+        type: string
+      phone:
+        description: 手机号码
+        type: string
+    type: object
   v1.LoginReq:
     properties:
       code:
@@ -33,104 +93,36 @@ definitions:
   v1.MeResp:
     properties:
       data:
-        $ref: '#/definitions/v1.MeRespData'
+        $ref: '#/definitions/v1.SimpleUser'
       errorMsg:
         type: string
       success:
         type: boolean
       total:
         type: integer
-    type: object
-  v1.MeRespData:
-    properties:
-      icon:
-        type: string
-      id:
-        type: integer
-      nickname:
-        type: string
     type: object
   v1.QueryShopByIDResp:
     properties:
       data:
-        $ref: '#/definitions/v1.QueryShopByIDRespData'
+        $ref: '#/definitions/model.Shop'
       errorMsg:
         type: string
       success:
         type: boolean
       total:
         type: integer
-    type: object
-  v1.QueryShopByIDRespData:
-    properties:
-      address:
-        description: 地址
-        type: string
-      area:
-        description: 商圈，例如陆家嘴
-        type: string
-      avg_price:
-        description: 均价，取整数
-        type: integer
-      comments:
-        description: 评论数量
-        type: integer
-      create_time:
-        description: 创建时间
-        type: string
-      id:
-        description: 主键
-        type: integer
-      images:
-        description: 商铺图片，多个图片以','隔开
-        type: string
-      name:
-        description: 商铺名称
-        type: string
-      open_hours:
-        description: 营业时间，例如 10:00-22:00
-        type: string
-      score:
-        description: 评分，1~5分，乘10保存，避免小数
-        type: integer
-      sold:
-        description: 销量
-        type: integer
-      type_id:
-        description: 商铺类型的id
-        type: integer
-      update_time:
-        description: 更新时间
-        type: string
-      x:
-        description: 经度
-        type: number
-      "y":
-        description: 维度
-        type: number
     type: object
   v1.QueryTypeListResp:
     properties:
       data:
         items:
-          $ref: '#/definitions/v1.QueryTypeListRespDataItem'
+          $ref: '#/definitions/model.User'
         type: array
       errorMsg:
         type: string
       success:
         type: boolean
       total:
-        type: integer
-    type: object
-  v1.QueryTypeListRespDataItem:
-    properties:
-      icon:
-        type: string
-      id:
-        type: integer
-      name:
-        type: string
-      sort:
         type: integer
     type: object
   v1.Response:
@@ -143,47 +135,14 @@ definitions:
       total:
         type: integer
     type: object
-  v1.UpdateShopReq:
+  v1.SimpleUser:
     properties:
-      address:
-        example: 金华路锦昌文华苑29号
+      icon:
         type: string
-      area:
-        example: 大关
-        type: string
-      avgPrice:
-        example: 80
-        type: integer
-      comments:
-        example: 3035
-        type: integer
       id:
-        example: 1
         type: integer
-      images:
-        example: ""
+      nickName:
         type: string
-      name:
-        example: 120茶餐厅
-        type: string
-      openHours:
-        example: 10:00-22:00
-        type: string
-      score:
-        example: 37
-        type: integer
-      sold:
-        example: 4215
-        type: integer
-      typeId:
-        example: 1
-        type: integer
-      x:
-        example: 0
-        type: number
-      "y":
-        example: 0
-        type: number
     type: object
 host: localhost:8081
 info:
@@ -208,7 +167,7 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/v1.UpdateShopReq'
+          $ref: '#/definitions/model.Shop'
       produces:
       - application/json
       responses:

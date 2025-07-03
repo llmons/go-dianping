@@ -42,7 +42,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/v1.UpdateShopReq"
+                            "$ref": "#/definitions/model.Shop"
                         }
                     }
                 ],
@@ -190,6 +190,88 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "model.Shop": {
+            "type": "object",
+            "properties": {
+                "address": {
+                    "description": "地址",
+                    "type": "string"
+                },
+                "area": {
+                    "description": "商圈，例如陆家嘴",
+                    "type": "string"
+                },
+                "avgPrice": {
+                    "description": "均价，取整数",
+                    "type": "integer"
+                },
+                "comments": {
+                    "description": "评论数量",
+                    "type": "integer"
+                },
+                "id": {
+                    "description": "主键",
+                    "type": "integer"
+                },
+                "images": {
+                    "description": "商铺图片，多个图片以','隔开",
+                    "type": "string"
+                },
+                "name": {
+                    "description": "商铺名称",
+                    "type": "string"
+                },
+                "openHours": {
+                    "description": "营业时间，例如 10:00-22:00",
+                    "type": "string"
+                },
+                "score": {
+                    "description": "评分，1~5分，乘10保存，避免小数",
+                    "type": "integer"
+                },
+                "sold": {
+                    "description": "销量",
+                    "type": "integer"
+                },
+                "typeId": {
+                    "description": "商铺类型的id",
+                    "type": "integer"
+                },
+                "x": {
+                    "description": "经度",
+                    "type": "number"
+                },
+                "y": {
+                    "description": "维度",
+                    "type": "number"
+                }
+            }
+        },
+        "model.User": {
+            "type": "object",
+            "properties": {
+                "icon": {
+                    "description": "人物头像",
+                    "type": "string"
+                },
+                "id": {
+                    "description": "主键",
+                    "type": "integer"
+                },
+                "nickName": {
+                    "description": "昵称，默认是用户id",
+                    "type": "string"
+                },
+                "password": {
+                    "description": "密码，加密存储",
+                    "type": "string"
+                },
+                "phone": {
+                    "description": "手机号码",
+                    "type": "string"
+                }
+            }
+        },
         "v1.LoginReq": {
             "type": "object",
             "required": [
@@ -240,7 +322,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "data": {
-                    "$ref": "#/definitions/v1.MeRespData"
+                    "$ref": "#/definitions/v1.SimpleUser"
                 },
                 "errorMsg": {
                     "type": "string"
@@ -250,20 +332,6 @@ const docTemplate = `{
                 },
                 "total": {
                     "type": "integer"
-                }
-            }
-        },
-        "v1.MeRespData": {
-            "type": "object",
-            "properties": {
-                "icon": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "integer"
-                },
-                "nickname": {
-                    "type": "string"
                 }
             }
         },
@@ -271,7 +339,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "data": {
-                    "$ref": "#/definitions/v1.QueryShopByIDRespData"
+                    "$ref": "#/definitions/model.Shop"
                 },
                 "errorMsg": {
                     "type": "string"
@@ -281,71 +349,6 @@ const docTemplate = `{
                 },
                 "total": {
                     "type": "integer"
-                }
-            }
-        },
-        "v1.QueryShopByIDRespData": {
-            "type": "object",
-            "properties": {
-                "address": {
-                    "description": "地址",
-                    "type": "string"
-                },
-                "area": {
-                    "description": "商圈，例如陆家嘴",
-                    "type": "string"
-                },
-                "avg_price": {
-                    "description": "均价，取整数",
-                    "type": "integer"
-                },
-                "comments": {
-                    "description": "评论数量",
-                    "type": "integer"
-                },
-                "create_time": {
-                    "description": "创建时间",
-                    "type": "string"
-                },
-                "id": {
-                    "description": "主键",
-                    "type": "integer"
-                },
-                "images": {
-                    "description": "商铺图片，多个图片以','隔开",
-                    "type": "string"
-                },
-                "name": {
-                    "description": "商铺名称",
-                    "type": "string"
-                },
-                "open_hours": {
-                    "description": "营业时间，例如 10:00-22:00",
-                    "type": "string"
-                },
-                "score": {
-                    "description": "评分，1~5分，乘10保存，避免小数",
-                    "type": "integer"
-                },
-                "sold": {
-                    "description": "销量",
-                    "type": "integer"
-                },
-                "type_id": {
-                    "description": "商铺类型的id",
-                    "type": "integer"
-                },
-                "update_time": {
-                    "description": "更新时间",
-                    "type": "string"
-                },
-                "x": {
-                    "description": "经度",
-                    "type": "number"
-                },
-                "y": {
-                    "description": "维度",
-                    "type": "number"
                 }
             }
         },
@@ -355,7 +358,7 @@ const docTemplate = `{
                 "data": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/v1.QueryTypeListRespDataItem"
+                        "$ref": "#/definitions/model.User"
                     }
                 },
                 "errorMsg": {
@@ -365,23 +368,6 @@ const docTemplate = `{
                     "type": "boolean"
                 },
                 "total": {
-                    "type": "integer"
-                }
-            }
-        },
-        "v1.QueryTypeListRespDataItem": {
-            "type": "object",
-            "properties": {
-                "icon": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "integer"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "sort": {
                     "type": "integer"
                 }
             }
@@ -401,60 +387,17 @@ const docTemplate = `{
                 }
             }
         },
-        "v1.UpdateShopReq": {
+        "v1.SimpleUser": {
             "type": "object",
             "properties": {
-                "address": {
-                    "type": "string",
-                    "example": "金华路锦昌文华苑29号"
-                },
-                "area": {
-                    "type": "string",
-                    "example": "大关"
-                },
-                "avgPrice": {
-                    "type": "integer",
-                    "example": 80
-                },
-                "comments": {
-                    "type": "integer",
-                    "example": 3035
+                "icon": {
+                    "type": "string"
                 },
                 "id": {
-                    "type": "integer",
-                    "example": 1
+                    "type": "integer"
                 },
-                "images": {
-                    "type": "string",
-                    "example": ""
-                },
-                "name": {
-                    "type": "string",
-                    "example": "120茶餐厅"
-                },
-                "openHours": {
-                    "type": "string",
-                    "example": "10:00-22:00"
-                },
-                "score": {
-                    "type": "integer",
-                    "example": 37
-                },
-                "sold": {
-                    "type": "integer",
-                    "example": 4215
-                },
-                "typeId": {
-                    "type": "integer",
-                    "example": 1
-                },
-                "x": {
-                    "type": "number",
-                    "example": 0
-                },
-                "y": {
-                    "type": "number",
-                    "example": 0
+                "nickName": {
+                    "type": "string"
                 }
             }
         }

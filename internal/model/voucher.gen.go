@@ -24,8 +24,8 @@ type Voucher struct {
 	CreateTime  *time.Time `gorm:"column:create_time;type:timestamp;not null;default:current_timestamp();autoCreateTime;comment:创建时间" json:"-"` // 创建时间
 	UpdateTime  *time.Time `gorm:"column:update_time;type:timestamp;not null;default:current_timestamp();autoUpdateTime;comment:更新时间" json:"-"` // 更新时间
 	Stock       int        `gorm:"-" json:"stock"`
-	BeginTime   time.Time  `gorm:"-" json:"begin_time"`
-	EndTime     time.Time  `gorm:"-" json:"end_time"`
+	BeginTime   time.Time  `gorm:"-" json:"beginTime"`
+	EndTime     time.Time  `gorm:"-" json:"endTime"`
 }
 
 // TableName Voucher's table name

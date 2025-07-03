@@ -94,8 +94,8 @@ func main() {
 		g.GenerateModelAs("tb_user_info", "UserInfo"),
 		g.GenerateModelAs("tb_voucher", "Voucher",
 			gen.FieldNew("Stock", "int", field.Tag{"gorm": "-", "json": "stock"}),
-			gen.FieldNew("BeginTime", "time.Time", field.Tag{"gorm": "-", "json": "begin_time"}),
-			gen.FieldNew("EndTime", "time.Time", field.Tag{"gorm": "-", "json": "end_time"}),
+			gen.FieldNew("BeginTime", "time.Time", field.Tag{"gorm": "-", "json": "beginTime"}),
+			gen.FieldNew("EndTime", "time.Time", field.Tag{"gorm": "-", "json": "endTime"}),
 		),
 		g.GenerateModelAs("tb_voucher_order", "VoucherOrder"),
 	)
