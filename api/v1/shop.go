@@ -8,6 +8,6 @@ type (
 	}
 	QueryShopByIDResp struct {
 		Response
-		Data model.Shop `json:"data"`
+		Data *model.Shop `json:"data"`
 	}
 )

@@ -3,15 +3,13 @@ package service
 import (
 	"context"
 	"encoding/json"
-	"github.com/jinzhu/copier"
 	"github.com/samber/lo"
-	"go-dianping/api/v1"
 	"go-dianping/internal/base/constants"
 	"go-dianping/internal/model"
 )
 
 type ShopTypeService interface {
-	QueryTypeList(ctx context.Context) ([]v1.QueryTypeListRespDataItem, error)
+	QueryTypeList(ctx context.Context) ([]*model.ShopType, error)
 }
 
 type shopTypeService struct {
@@ -26,7 +24,7 @@ func NewShopTypeService(
 	}
 }
 
-func (s *shopTypeService) QueryTypeList(ctx context.Context) ([]v1.QueryTypeListRespDataItem, error) {
+func (s *shopTypeService) QueryTypeList(ctx context.Context) ([]*model.ShopType, error) {
 	// 使用 List 结构
 
 	exist, err := s.rdb.Exists(ctx, constants.RedisCacheShopTypeKey).Result()
@@ -38,12 +36,12 @@ func (s *shopTypeService) QueryTypeList(ctx context.Context) ([]v1.QueryTypeList
 		if err != nil {
 			return nil, err
 		}
-		return lo.Map(strSlices, func(el string, idx int) v1.QueryTypeListRespDataItem {
-			var item v1.QueryTypeListRespDataItem
+		return lo.Map(strSlices, func(el string, idx int) *model.ShopType {
+			var item model.ShopType
 			if err := json.Unmarshal([]byte(el), &item); err != nil {
-				return item
+				return &item
 			}
-			return item
+			return &item
 		}), nil
 	}
 
@@ -52,26 +50,20 @@ func (s *shopTypeService) QueryTypeList(ctx context.Context) ([]v1.QueryTypeList
 		return nil, err
 	}
 
-	data := lo.Map(list, func(el *model.ShopType, idx int) v1.QueryTypeListRespDataItem {
-		var item v1.QueryTypeListRespDataItem
-		if err := copier.Copy(&item, el); err != nil {
-			return item
+	lo.ForEach(list, func(el *model.ShopType, idx int) {
+		bytes, closureErr := json.Marshal(el)
+		if closureErr != nil {
+			err = closureErr
+		}
+		if closureErr := s.rdb.RPush(ctx, constants.RedisCacheShopTypeKey, string(bytes)).Err(); closureErr != nil {
+			err = closureErr
 		}
 
-		bytes, err := json.Marshal(item)
-		if err != nil {
-			return v1.QueryTypeListRespDataItem{}
-		}
-		if err := s.rdb.RPush(ctx, constants.RedisCacheShopTypeKey, string(bytes)).Err(); err != nil {
-			return v1.QueryTypeListRespDataItem{}
-		}
-
-		return item
 	})
 
 	if err := s.rdb.Expire(ctx, constants.RedisCacheShopTypeKey, constants.RedisCacheShopTypeTTL).Err(); err != nil {
 		return nil, err
 	}
 
-	return data, nil
+	return list, nil
 }

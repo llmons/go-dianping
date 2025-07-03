@@ -3,9 +3,8 @@ package handler
 import (
 	"fmt"
 	"github.com/samber/lo"
-	v1 "go-dianping/api/v1"
 	"go-dianping/internal/handler"
-	"go-dianping/internal/repository"
+	"go-dianping/internal/model"
 	"go-dianping/internal/service"
 	"net/http"
 	"testing"
@@ -23,7 +22,7 @@ func TestVoucherHandler_AddSeckillVoucher(t *testing.T) {
 		panic(err)
 	}
 
-	params := v1.AddSeckillVoucherReq{
+	params := model.Voucher{
 		ShopID:      lo.ToPtr(uint64(2)),
 		Title:       "100元代金券",
 		SubTitle:    lo.ToPtr("周一至周五均可使用"),
@@ -36,9 +35,7 @@ func TestVoucherHandler_AddSeckillVoucher(t *testing.T) {
 		EndTime:     endTime,
 	}
 
-	voucherRepo := repository.NewVoucherRepository(repo)
-	seckillRepo := repository.NewSeckillVoucherRepository(repo)
-	voucherService := service.NewVoucherService(srv, voucherRepo, seckillRepo)
+	voucherService := service.NewVoucherService(srv)
 
 	voucherHandler := handler.NewVoucherHandler(hdl, voucherService)
 	router.POST("/api/voucher/seckill", voucherHandler.AddSeckillVoucher)

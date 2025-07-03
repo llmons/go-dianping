@@ -13,11 +13,11 @@ const TableNameSign = "tb_sign"
 // Sign mapped from table <tb_sign>
 type Sign struct {
 	ID       uint64    `gorm:"column:id;type:bigint(20) unsigned;primaryKey;autoIncrement:true;comment:主键" json:"id"` // 主键
-	UserID   uint64    `gorm:"column:user_id;type:bigint(20) unsigned;not null;comment:用户id" json:"user_id"`          // 用户id
+	UserID   uint64    `gorm:"column:user_id;type:bigint(20) unsigned;not null;comment:用户id" json:"userId"`           // 用户id
 	Year     int32     `gorm:"column:year;type:year(4);not null;comment:签到的年" json:"year"`                            // 签到的年
 	Month    int8      `gorm:"column:month;type:tinyint(2);not null;comment:签到的月" json:"month"`                       // 签到的月
 	Date     time.Time `gorm:"column:date;type:date;not null;comment:签到的日期" json:"date"`                              // 签到的日期
-	IsBackup *uint8    `gorm:"column:is_backup;type:tinyint(1) unsigned;comment:是否补签" json:"is_backup"`               // 是否补签
+	IsBackup *uint8    `gorm:"column:is_backup;type:tinyint(1) unsigned;comment:是否补签" json:"isBackup"`                // 是否补签
 }
 
 // TableName Sign's table name

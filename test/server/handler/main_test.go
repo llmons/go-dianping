@@ -8,7 +8,6 @@ import (
 	"github.com/redis/go-redis/v9"
 	"go-dianping/internal/handler"
 	"go-dianping/internal/middleware"
-	"go-dianping/internal/repository"
 	"go-dianping/internal/service"
 	"go-dianping/pkg/config"
 	"go-dianping/pkg/log"
@@ -25,7 +24,6 @@ var router *gin.Engine
 
 var db *gorm.DB
 var rdb *redis.Client
-var repo *repository.Repository
 
 var srv *service.Service
 
@@ -46,11 +44,10 @@ func TestMain(m *testing.M) {
 	logger = log.NewLog(conf)
 	hdl = handler.NewHandler(logger)
 
-	db = repository.NewDB(conf, logger)
-	query := repository.NewQuery(db)
-	repo = repository.NewRepository(query, logger)
+	db = service.NewDB(conf, logger)
+	query := service.NewQuery(db)
 
-	srv = service.NewService(logger, conf, rdb)
+	srv = service.NewService(logger, conf, query, rdb)
 
 	gin.SetMode(gin.TestMode)
 	router = gin.Default()

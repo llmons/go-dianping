@@ -16,7 +16,6 @@ import (
 	"go-dianping/internal/service"
 	"go-dianping/pkg/config"
 	"go-dianping/pkg/log"
-	"go-dianping/pkg/redis"
 	"os"
 	"path/filepath"
 	"sync"
@@ -51,7 +50,7 @@ func TestMain(m *testing.M) {
 	conf = config.NewConfig(*envConf)
 
 	logger = log.NewLog(conf)
-	rdb = redis.NewRedis(conf)
+	rdb = service.NewRedis(conf)
 	pool, err = ants.NewPool(500)
 	if err != nil {
 		panic(err)

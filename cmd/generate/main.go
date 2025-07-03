@@ -36,14 +36,27 @@ func main() {
 	})
 
 	fieldOpts := []gen.ModelOpt{
-		gen.FieldGORMTag("update_time", func(tag field.GormTag) field.GormTag {
-			tag.Set("autoUpdateTime", "")
-			return tag
-		}),
 		gen.FieldGORMTag("create_time", func(tag field.GormTag) field.GormTag {
 			tag.Set("autoCreateTime", "")
 			return tag
 		}),
+		gen.FieldGORMTag("update_time", func(tag field.GormTag) field.GormTag {
+			tag.Set("autoUpdateTime", "")
+			return tag
+		}),
+		gen.FieldJSONTagWithNS(func(columnName string) (tagContent string) {
+			// snake_case TO camelCase
+			parts := strings.Split(columnName, "_")
+			for i := 1; i < len(parts); i++ {
+				if len(parts[i]) > 0 {
+					parts[i] = strings.ToUpper(parts[i][:1]) + parts[i][1:]
+				}
+			}
+			camel := strings.Join(parts, "")
+			return strings.ToLower(camel[:1]) + camel[1:]
+		}),
+		gen.FieldJSONTag("create_time", "-"),
+		gen.FieldJSONTag("update_time", "-"),
 	}
 
 	g.WithOpts(fieldOpts...)

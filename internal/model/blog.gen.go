@@ -12,16 +12,16 @@ const TableNameBlog = "tb_blog"
 
 // Blog mapped from table <tb_blog>
 type Blog struct {
-	ID         uint64     `gorm:"column:id;type:bigint(20) unsigned;primaryKey;autoIncrement:true;comment:主键" json:"id"`                                 // 主键
-	ShopID     int64      `gorm:"column:shop_id;type:bigint(20);not null;comment:商户id" json:"shop_id"`                                                   // 商户id
-	UserID     uint64     `gorm:"column:user_id;type:bigint(20) unsigned;not null;comment:用户id" json:"user_id"`                                          // 用户id
-	Title      string     `gorm:"column:title;type:varchar(255);not null;comment:标题" json:"title"`                                                       // 标题
-	Images     string     `gorm:"column:images;type:varchar(2048);not null;comment:探店的照片，最多9张，多张以","隔开" json:"images"`                                   // 探店的照片，最多9张，多张以","隔开
-	Content    string     `gorm:"column:content;type:varchar(2048);not null;comment:探店的文字描述" json:"content"`                                             // 探店的文字描述
-	Liked      *uint32    `gorm:"column:liked;type:int(8) unsigned;comment:点赞数量" json:"liked"`                                                           // 点赞数量
-	Comments   *uint32    `gorm:"column:comments;type:int(8) unsigned;comment:评论数量" json:"comments"`                                                     // 评论数量
-	CreateTime *time.Time `gorm:"column:create_time;type:timestamp;not null;default:current_timestamp();autoCreateTime;comment:创建时间" json:"create_time"` // 创建时间
-	UpdateTime *time.Time `gorm:"column:update_time;type:timestamp;not null;default:current_timestamp();autoUpdateTime;comment:更新时间" json:"update_time"` // 更新时间
+	ID         uint64     `gorm:"column:id;type:bigint(20) unsigned;primaryKey;autoIncrement:true;comment:主键" json:"id"`                       // 主键
+	ShopID     int64      `gorm:"column:shop_id;type:bigint(20);not null;comment:商户id" json:"shopId"`                                          // 商户id
+	UserID     uint64     `gorm:"column:user_id;type:bigint(20) unsigned;not null;comment:用户id" json:"userId"`                                 // 用户id
+	Title      string     `gorm:"column:title;type:varchar(255);not null;comment:标题" json:"title"`                                             // 标题
+	Images     string     `gorm:"column:images;type:varchar(2048);not null;comment:探店的照片，最多9张，多张以","隔开" json:"images"`                         // 探店的照片，最多9张，多张以","隔开
+	Content    string     `gorm:"column:content;type:varchar(2048);not null;comment:探店的文字描述" json:"content"`                                   // 探店的文字描述
+	Liked      *uint32    `gorm:"column:liked;type:int(8) unsigned;comment:点赞数量" json:"liked"`                                                 // 点赞数量
+	Comments   *uint32    `gorm:"column:comments;type:int(8) unsigned;comment:评论数量" json:"comments"`                                           // 评论数量
+	CreateTime *time.Time `gorm:"column:create_time;type:timestamp;not null;default:current_timestamp();autoCreateTime;comment:创建时间" json:"-"` // 创建时间
+	UpdateTime *time.Time `gorm:"column:update_time;type:timestamp;not null;default:current_timestamp();autoUpdateTime;comment:更新时间" json:"-"` // 更新时间
 }
 
 // TableName Blog's table name
