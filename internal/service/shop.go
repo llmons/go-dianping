@@ -57,6 +57,7 @@ func (s *shopService) QueryById(ctx context.Context, req *v1.QueryShopByIDReq) (
 
 func (s *shopService) UpdateShop(ctx context.Context, req *model.Shop) error {
 	// 1. 更新数据库
+
 	var shop model.Shop
 	if err := copier.Copy(&shop, &req); err != nil {
 		return err

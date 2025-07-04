@@ -27,8 +27,11 @@ func NewHTTPServer(
 	if conf.GetString("env") == "prod" {
 		gin.SetMode(gin.ReleaseMode)
 	}
+	g := gin.Default()
+	g.RedirectTrailingSlash = true
+
 	s := http.NewServer(
-		gin.Default(),
+		g,
 		logger,
 		http.WithServerHost(conf.GetString("http.host")),
 		http.WithServerPort(conf.GetInt("http.port")),
@@ -63,7 +66,7 @@ func NewHTTPServer(
 		shopRouter := s.Group("/shop")
 		{
 			shopRouter.GET("/:id", shopHandler.QueryShopById)
-			shopRouter.PUT("/", shopHandler.UpdateShop)
+			shopRouter.PUT("", shopHandler.UpdateShop)
 		}
 
 		shopTypeRouter := s.Group("/shop-type")
@@ -73,7 +76,7 @@ func NewHTTPServer(
 
 		uploadRouter := s.Group("/upload")
 		{
-			uploadRouter.GET("/")
+			uploadRouter.GET("")
 		}
 
 		userRouter := s.Group("/user")
@@ -92,7 +95,7 @@ func NewHTTPServer(
 		voucherRouter := s.Group("/voucher")
 		{
 			voucherRouter.POST("/seckill", voucherHandler.AddSeckillVoucher)
-			voucherRouter.POST("/", voucherHandler.AddVoucher)
+			voucherRouter.POST("", voucherHandler.AddVoucher)
 			voucherRouter.GET("/list/:shopId", voucherHandler.QueryVoucherOfShop)
 		}
 

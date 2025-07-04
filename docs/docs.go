@@ -23,7 +23,7 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/shop": {
+        "/api/shop": {
             "put": {
                 "consumes": [
                     "application/json"
@@ -187,6 +187,103 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/voucher": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "voucher"
+                ],
+                "summary": "新增普通券",
+                "parameters": [
+                    {
+                        "description": "优惠券信息",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.Voucher"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/v1.AddVoucherResp"
+                        }
+                    }
+                }
+            }
+        },
+        "/voucher/list/{shopId}": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "voucher"
+                ],
+                "summary": "查询店铺的优惠券列表",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "商铺 id",
+                        "name": "shopId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/v1.QueryVoucherOfShopResp"
+                        }
+                    }
+                }
+            }
+        },
+        "/voucher/seckill": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "voucher"
+                ],
+                "summary": "新增秒杀券",
+                "parameters": [
+                    {
+                        "description": "优惠券信息，包含秒杀信息",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.Voucher"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/v1.AddSeckillVoucherResp"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -269,6 +366,106 @@ const docTemplate = `{
                 "phone": {
                     "description": "手机号码",
                     "type": "string"
+                }
+            }
+        },
+        "model.Voucher": {
+            "type": "object",
+            "properties": {
+                "actualValue": {
+                    "description": "抵扣金额，单位是分。例如200代表2元",
+                    "type": "integer"
+                },
+                "beginTime": {
+                    "type": "string"
+                },
+                "endTime": {
+                    "type": "string"
+                },
+                "id": {
+                    "description": "主键",
+                    "type": "integer"
+                },
+                "payValue": {
+                    "description": "支付金额，单位是分。例如200代表2元",
+                    "type": "integer"
+                },
+                "rules": {
+                    "description": "使用规则",
+                    "type": "string"
+                },
+                "shopId": {
+                    "description": "商铺id",
+                    "type": "integer"
+                },
+                "status": {
+                    "description": "1,上架; 2,下架; 3,过期",
+                    "type": "integer"
+                },
+                "stock": {
+                    "type": "integer"
+                },
+                "subTitle": {
+                    "description": "副标题",
+                    "type": "string"
+                },
+                "title": {
+                    "description": "代金券标题",
+                    "type": "string"
+                },
+                "type": {
+                    "description": "0,普通券；1,秒杀券",
+                    "type": "integer"
+                }
+            }
+        },
+        "v1.AddSeckillVoucherResp": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/v1.AddSeckillVoucherRespData"
+                },
+                "errorMsg": {
+                    "type": "string"
+                },
+                "success": {
+                    "type": "boolean"
+                },
+                "total": {
+                    "type": "integer"
+                }
+            }
+        },
+        "v1.AddSeckillVoucherRespData": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "v1.AddVoucherResp": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/v1.AddVoucherRespData"
+                },
+                "errorMsg": {
+                    "type": "string"
+                },
+                "success": {
+                    "type": "boolean"
+                },
+                "total": {
+                    "type": "integer"
+                }
+            }
+        },
+        "v1.AddVoucherRespData": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
                 }
             }
         },
@@ -359,6 +556,26 @@ const docTemplate = `{
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/model.User"
+                    }
+                },
+                "errorMsg": {
+                    "type": "string"
+                },
+                "success": {
+                    "type": "boolean"
+                },
+                "total": {
+                    "type": "integer"
+                }
+            }
+        },
+        "v1.QueryVoucherOfShopResp": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.Voucher"
                     }
                 },
                 "errorMsg": {
