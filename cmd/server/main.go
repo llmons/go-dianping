@@ -19,7 +19,7 @@ import (
 // @contact.email  llmons@foxmail.com
 // @license.name  MIT
 // @license.url   https://opensource.org/licenses/MIT
-// @host      localhost:8081
+// @host      localhost:8080
 // @securityDefinitions.apiKey Bearer
 // @in header
 // @name Authorization

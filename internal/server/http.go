@@ -54,30 +54,29 @@ func NewHTTPServer(
 	s.GET("/", func(ctx *gin.Context) {
 		ctx.String(netHttp.StatusOK, "OK")
 	})
-	api := s.Group("/api")
 	{
-		blogRouter := api.Group("/blog")
+		blogRouter := s.Group("/blog")
 		{
 			blogRouter.GET("/hot")
 		}
 
-		shopRouter := api.Group("/shop")
+		shopRouter := s.Group("/shop")
 		{
 			shopRouter.GET("/:id", shopHandler.QueryShopById)
 			shopRouter.PUT("/", shopHandler.UpdateShop)
 		}
 
-		shopTypeRouter := api.Group("/shop-type")
+		shopTypeRouter := s.Group("/shop-type")
 		{
 			shopTypeRouter.GET("/list", shopTypeHandler.QueryTypeList)
 		}
 
-		uploadRouter := api.Group("/upload")
+		uploadRouter := s.Group("/upload")
 		{
 			uploadRouter.GET("/")
 		}
 
-		userRouter := api.Group("/user")
+		userRouter := s.Group("/user")
 		{
 			noAuthRouter := userRouter.Group("/")
 			{
@@ -90,12 +89,12 @@ func NewHTTPServer(
 			}
 		}
 
-		voucherRouter := api.Group("/voucher")
+		voucherRouter := s.Group("/voucher")
 		{
 			voucherRouter.POST("/seckill", voucherHandler.AddSeckillVoucher)
 		}
 
-		voucherOrderRouter := api.Group("/voucher-order").Use(middleware.Login())
+		voucherOrderRouter := s.Group("/voucher-order").Use(middleware.Login())
 		{
 			voucherOrderRouter.POST("/seckill/:id", voucherOrderHandler.SeckillVoucher)
 		}
