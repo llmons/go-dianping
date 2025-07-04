@@ -3,11 +3,14 @@ package service
 import (
 	"context"
 	"github.com/jinzhu/copier"
+	v1 "go-dianping/api/v1"
 	"go-dianping/internal/model"
 )
 
 type VoucherService interface {
 	AddSeckillVoucher(ctx context.Context, req *model.Voucher) error
+	AddVoucher(ctx context.Context, req *model.Voucher) error
+	QueryVoucherOfShop(ctx context.Context, req *v1.QueryVoucherOfShopReq) ([]*model.Voucher, error)
 }
 
 func NewVoucherService(
@@ -34,4 +37,12 @@ func (s *voucherService) AddSeckillVoucher(_ context.Context, req *model.Voucher
 		return err
 	}
 	return s.query.SeckillVoucher.Save(&seckillVoucher)
+}
+
+func (s *voucherService) AddVoucher(_ context.Context, req *model.Voucher) error {
+	return s.query.Voucher.Save(req)
+}
+
+func (s *voucherService) QueryVoucherOfShop(_ context.Context, req *v1.QueryVoucherOfShopReq) ([]*model.Voucher, error) {
+	return s.query.Voucher.Where(s.query.Voucher.ShopID.Eq(req.ShopId)).Find()
 }

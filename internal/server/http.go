@@ -92,6 +92,8 @@ func NewHTTPServer(
 		voucherRouter := s.Group("/voucher")
 		{
 			voucherRouter.POST("/seckill", voucherHandler.AddSeckillVoucher)
+			voucherRouter.POST("/", voucherHandler.AddVoucher)
+			voucherRouter.GET("/list/:shopId", voucherHandler.QueryVoucherOfShop)
 		}
 
 		voucherOrderRouter := s.Group("/voucher-order").Use(middleware.Login())
