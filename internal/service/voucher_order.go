@@ -7,8 +7,11 @@ import (
 	"go-dianping/internal/base/user_holder"
 	"go-dianping/internal/model"
 	"go-dianping/internal/query"
+	"sync"
 	"time"
 )
+
+var userLocks sync.Map
 
 type VoucherOrderService interface {
 	SeckillVoucher(ctx context.Context, req *v1.SeckillVoucherReq) (int64, error)
@@ -45,27 +48,31 @@ func (s *voucherOrderService) SeckillVoucher(ctx context.Context, req *v1.Seckil
 	}
 	//	4. 判断库存是否充足
 	if voucher.Stock < 1 {
+		// 库存不足
 		return 0, v1.ErrInsufficientStock
 	}
 
+	userId := user_holder.GetUser(ctx).ID
+	lock, _ := userLocks.LoadOrStore(*userId, &sync.Mutex{})
+	lock.(*sync.Mutex).Lock()
+	defer lock.(*sync.Mutex).Unlock()
 	return s.createVoucherOrder(ctx, err, voucher)
 }
 
 func (s *voucherOrderService) createVoucherOrder(ctx context.Context, err error, voucher *model.SeckillVoucher) (int64, error) {
-	// 5. 一人一单
+	//	5. 一人一单
 	userId := user_holder.GetUser(ctx).ID
-	// 5.1. 查询订单
+	//	5.1. 查询订单
 	count, err := s.query.VoucherOrder.Where(s.query.VoucherOrder.UserID.Eq(*userId)).
 		Where(s.query.VoucherOrder.VoucherID.Eq(voucher.VoucherID)).Count()
 	if err != nil {
 		return 0, err
 	}
-	// 5.2. 判断是否存在
+	//	5.2.判断是否存在
 	if count > 0 {
-		// 用户已经购买过了
+		//	用户已经购买过了
 		return 0, v1.ErrAlreadySeckill
 	}
-
 	//	6. 扣减库存，返回订单 id
 	var orderId int64
 	return orderId, s.query.Transaction(func(tx *query.Query) error {
@@ -89,6 +96,7 @@ func (s *voucherOrderService) createVoucherOrder(ctx context.Context, err error,
 		}
 		voucherOrder.ID = orderId
 		// 7.2. 用户 id
+		userId := user_holder.GetUser(ctx).ID
 		voucherOrder.UserID = *userId
 		// 7.3. 代金券 id
 		voucherOrder.VoucherID = voucher.VoucherID
