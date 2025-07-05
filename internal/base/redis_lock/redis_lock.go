@@ -15,8 +15,9 @@ type ILock interface {
 }
 
 type SimpleRedisLock struct {
-	rdb  *redis.Client
 	name string
+	uuid string
+	rdb  *redis.Client
 }
 
 func NewSimpleRedisLock(name string, rdb *redis.Client) ILock {
@@ -28,15 +29,25 @@ func NewSimpleRedisLock(name string, rdb *redis.Client) ILock {
 
 func (l *SimpleRedisLock) TryLock(ctx context.Context, timeout time.Duration) (bool, error) {
 	// 生成一个标识
-	id, err := random.UUIdV4()
+	uuid, err := random.UUIdV4()
 	if err != nil {
 		return false, err
 	}
+	l.uuid = uuid
 	// 获取锁
-	return l.rdb.SetNX(ctx, KeyLockPrefix+l.name, id, timeout).Result()
+	return l.rdb.SetNX(ctx, KeyLockPrefix+l.name, l.uuid, timeout).Result()
 }
 
 func (l *SimpleRedisLock) Unlock(ctx context.Context) error {
-	// 释放锁
-	return l.rdb.Del(ctx, KeyLockPrefix+l.name).Err()
+	// 获取锁中的标识
+	id, err := l.rdb.Get(ctx, KeyLockPrefix+l.name).Result()
+	if err != nil {
+		return err
+	}
+	// 判断标识是否一致
+	if l.uuid == id {
+		// 释放锁
+		return l.rdb.Del(ctx, KeyLockPrefix+l.name).Err()
+	}
+	return nil
 }
