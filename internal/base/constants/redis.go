@@ -20,5 +20,5 @@ const (
 
 	RedisCacheNullTTL = time.Minute * 2
 
-	RedisLockShopKey = "lock:shop:"
+	RedisLockShopKey = "redis_lock:shop:"
 )

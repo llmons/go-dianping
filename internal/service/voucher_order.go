@@ -2,16 +2,15 @@ package service
 
 import (
 	"context"
+	"fmt"
 	"go-dianping/api/v1"
+	"go-dianping/internal/base/redis_lock"
 	"go-dianping/internal/base/redis_worker"
 	"go-dianping/internal/base/user_holder"
 	"go-dianping/internal/model"
 	"go-dianping/internal/query"
-	"sync"
 	"time"
 )
-
-var userLocks sync.Map
 
 type VoucherOrderService interface {
 	SeckillVoucher(ctx context.Context, req *v1.SeckillVoucherReq) (int64, error)
@@ -32,7 +31,7 @@ type voucherOrderService struct {
 	redisWorker redis_worker.RedisWorker
 }
 
-func (s *voucherOrderService) SeckillVoucher(ctx context.Context, req *v1.SeckillVoucherReq) (int64, error) {
+func (s *voucherOrderService) SeckillVoucher(ctx context.Context, req *v1.SeckillVoucherReq) (voucherId int64, err error) {
 	//	1. 查询优惠券
 	voucher, err := s.query.SeckillVoucher.Where(s.query.SeckillVoucher.VoucherID.Eq(req.ID)).First()
 	if err != nil {
@@ -53,9 +52,26 @@ func (s *voucherOrderService) SeckillVoucher(ctx context.Context, req *v1.Seckil
 	}
 
 	userId := user_holder.GetUser(ctx).ID
-	lock, _ := userLocks.LoadOrStore(*userId, &sync.Mutex{})
-	lock.(*sync.Mutex).Lock()
-	defer lock.(*sync.Mutex).Unlock()
+	// 创建锁
+	lockName := fmt.Sprintf("%s:%d", "order", *userId)
+	lock := redis_lock.NewSimpleRedisLock(lockName, s.rdb)
+	// 获取锁
+	isLock, err := lock.TryLock(ctx, time.Second*5)
+	if err != nil {
+		return 0, err
+	}
+	// 判断是否获取锁成功
+	if !isLock {
+		//	获取锁失败，返回错误或重试
+		return 0, v1.ErrNotAllowDoubleBuy
+	}
+	// 结束时释放锁
+	defer func(lock redis_lock.ILock, ctx context.Context) {
+		closureErr := lock.Unlock(ctx)
+		if closureErr != nil {
+			err = closureErr
+		}
+	}(lock, ctx)
 	return s.createVoucherOrder(ctx, err, voucher)
 }
 

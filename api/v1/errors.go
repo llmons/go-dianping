@@ -9,4 +9,5 @@ var (
 	ErrSeckillIsEnd      = newError(1202, "秒杀已经结束")
 	ErrInsufficientStock = newError(1203, "库存不足")
 	ErrAlreadySeckill    = newError(1204, "用户已经购买过一次")
+	ErrNotAllowDoubleBuy = newError(1205, "不允许重复下单")
 )
