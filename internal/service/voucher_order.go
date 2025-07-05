@@ -56,7 +56,7 @@ func (s *voucherOrderService) SeckillVoucher(ctx context.Context, req *v1.Seckil
 	lockName := fmt.Sprintf("order:%d", *userId)
 	lock := redis_lock.NewSimpleRedisLock(lockName, s.rdb)
 	// 获取锁
-	isLock, err := lock.TryLock(ctx, time.Second*5)
+	isLock, err := lock.TryLock(ctx, time.Hour*5)
 	if err != nil {
 		return 0, err
 	}
