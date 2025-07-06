@@ -5,7 +5,6 @@ import (
 	"flag"
 	"fmt"
 	"github.com/golang/mock/gomock"
-	"github.com/panjf2000/ants/v2"
 	goRedis "github.com/redis/go-redis/v9"
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
@@ -29,7 +28,6 @@ var (
 	rdb    *goRedis.Client
 
 	redisWorker redis_worker.RedisWorker
-	pool        *ants.Pool
 )
 
 func TestMain(m *testing.M) {
@@ -51,10 +49,6 @@ func TestMain(m *testing.M) {
 
 	logger = log.NewLog(conf)
 	rdb = service.NewRedis(conf)
-	pool, err = ants.NewPool(500)
-	if err != nil {
-		panic(err)
-	}
 
 	redisWorker = redis_worker.NewRedisWorker(rdb)
 
@@ -79,10 +73,7 @@ func TestIdWork(t *testing.T) {
 	}
 	for i := 0; i < 300; i++ {
 		wg.Add(1)
-		if err := pool.Submit(task); err != nil {
-			fmt.Println(err)
-			return
-		}
+		go task()
 	}
 	begin := time.Now().UnixMilli()
 	wg.Wait()

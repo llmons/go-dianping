@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"github.com/jinzhu/copier"
-	"github.com/panjf2000/ants/v2"
 	"github.com/redis/go-redis/v9"
 	"go-dianping/internal/base/constants"
 	"go-dianping/internal/base/redis_data"
@@ -23,19 +22,12 @@ type CacheClient[ENTITY any] interface {
 	QueryWithLogicalExpire(ctx context.Context, keyPrefix string, id uint64, dbFallback func(uint64) (*ENTITY, error), expireTime time.Duration) (*ENTITY, error)
 }
 type cacheClient[ENTITY any] struct {
-	rdb              *redis.Client
-	cacheRebuildPool *ants.Pool
+	rdb *redis.Client
 }
 
 func NewCacheClient[ENTITY any](rdb *redis.Client) CacheClient[ENTITY] {
-	pool, err := ants.NewPool(10)
-	if err != nil {
-		return nil
-	}
-
 	return &cacheClient[ENTITY]{
-		rdb:              rdb,
-		cacheRebuildPool: pool,
+		rdb: rdb,
 	}
 }
 
@@ -220,8 +212,8 @@ func (c *cacheClient[ENTITY]) QueryWithLogicalExpire(ctx context.Context, keyPre
 			return nil, errors.New("shop not exist")
 		}
 
-		// 6.3. 成功，开启独立线程，实现缓存重建
-		if err := c.cacheRebuildPool.Submit(func() {
+		// 6.3. 成功，开启独立协程，实现缓存重建
+		go func() {
 			// 等待释放锁
 			defer func(c *cacheClient[ENTITY], ctx context.Context, key string) {
 				if closeErr := c.unlock(ctx, key); closeErr != nil {
@@ -238,9 +230,7 @@ func (c *cacheClient[ENTITY]) QueryWithLogicalExpire(ctx context.Context, keyPre
 			if err := c.SetWithLogicExpire(newCtx, key, retFromDB, expireTime); err != nil {
 				return
 			}
-		}); err != nil {
-			return nil, err
-		}
+		}()
 		// 6.4. 返回过期的商铺信息
 		return ret, nil
 	}

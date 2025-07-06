@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"github.com/jinzhu/copier"
-	"github.com/panjf2000/ants/v2"
 	"go-dianping/api/v1"
 	"go-dianping/internal/base/cache_client"
 	"go-dianping/internal/base/constants"
@@ -18,8 +17,7 @@ type ShopService interface {
 
 type shopService struct {
 	*Service
-	cacheClient      cache_client.CacheClient[model.Shop]
-	cacheRebuildPool *ants.Pool
+	cacheClient cache_client.CacheClient[model.Shop]
 }
 
 func NewShopService(
