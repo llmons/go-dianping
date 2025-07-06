@@ -37,13 +37,13 @@ func (s *shopService) QueryById(ctx context.Context, req *v1.QueryShopByIDReq) (
 	}
 
 	// 互斥锁解决缓存击穿
-	//shop, err := s.cacheClient.QueryWithMutex(ctx, constants.RedisCacheShopKey, *req.ID, s.shopRepo.GetById, constants.RedisCacheShopTTL)
+	//shop, err := s.cacheClient.QueryWithMutex(ctx, constants.RedisCacheShopKey, *req.VoucherId, s.shopRepo.GetById, constants.RedisCacheShopTTL)
 	//if err != nil {
 	//	return nil, err
 	//}
 
 	// 逻辑过期解决缓存击穿
-	//shop, err := s.cacheClient.QueryWithLogicalExpire(ctx, constants.RedisCacheShopKey, *req.ID, s.shopRepo.GetById, time.Second*20)
+	//shop, err := s.cacheClient.QueryWithLogicalExpire(ctx, constants.RedisCacheShopKey, *req.VoucherId, s.shopRepo.GetById, time.Second*20)
 	//if err != nil {
 	//	return nil, err
 	//}
