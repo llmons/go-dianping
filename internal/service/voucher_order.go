@@ -13,7 +13,10 @@ import (
 	"go.uber.org/zap"
 	"os"
 	"path/filepath"
+	"time"
 )
+
+const streamName = "stream.orders"
 
 type VoucherOrderService interface {
 	SeckillVoucher(ctx context.Context, req *v1.SeckillVoucherReq) (int64, error)
@@ -51,12 +54,60 @@ func NewVoucherOrderService(
 	}
 	go func() {
 		for {
-			order := <-srv.orderTasks
-			if err := srv.handleVoucherOrder(order); err != nil {
+			// 1. 获取消息队列中的订单信息
+			ctx := context.Background()
+			result, err := srv.rdb.XReadGroup(ctx, &redis.XReadGroupArgs{
+				Group:    "g1",
+				Consumer: "c1",
+				Count:    1,
+				Block:    time.Second * 2,
+				Streams:  []string{streamName, ">"},
+			}).Result()
+			if err != nil {
+				return
+			}
+			// 2. 判断消息获取是否成功
+			if len(result) == 0 {
+				//	如果获取失败，说明没有消息，继续下一次循环
+				continue
+			}
+			// 3. 解析消息中的订单信息
+			messages := result[0].Messages
+			values := messages[0].Values
+			order := model.VoucherOrder{
+				ID:        values["id"].(int64),
+				UserID:    values["userId"].(uint64),
+				VoucherID: values["voucherId"].(uint64),
+			}
+			// 4. 如果获取成功，可以下单
+			if err := srv.handleVoucherOrder(&order); err != nil {
 				srv.logger.Error("处理订单异常", zap.Error(err))
+				srv.handlePendingList()
+			}
+			// 5. ACK 消息
+			if err := srv.rdb.XAck(ctx, streamName, "g1", messages[0].ID).Err(); err != nil {
+				return
 			}
 		}
 	}()
+
+	//orderTasks := make(chan *model.VoucherOrder, 1024*1024)
+	//srv := &voucherOrderService{
+	//	Service:       service,
+	//	redisWorker:   redisWorker,
+	//	seckillScript: seckillScript,
+	//	orderTasks:    orderTasks,
+	//}
+	//go func() {
+	//	for {
+	//		// 1. 获取 chan 中的订单信息
+	//		order := <-srv.orderTasks
+	//		// 2. 创建订单
+	//		if err := srv.handleVoucherOrder(order); err != nil {
+	//			srv.logger.Error("处理订单异常", zap.Error(err))
+	//		}
+	//	}
+	//}()
 
 	return srv
 }
@@ -85,10 +136,56 @@ func (s *voucherOrderService) handleVoucherOrder(order *model.VoucherOrder) (err
 	return s.createVoucherOrder(order)
 }
 
+func (s *voucherOrderService) handlePendingList() {
+	for {
+		// 1. 获取 pending list 中的订单信息
+		ctx := context.Background()
+		result, err := s.rdb.XReadGroup(ctx, &redis.XReadGroupArgs{
+			Group:    "g1",
+			Consumer: "c1",
+			Count:    1,
+			Block:    time.Second * 2,
+			Streams:  []string{streamName, "0"},
+		}).Result()
+		if err != nil {
+			return
+		}
+		// 2. 判断消息获取是否成功
+		if len(result) == 0 {
+			//	如果获取失败，说明 pending list 没有消息，结束循环
+			break
+		}
+		// 3. 解析消息中的订单信息
+		messages := result[0].Messages
+		values := messages[0].Values
+		order := model.VoucherOrder{
+			ID:        values["id"].(int64),
+			UserID:    values["userId"].(uint64),
+			VoucherID: values["voucherId"].(uint64),
+		}
+		// 4. 如果获取成功，可以下单
+		if err := s.handleVoucherOrder(&order); err != nil {
+			s.logger.Error("处理订单异常", zap.Error(err))
+			time.Sleep(time.Millisecond * 20)
+			continue
+		}
+		// 5. ACK 消息
+		if err := s.rdb.XAck(ctx, streamName, "g1", messages[0].ID).Err(); err != nil {
+			return
+		}
+	}
+}
+
 func (s *voucherOrderService) SeckillVoucher(ctx context.Context, req *v1.SeckillVoucherReq) (voucherId int64, err error) {
-	// 1. 执行 lua 脚本
+	// 获取用户 id
 	userId := user_holder.GetUser(ctx).ID
-	result, err := s.seckillScript.Run(ctx, s.rdb, []string{}, req.VoucherID, *userId).Result()
+	// 生成订单 id
+	orderId, err := s.redisWorker.NextId(ctx, "order")
+	if err != nil {
+		return 0, err
+	}
+	// 1. 执行 lua 脚本
+	result, err := s.seckillScript.Run(ctx, s.rdb, []string{}, req.VoucherID, *userId, orderId).Result()
 	if err != nil {
 		return 0, err
 	}
@@ -101,28 +198,46 @@ func (s *voucherOrderService) SeckillVoucher(ctx context.Context, req *v1.Seckil
 			return 0, v1.ErrNotAllowDoubleBuy
 		}
 	}
-	// 2.2. 为 0，有购买资格，把下单信息保存到阻塞队列
-	orderId, err := s.redisWorker.NextId(ctx, "order")
-	if err != nil {
-		return 0, err
-	}
-	var voucherOrder model.VoucherOrder
-	// 2.3. 订单 id
-	orderId, err = s.redisWorker.NextId(ctx, "order")
-	if err != nil {
-		return 0, err
-	}
-	voucherOrder.ID = orderId
-	// 2.4. 用户 id
-	voucherOrder.UserID = *userId
-	// 2.5. 代金券 id
-	voucherOrder.VoucherID = req.VoucherID
-	// 2.6. 放入阻塞队列
-	s.orderTasks <- &voucherOrder
 
 	// 3. 返回订单 id
 	return orderId, nil
 }
+
+//func (s *voucherOrderService) SeckillVoucher(ctx context.Context, req *v1.SeckillVoucherReq) (voucherId int64, err error) {
+//	// 获取用户
+//	userId := user_holder.GetUser(ctx).ID
+//	1. 执行 lua 脚本
+//	result, err := s.seckillScript.Run(ctx, s.rdb, []string{}, req.VoucherID, *userId).Result()
+//	if err != nil {
+//		return 0, err
+//	}
+//	// 2. 判断结果是否为 0
+//	if result.(int64) != 0 {
+//		// 2.1. 不为 0，代表没有购买资格
+//		if result.(int64) == 1 {
+//			return 0, v1.ErrInsufficientStock
+//		} else {
+//			return 0, v1.ErrNotAllowDoubleBuy
+//		}
+//	}
+//	// 2.2. 为 0，有购买资格，把下单信息保存到阻塞队列
+//	var voucherOrder model.VoucherOrder
+//	// 2.3. 订单 id
+//	orderId, err = s.redisWorker.NextId(ctx, "order")
+//	if err != nil {
+//		return 0, err
+//	}
+//	voucherOrder.ID = orderId
+//	// 2.4. 用户 id
+//	voucherOrder.UserID = *userId
+//	// 2.5. 代金券 id
+//	voucherOrder.VoucherID = req.VoucherID
+//	// 2.6. 放入阻塞队列
+//	s.orderTasks <- &voucherOrder
+//
+//	// 3. 返回订单 id
+//	return orderId, nil
+//}
 
 //func (s *voucherOrderService) SeckillVoucher(ctx context.Context, req *v1.SeckillVoucherReq) (voucherId int64, err error) {
 //	//	1. 查询优惠券

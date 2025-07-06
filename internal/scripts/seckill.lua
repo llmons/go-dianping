@@ -3,6 +3,8 @@
 local voucherId = ARGV[1]
 -- 1.2. 用户 id
 local userId = ARGV[2]
+-- 1.3. 订单 id
+local orderId = ARGV[3]
 
 -- 2. 数据 key
 -- 2.1. 库存 key
@@ -17,7 +19,7 @@ if ((tonumber(redis.call('get', stockKey))) <= 0) then
     return 1
 end
 -- 3.3. 判断用户是否下单
-if redis.call('sismember',orderKey,userId)==1 then
+if redis.call('sismember', orderKey, userId) == 1 then
     -- 3.4. 存在，重复下单，返回2
     return 2
 end
@@ -25,4 +27,6 @@ end
 redis.call('decr', stockKey)
 -- 3.6. 下单（保存用户到集合）
 redis.call('sadd', orderKey, userId)
+-- 3.7. 发送消息到队列中
+redis.call('xadd', 'stream.orders', '*', 'userId', userId, 'voucherId', voucherId, 'id', orderId)
 return 0
