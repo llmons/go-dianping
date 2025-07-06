@@ -26,7 +26,8 @@ func NewWire(viperViper *viper.Viper, logger *log.Logger) (*app.App, func(), err
 	handlerHandler := handler.NewHandler(logger)
 	db := service.NewDB(viperViper, logger)
 	query := service.NewQuery(db)
-	serviceService := service.NewService(logger, viperViper, query, client)
+	redsync := service.NewRedSync(client)
+	serviceService := service.NewService(logger, viperViper, query, client, redsync)
 	cacheClient := cache_client.NewCacheClientForShop(client)
 	shopService := service.NewShopService(serviceService, cacheClient)
 	shopHandler := handler.NewShopHandler(handlerHandler, shopService)
@@ -51,7 +52,7 @@ var cacheClientSet = wire.NewSet(cache_client.NewCacheClientForShop)
 
 var redisWorkerSet = wire.NewSet(redis_worker.NewRedisWorker)
 
-var serviceSet = wire.NewSet(service.NewDB, service.NewRedis, service.NewQuery, service.NewService, service.NewSeckillVoucherService, service.NewShopService, service.NewShopTypeService, service.NewUserService, service.NewVoucherService, service.NewVoucherOrderService)
+var serviceSet = wire.NewSet(service.NewDB, service.NewQuery, service.NewRedis, service.NewRedSync, service.NewService, service.NewSeckillVoucherService, service.NewShopService, service.NewShopTypeService, service.NewUserService, service.NewVoucherService, service.NewVoucherOrderService)
 
 var handlerSet = wire.NewSet(handler.NewHandler, handler.NewShopHandler, handler.NewShopTypeHandler, handler.NewUserHandler, handler.NewVoucherHandler, handler.NewVoucherOrderHandler)
 

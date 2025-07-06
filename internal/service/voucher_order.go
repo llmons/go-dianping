@@ -3,8 +3,8 @@ package service
 import (
 	"context"
 	"fmt"
+	"github.com/go-redsync/redsync/v4"
 	"go-dianping/api/v1"
-	"go-dianping/internal/base/redis_lock"
 	"go-dianping/internal/base/redis_worker"
 	"go-dianping/internal/base/user_holder"
 	"go-dianping/internal/model"
@@ -52,26 +52,46 @@ func (s *voucherOrderService) SeckillVoucher(ctx context.Context, req *v1.Seckil
 	}
 
 	userId := user_holder.GetUser(ctx).ID
-	// 创建锁
 	lockName := fmt.Sprintf("order:%d", *userId)
-	lock := redis_lock.NewSimpleRedisLock(lockName, s.rdb)
+
+	// ==================== CUSTOM LOCK ====================
+	// 创建锁
+	//lock := redis_lock.NewSimpleRedisLock(lockName, s.rdb)
 	// 获取锁
-	isLock, err := lock.TryLock(ctx, time.Second*5)
-	if err != nil {
-		return 0, err
-	}
+	//isLock, err := lock.TryLock(ctx, time.Second*5)
+	//if err != nil {
+	//	return 0, err
+	//}
 	// 判断是否获取锁成功
-	if !isLock {
+	//if !isLock {
+	//	//	获取锁失败，返回错误或重试
+	//	return 0, v1.ErrNotAllowDoubleBuy
+	//}
+	// 结束时释放锁
+	//defer func(lock redis_lock.ILock, ctx context.Context) {
+	//	closureErr := lock.Unlock(ctx)
+	//	if closureErr != nil {
+	//		err = closureErr
+	//	}
+	//}(lock, ctx)
+
+	// ==================== RedSync Lib ====================
+	// 创建锁
+	lock := s.rs.NewMutex(lockName)
+	// 获取锁
+	err = lock.TryLock()
+	// 判断是否获取锁成功
+	if err != nil {
 		//	获取锁失败，返回错误或重试
 		return 0, v1.ErrNotAllowDoubleBuy
 	}
 	// 结束时释放锁
-	defer func(lock redis_lock.ILock, ctx context.Context) {
-		closureErr := lock.Unlock(ctx)
+	defer func(lock *redsync.Mutex) {
+		_, closureErr := lock.Unlock()
 		if closureErr != nil {
 			err = closureErr
 		}
-	}(lock, ctx)
+	}(lock)
 	return s.createVoucherOrder(ctx, err, voucher)
 }
 

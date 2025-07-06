@@ -26,8 +26,9 @@ var redisWorkerSet = wire.NewSet(
 
 var serviceSet = wire.NewSet(
 	service.NewDB,
-	service.NewRedis,
 	service.NewQuery,
+	service.NewRedis,
+	service.NewRedSync,
 	service.NewService,
 	service.NewSeckillVoucherService,
 	service.NewShopService,

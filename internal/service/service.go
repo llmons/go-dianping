@@ -3,6 +3,8 @@ package service
 import (
 	"context"
 	"fmt"
+	"github.com/go-redsync/redsync/v4"
+	"github.com/go-redsync/redsync/v4/redis/goredis/v9"
 	"github.com/redis/go-redis/v9"
 	"github.com/spf13/viper"
 	"go-dianping/internal/query"
@@ -19,14 +21,16 @@ type Service struct {
 	conf   *viper.Viper
 	query  *query.Query
 	rdb    *redis.Client
+	rs     *redsync.Redsync
 }
 
-func NewService(logger *log.Logger, conf *viper.Viper, query *query.Query, rdb *redis.Client) *Service {
+func NewService(logger *log.Logger, conf *viper.Viper, query *query.Query, rdb *redis.Client, rs *redsync.Redsync) *Service {
 	return &Service{
 		logger: logger,
 		conf:   conf,
 		query:  query,
 		rdb:    rdb,
+		rs:     rs,
 	}
 }
 
@@ -62,4 +66,9 @@ func NewRedis(conf *viper.Viper) *redis.Client {
 	}
 
 	return rdb
+}
+
+func NewRedSync(rdb *redis.Client) *redsync.Redsync {
+	pool := goredis.NewPool(rdb)
+	return redsync.New(pool)
 }
