@@ -38,11 +38,11 @@ func (s *userService) SendCode(ctx context.Context, req *v1.SendCodeReq) error {
 	}
 	// 3. 符合，生成验证码
 	var code string
-	if s.conf.Get("env") == "prod" {
-		code = random.RandNumeral(6)
-	} else {
-		code = "123456"
-	}
+	//if s.conf.Get("env") == "prod" {
+	//	code = random.RandNumeral(6)
+	//} else {
+	code = "123456"
+	//}
 
 	// 4. 保存验证码到 redis
 	key := constants.RedisLoginCodeKey + req.Phone
@@ -50,7 +50,7 @@ func (s *userService) SendCode(ctx context.Context, req *v1.SendCodeReq) error {
 		return err
 	}
 
-	// 5. 发送验证码
+	// 5. 发送验证码，接入第三方服务
 	s.logger.Info("发送短信验证码成功", zap.String("验证码：", code))
 	// 返回 ok
 	return nil

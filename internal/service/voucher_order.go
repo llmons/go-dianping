@@ -119,7 +119,7 @@ func (s *voucherOrderService) createVoucherOrder(ctx context.Context, err error,
 		if err != nil {
 			return err
 		}
-		if info.Error != nil {
+		if info.Error != nil || info.RowsAffected == 0 { // info.RowsAffected == 0 即库存为 0，没有更新（扣减失败），但是也没 error
 			// 扣减失败
 			return v1.ErrInsufficientStock
 		}
