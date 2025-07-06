@@ -19,13 +19,27 @@ services:
       - "6379:6379"
     command: [ "redis-server", "--requirepass 123321" ]
 
+#  redis2:
+#    image: redis:alpine
+#    hostname: redis2
+#    container_name: redis2
+#    ports:
+#      - "6380:6379"
+#
+#  redis3:
+#    image: redis:alpine
+#    hostname: redis3
+#    container_name: redis3
+#    ports:
+#      - "6381:6379"
+
   nginx:
     image: nginx:alpine
     container_name: nginx
     ports:
       - "8080:8080"
     volumes:
-        - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
     depends_on:
       - redis
       - mysql

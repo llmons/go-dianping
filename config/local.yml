@@ -15,6 +15,18 @@ data:
     db: 0
     read_timeout: 0.2s
     write_timeout: 0.2s
+  redis2:
+    addr: 127.0.0.1:6380
+    password: ""
+    db: 0
+    read_timeout: 0.2s
+    write_timeout: 0.2s
+  redis3:
+    addr: 127.0.0.1:6381
+    password: ""
+    db: 0
+    read_timeout: 0.2s
+    write_timeout: 0.2s
 
 log:
   log_level: debug
