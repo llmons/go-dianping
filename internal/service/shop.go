@@ -3,7 +3,6 @@ package service
 import (
 	"context"
 	"fmt"
-	"github.com/jinzhu/copier"
 	"go-dianping/api/v1"
 	"go-dianping/internal/base/cache_client"
 	"go-dianping/internal/base/constants"
@@ -53,17 +52,11 @@ func (s *shopService) QueryById(ctx context.Context, req *v1.QueryShopByIDReq) (
 	return shop, nil
 }
 
-func (s *shopService) UpdateShop(ctx context.Context, req *model.Shop) error {
+func (s *shopService) UpdateShop(ctx context.Context, shop *model.Shop) error {
 	// 1. 更新数据库
-
-	var shop model.Shop
-	if err := copier.Copy(&shop, &req); err != nil {
-		return err
-	}
-
-	if _, err := s.query.Shop.Where(s.query.Shop.ID.Eq(req.ID)).Updates(&shop); err != nil {
+	if _, err := s.query.Shop.Where(s.query.Shop.ID.Eq(shop.ID)).Updates(&shop); err != nil {
 		return err
 	}
 	// 2. 删除缓存
-	return s.rdb.Del(ctx, fmt.Sprintf("%s%d", constants.RedisCacheShopKey, req.ID)).Err()
+	return s.rdb.Del(ctx, fmt.Sprintf("%s%d", constants.RedisCacheShopKey, shop.ID)).Err()
 }

@@ -21,4 +21,6 @@ const (
 	RedisCacheNullTTL = time.Minute * 2
 
 	RedisLockShopKey = "redis_lock:shop:"
+
+	RedisSeckillStockKey = "seckill:stock:"
 )
