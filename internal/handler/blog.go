@@ -24,7 +24,35 @@ func NewBlogHandler(
 	}
 }
 
+// SaveBlog godoc
+// @Summary 保存博文
+// @Schemes
+// @Description
+// @Tags shop
+// @Accept json
+// @Produce json
+// @Param blog body model.Blog true "博文信息"
+// @Success 200 {object} v1.QueryShopByIDResp
+// @Router /blog/ [post]
 func (h *BlogHandler) SaveBlog(ctx *gin.Context) {
+	var blog model.Blog
+	if err := ctx.ShouldBindJSON(&blog); err != nil {
+		v1.HandleError(ctx, http.StatusBadRequest, err.Error(), nil)
+		return
+	}
+	// 获取登录用户
+	user := user_holder.GetUser(ctx)
+	blog.ID = *user.ID
+	//	保存探店博文
+	if err := h.blogService.SaveBlog(ctx, &blog); err != nil {
+		v1.HandleError(ctx, http.StatusInternalServerError, err.Error(), nil)
+		return
+	}
+	//	返回 id
+	v1.HandleSuccess(ctx, blog.ID)
+}
+
+func (h *BlogHandler) LikeBlog(ctx *gin.Context) {
 	var blog model.Blog
 	if err := ctx.ShouldBindJSON(&blog); err != nil {
 		v1.HandleError(ctx, http.StatusBadRequest, err.Error(), nil)
