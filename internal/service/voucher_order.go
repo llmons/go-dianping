@@ -13,6 +13,7 @@ import (
 	"go.uber.org/zap"
 	"os"
 	"path/filepath"
+	"strconv"
 	"time"
 )
 
@@ -74,10 +75,22 @@ func NewVoucherOrderService(
 			// 3. 解析消息中的订单信息
 			messages := result[0].Messages
 			values := messages[0].Values
+			id, err := strconv.Atoi(values["id"].(string))
+			if err != nil {
+				return
+			}
+			userID, err := strconv.Atoi(values["userId"].(string))
+			if err != nil {
+				return
+			}
+			voucherID, err := strconv.Atoi(values["voucherId"].(string))
+			if err != nil {
+				return
+			}
 			order := model.VoucherOrder{
-				ID:        values["id"].(int64),
-				UserID:    values["userId"].(uint64),
-				VoucherID: values["voucherId"].(uint64),
+				ID:        int64(id),
+				UserID:    uint64(userID),
+				VoucherID: uint64(voucherID),
 			}
 			// 4. 如果获取成功，可以下单
 			if err := srv.handleVoucherOrder(&order); err != nil {
