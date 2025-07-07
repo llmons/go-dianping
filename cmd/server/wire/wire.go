@@ -31,6 +31,7 @@ var serviceSet = wire.NewSet(
 	service.NewRedSync,
 
 	service.NewService,
+	service.NewBlogService,
 	service.NewSeckillVoucherService,
 	service.NewShopService,
 	service.NewShopTypeService,
@@ -41,6 +42,7 @@ var serviceSet = wire.NewSet(
 
 var handlerSet = wire.NewSet(
 	handler.NewHandler,
+	handler.NewBlogHandler,
 	handler.NewShopHandler,
 	handler.NewShopTypeHandler,
 	handler.NewUploadHandler,
