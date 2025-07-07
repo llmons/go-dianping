@@ -78,6 +78,7 @@ func NewHTTPServer(
 		uploadRouter := s.Group("/upload")
 		{
 			uploadRouter.POST("/blog", uploadHandler.UploadImage)
+			uploadRouter.GET("/blog/delete", uploadHandler.DeleteBlogImg)
 		}
 
 		userRouter := s.Group("/user")

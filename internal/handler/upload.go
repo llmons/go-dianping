@@ -51,13 +51,37 @@ func (h *UploadHandler) UploadImage(ctx *gin.Context) {
 	v1.HandleSuccess(ctx, filename)
 }
 
+func (h *UploadHandler) DeleteBlogImg(ctx *gin.Context) {
+	var req struct {
+		Name string `form:"name"`
+	}
+	if err := ctx.ShouldBindQuery(&req); err != nil {
+		v1.HandleError(ctx, http.StatusBadRequest, err.Error(), nil)
+		return
+	}
+	info, err := os.Stat(filepath.Join(imageUploadPath, req.Name))
+	if err != nil {
+		v1.HandleError(ctx, http.StatusBadRequest, err.Error(), nil)
+		return
+	}
+	if info.IsDir() {
+		v1.HandleError(ctx, http.StatusBadRequest, v1.ErrIncorrectFilename.Error(), nil)
+		return
+	}
+	if err := os.Remove(filepath.Join(imageUploadPath, req.Name)); err != nil {
+		v1.HandleError(ctx, http.StatusInternalServerError, err.Error(), nil)
+		return
+	}
+	v1.HandleSuccess(ctx, nil)
+}
+
 func (h *UploadHandler) createNewFilename(originalFilename string) (string, error) {
 	// 获取后缀
 	var suffix string
 	if dot := strings.LastIndex(originalFilename, "."); dot != -1 {
 		suffix = originalFilename[dot+1:]
 	}
-
+	// 生成目录
 	hashBuilder := fnv.New32a()
 	if _, err := hashBuilder.Write([]byte(originalFilename)); err != nil {
 		return "", err
@@ -67,5 +91,6 @@ func (h *UploadHandler) createNewFilename(originalFilename string) (string, erro
 	if err := os.MkdirAll(filepath.Join(imageUploadPath, d1, d2), os.ModePerm); err != nil {
 		return "", err
 	}
+	// 生成文件名
 	return filepath.Join(imageUploadPath, d1, d2, strconv.Itoa(int(hash)), suffix), nil
 }
