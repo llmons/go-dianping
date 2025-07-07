@@ -65,7 +65,7 @@ func NewVoucherOrderService(
 				Streams:  []string{streamName, ">"},
 			}).Result()
 			if err != nil {
-				return
+				continue
 			}
 			// 2. 判断消息获取是否成功
 			if len(result) == 0 {
@@ -77,15 +77,15 @@ func NewVoucherOrderService(
 			values := messages[0].Values
 			id, err := strconv.Atoi(values["id"].(string))
 			if err != nil {
-				return
+				continue
 			}
 			userID, err := strconv.Atoi(values["userId"].(string))
 			if err != nil {
-				return
+				continue
 			}
 			voucherID, err := strconv.Atoi(values["voucherId"].(string))
 			if err != nil {
-				return
+				continue
 			}
 			order := model.VoucherOrder{
 				ID:        int64(id),
@@ -99,7 +99,7 @@ func NewVoucherOrderService(
 			}
 			// 5. ACK 消息
 			if err := srv.rdb.XAck(ctx, streamName, "g1", messages[0].ID).Err(); err != nil {
-				return
+				continue
 			}
 		}
 	}()
@@ -161,7 +161,7 @@ func (s *voucherOrderService) handlePendingList() {
 			Streams:  []string{streamName, "0"},
 		}).Result()
 		if err != nil {
-			return
+			continue
 		}
 		// 2. 判断消息获取是否成功
 		if len(result) == 0 {
@@ -171,10 +171,22 @@ func (s *voucherOrderService) handlePendingList() {
 		// 3. 解析消息中的订单信息
 		messages := result[0].Messages
 		values := messages[0].Values
+		id, err := strconv.Atoi(values["id"].(string))
+		if err != nil {
+			continue
+		}
+		userID, err := strconv.Atoi(values["userId"].(string))
+		if err != nil {
+			continue
+		}
+		voucherID, err := strconv.Atoi(values["voucherId"].(string))
+		if err != nil {
+			continue
+		}
 		order := model.VoucherOrder{
-			ID:        values["id"].(int64),
-			UserID:    values["userId"].(uint64),
-			VoucherID: values["voucherId"].(uint64),
+			ID:        int64(id),
+			UserID:    uint64(userID),
+			VoucherID: uint64(voucherID),
 		}
 		// 4. 如果获取成功，可以下单
 		if err := s.handleVoucherOrder(&order); err != nil {
@@ -184,7 +196,7 @@ func (s *voucherOrderService) handlePendingList() {
 		}
 		// 5. ACK 消息
 		if err := s.rdb.XAck(ctx, streamName, "g1", messages[0].ID).Err(); err != nil {
-			return
+			continue
 		}
 	}
 }

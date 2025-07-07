@@ -235,7 +235,7 @@
             <stringProp name="variableNames">token</stringProp>
           </CSVDataSet>
           <hashTree/>
-          <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="登录状态头" enabled="true">
+          <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="登录状态头">
             <collectionProp name="HeaderManager.headers">
               <elementProp name="" elementType="Header">
                 <stringProp name="Header.name">Authorization</stringProp>
