@@ -20,6 +20,7 @@ func NewHTTPServer(
 	rdb *redis.Client,
 	shopHandler *handler.ShopHandler,
 	shopTypeHandler *handler.ShopTypeHandler,
+	uploadHandler *handler.UploadHandler,
 	userHandler *handler.UserHandler,
 	voucherHandler *handler.VoucherHandler,
 	voucherOrderHandler *handler.VoucherOrderHandler,
@@ -76,7 +77,7 @@ func NewHTTPServer(
 
 		uploadRouter := s.Group("/upload")
 		{
-			uploadRouter.GET("")
+			uploadRouter.POST("/blog", uploadHandler.UploadImage)
 		}
 
 		userRouter := s.Group("/user")

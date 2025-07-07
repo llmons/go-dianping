@@ -29,6 +29,7 @@ var serviceSet = wire.NewSet(
 	service.NewQuery,
 	service.NewRedis,
 	service.NewRedSync,
+
 	service.NewService,
 	service.NewSeckillVoucherService,
 	service.NewShopService,
@@ -42,6 +43,7 @@ var handlerSet = wire.NewSet(
 	handler.NewHandler,
 	handler.NewShopHandler,
 	handler.NewShopTypeHandler,
+	handler.NewUploadHandler,
 	handler.NewUserHandler,
 	handler.NewVoucherHandler,
 	handler.NewVoucherOrderHandler,

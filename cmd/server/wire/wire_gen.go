@@ -33,6 +33,7 @@ func NewWire(viperViper *viper.Viper, logger *log.Logger) (*app.App, func(), err
 	shopHandler := handler.NewShopHandler(handlerHandler, shopService)
 	shopTypeService := service.NewShopTypeService(serviceService)
 	shopTypeHandler := handler.NewShopTypeHandler(handlerHandler, shopTypeService)
+	uploadHandler := handler.NewUploadHandler(handlerHandler)
 	userService := service.NewUserService(serviceService)
 	userHandler := handler.NewUserHandler(handlerHandler, userService)
 	voucherService := service.NewVoucherService(serviceService)
@@ -40,7 +41,7 @@ func NewWire(viperViper *viper.Viper, logger *log.Logger) (*app.App, func(), err
 	redisWorker := redis_worker.NewRedisWorker(client)
 	voucherOrderService := service.NewVoucherOrderService(serviceService, redisWorker)
 	voucherOrderHandler := handler.NewVoucherOrderHandler(handlerHandler, voucherOrderService)
-	httpServer := server.NewHTTPServer(logger, viperViper, client, shopHandler, shopTypeHandler, userHandler, voucherHandler, voucherOrderHandler)
+	httpServer := server.NewHTTPServer(logger, viperViper, client, shopHandler, shopTypeHandler, uploadHandler, userHandler, voucherHandler, voucherOrderHandler)
 	appApp := newApp(httpServer)
 	return appApp, func() {
 	}, nil
@@ -54,7 +55,7 @@ var redisWorkerSet = wire.NewSet(redis_worker.NewRedisWorker)
 
 var serviceSet = wire.NewSet(service.NewDB, service.NewQuery, service.NewRedis, service.NewRedSync, service.NewService, service.NewSeckillVoucherService, service.NewShopService, service.NewShopTypeService, service.NewUserService, service.NewVoucherService, service.NewVoucherOrderService)
 
-var handlerSet = wire.NewSet(handler.NewHandler, handler.NewShopHandler, handler.NewShopTypeHandler, handler.NewUserHandler, handler.NewVoucherHandler, handler.NewVoucherOrderHandler)
+var handlerSet = wire.NewSet(handler.NewHandler, handler.NewShopHandler, handler.NewShopTypeHandler, handler.NewUploadHandler, handler.NewUserHandler, handler.NewVoucherHandler, handler.NewVoucherOrderHandler)
 
 var serverSet = wire.NewSet(server.NewHTTPServer)
 
