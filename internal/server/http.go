@@ -63,7 +63,10 @@ func NewHTTPServer(
 		blogRouter := s.Group("/blog")
 		{
 			blogRouter.POST("", blogHandler.SaveBlog)
-			blogRouter.GET("/hot")
+			blogRouter.PUT("/like/:id", blogHandler.LikeBlog)
+			blogRouter.GET("/of/me", blogHandler.QueryMyBlog)
+			blogRouter.GET("/hot", blogHandler.QueryHotBlog)
+			blogRouter.GET("/:id", blogHandler.QueryById)
 		}
 
 		shopRouter := s.Group("/shop")

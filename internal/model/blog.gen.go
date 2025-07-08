@@ -22,6 +22,8 @@ type Blog struct {
 	Comments   *uint32    `gorm:"column:comments;type:int(8) unsigned;comment:评论数量" json:"comments"`                                           // 评论数量
 	CreateTime *time.Time `gorm:"column:create_time;type:timestamp;not null;default:current_timestamp();autoCreateTime;comment:创建时间" json:"-"` // 创建时间
 	UpdateTime *time.Time `gorm:"column:update_time;type:timestamp;not null;default:current_timestamp();autoUpdateTime;comment:更新时间" json:"-"` // 更新时间
+	Icon       *string    `gorm:"-" json:"icon"`
+	Name       *string    `gorm:"-" json:"name"`
 }
 
 // TableName Blog's table name

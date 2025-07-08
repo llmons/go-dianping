@@ -32,7 +32,7 @@ func NewBlogHandler(
 // @Accept json
 // @Produce json
 // @Param blog body model.Blog true "博文信息"
-// @Success 200 {object} v1.QueryShopByIDResp
+// @Success 200 {object} v1.Response
 // @Router /blog/ [post]
 func (h *BlogHandler) SaveBlog(ctx *gin.Context) {
 	var blog model.Blog
@@ -60,7 +60,7 @@ func (h *BlogHandler) SaveBlog(ctx *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param id path uint64 true "博文 ID"
-// @Success 200 {object} v1.QueryShopByIDResp
+// @Success 200 {object} v1.Response
 // @Router /blog/like/{id} [put]
 func (h *BlogHandler) LikeBlog(ctx *gin.Context) {
 	var req struct {
@@ -75,6 +75,86 @@ func (h *BlogHandler) LikeBlog(ctx *gin.Context) {
 		v1.HandleError(ctx, http.StatusInternalServerError, err.Error(), nil)
 		return
 	}
-	//	返回 id
 	v1.HandleSuccess(ctx, nil)
+}
+
+// QueryMyBlog godoc
+// @Summary 查询我的博文
+// @Schemes
+// @Description
+// @Tags shop
+// @Accept json
+// @Produce json
+// @Param current query int true "当前页码"
+// @Success 200 {object} v1.QueryMyBlogResp
+// @Router /blog/of/me [get]
+func (h *BlogHandler) QueryMyBlog(ctx *gin.Context) {
+	var req struct {
+		Current int `form:"id" binding:"required"`
+	}
+	if err := ctx.ShouldBindQuery(&req); err != nil {
+		v1.HandleError(ctx, http.StatusBadRequest, err.Error(), nil)
+		return
+	}
+
+	records, err := h.blogService.QueryMyBlog(ctx, req.Current)
+	if err != nil {
+		v1.HandleError(ctx, http.StatusInternalServerError, err.Error(), nil)
+		return
+	}
+	v1.HandleListSuccess(ctx, records, len(records))
+}
+
+// QueryHotBlog godoc
+// @Summary 查询热门博文
+// @Schemes
+// @Description
+// @Tags shop
+// @Accept json
+// @Produce json
+// @Param current query int true "当前页码"
+// @Success 200 {object} v1.QueryHotBlogResp
+// @Router /blog/hot [get]
+func (h *BlogHandler) QueryHotBlog(ctx *gin.Context) {
+	var req struct {
+		Current int `form:"id" binding:"required"`
+	}
+	if err := ctx.ShouldBindQuery(&req); err != nil {
+		v1.HandleError(ctx, http.StatusBadRequest, err.Error(), nil)
+		return
+	}
+
+	records, err := h.blogService.QueryHotBlog(ctx, req.Current)
+	if err != nil {
+		v1.HandleError(ctx, http.StatusInternalServerError, err.Error(), nil)
+		return
+	}
+	v1.HandleListSuccess(ctx, records, len(records))
+}
+
+// QueryById godoc
+// @Summary 根据 ID 查询博文
+// @Schemes
+// @Description
+// @Tags shop
+// @Accept json
+// @Produce json
+// @Param id path uint64 true "博文 ID"
+// @Success 200 {object} v1.QueryBlogByIDResp
+// @Router /blog/{id} [get]
+func (h *BlogHandler) QueryById(ctx *gin.Context) {
+	var req struct {
+		ID uint64 `uri:"id" binding:"required"`
+	}
+	if err := ctx.ShouldBindUri(&req); err != nil {
+		v1.HandleError(ctx, http.StatusBadRequest, err.Error(), nil)
+		return
+	}
+
+	blog, err := h.blogService.QueryById(ctx, req.ID)
+	if err != nil {
+		v1.HandleError(ctx, http.StatusInternalServerError, err.Error(), nil)
+		return
+	}
+	v1.HandleSuccess(ctx, blog)
 }

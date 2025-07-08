@@ -61,10 +61,6 @@ func main() {
 		gen.FieldJSONTag("update_time", "-"),
 	}
 
-	for _, col := range []string{"id", "user_id", "voucher_id", "order_id"} {
-		fieldOpts = append(fieldOpts, gen.FieldRename(col, snakeToLowerCamel(col)))
-	}
-
 	g.WithOpts(fieldOpts...)
 
 	g.WithFileNameStrategy(func(table string) string {
@@ -85,7 +81,10 @@ func main() {
 	}
 	g.UseDB(db)
 	g.ApplyInterface(func(Querier) {},
-		g.GenerateModelAs("tb_blog", "Blog"),
+		g.GenerateModelAs("tb_blog", "Blog",
+			gen.FieldNew("Icon", "*string", field.Tag{"gorm": "-", "json": "icon"}),
+			gen.FieldNew("Name", "*string", field.Tag{"gorm": "-", "json": "name"}),
+		),
 		g.GenerateModelAs("tb_blog_comments", "BlogComments"),
 		g.GenerateModelAs("tb_follow", "Follow"),
 		g.GenerateModelAs("tb_seckill_voucher", "SeckillVoucher"),
