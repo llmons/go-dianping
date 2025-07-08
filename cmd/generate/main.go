@@ -11,6 +11,16 @@ import (
 	"strings"
 )
 
+func snakeToLowerCamel(snake string) string {
+	parts := strings.Split(snake, "_")
+	for i := 1; i < len(parts); i++ {
+		if len(parts[i]) > 0 {
+			parts[i] = strings.ToUpper(parts[i][:1]) + parts[i][1:]
+		}
+	}
+	return strings.Join(parts, "")
+}
+
 type Querier interface {
 	// GetByID
 	// SELECT * FROM @@table WHERE id=@id
@@ -45,18 +55,14 @@ func main() {
 			return tag
 		}),
 		gen.FieldJSONTagWithNS(func(columnName string) (tagContent string) {
-			// snake_case TO camelCase
-			parts := strings.Split(columnName, "_")
-			for i := 1; i < len(parts); i++ {
-				if len(parts[i]) > 0 {
-					parts[i] = strings.ToUpper(parts[i][:1]) + parts[i][1:]
-				}
-			}
-			camel := strings.Join(parts, "")
-			return strings.ToLower(camel[:1]) + camel[1:]
+			return snakeToLowerCamel(columnName)
 		}),
 		gen.FieldJSONTag("create_time", "-"),
 		gen.FieldJSONTag("update_time", "-"),
+	}
+
+	for _, col := range []string{"id", "user_id", "voucher_id", "order_id"} {
+		fieldOpts = append(fieldOpts, gen.FieldRename(col, snakeToLowerCamel(col)))
 	}
 
 	g.WithOpts(fieldOpts...)
@@ -67,10 +73,6 @@ func main() {
 
 	g.WithDataTypeMap(map[string]func(gorm.ColumnType) string{
 		"tinyint": func(column gorm.ColumnType) string {
-			detail, ok := column.ColumnType()
-			if ok && detail == "tinyint(1)" {
-				return "int8"
-			}
 			return "int8"
 		},
 	})
