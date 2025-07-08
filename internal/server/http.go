@@ -18,8 +18,10 @@ func NewHTTPServer(
 	logger *log.Logger,
 	conf *viper.Viper,
 	rdb *redis.Client,
+	blogHandler *handler.BlogHandler,
 	shopHandler *handler.ShopHandler,
 	shopTypeHandler *handler.ShopTypeHandler,
+	uploadHandler *handler.UploadHandler,
 	userHandler *handler.UserHandler,
 	voucherHandler *handler.VoucherHandler,
 	voucherOrderHandler *handler.VoucherOrderHandler,
@@ -60,6 +62,7 @@ func NewHTTPServer(
 	{
 		blogRouter := s.Group("/blog")
 		{
+			blogRouter.POST("", blogHandler.SaveBlog)
 			blogRouter.GET("/hot")
 		}
 
@@ -76,7 +79,8 @@ func NewHTTPServer(
 
 		uploadRouter := s.Group("/upload")
 		{
-			uploadRouter.GET("")
+			uploadRouter.POST("/blog", uploadHandler.UploadImage)
+			uploadRouter.GET("/blog/delete", uploadHandler.DeleteBlogImg)
 		}
 
 		userRouter := s.Group("/user")

@@ -28,11 +28,14 @@ func NewWire(viperViper *viper.Viper, logger *log.Logger) (*app.App, func(), err
 	query := service.NewQuery(db)
 	redsync := service.NewRedSync(client)
 	serviceService := service.NewService(logger, viperViper, query, client, redsync)
+	blogService := service.NewBlogService(serviceService)
+	blogHandler := handler.NewBlogHandler(handlerHandler, blogService)
 	cacheClient := cache_client.NewCacheClientForShop(client)
 	shopService := service.NewShopService(serviceService, cacheClient)
 	shopHandler := handler.NewShopHandler(handlerHandler, shopService)
 	shopTypeService := service.NewShopTypeService(serviceService)
 	shopTypeHandler := handler.NewShopTypeHandler(handlerHandler, shopTypeService)
+	uploadHandler := handler.NewUploadHandler(handlerHandler)
 	userService := service.NewUserService(serviceService)
 	userHandler := handler.NewUserHandler(handlerHandler, userService)
 	voucherService := service.NewVoucherService(serviceService)
@@ -40,7 +43,7 @@ func NewWire(viperViper *viper.Viper, logger *log.Logger) (*app.App, func(), err
 	redisWorker := redis_worker.NewRedisWorker(client)
 	voucherOrderService := service.NewVoucherOrderService(serviceService, redisWorker)
 	voucherOrderHandler := handler.NewVoucherOrderHandler(handlerHandler, voucherOrderService)
-	httpServer := server.NewHTTPServer(logger, viperViper, client, shopHandler, shopTypeHandler, userHandler, voucherHandler, voucherOrderHandler)
+	httpServer := server.NewHTTPServer(logger, viperViper, client, blogHandler, shopHandler, shopTypeHandler, uploadHandler, userHandler, voucherHandler, voucherOrderHandler)
 	appApp := newApp(httpServer)
 	return appApp, func() {
 	}, nil
@@ -52,9 +55,9 @@ var cacheClientSet = wire.NewSet(cache_client.NewCacheClientForShop)
 
 var redisWorkerSet = wire.NewSet(redis_worker.NewRedisWorker)
 
-var serviceSet = wire.NewSet(service.NewDB, service.NewQuery, service.NewRedis, service.NewRedSync, service.NewService, service.NewSeckillVoucherService, service.NewShopService, service.NewShopTypeService, service.NewUserService, service.NewVoucherService, service.NewVoucherOrderService)
+var serviceSet = wire.NewSet(service.NewDB, service.NewQuery, service.NewRedis, service.NewRedSync, service.NewService, service.NewBlogService, service.NewSeckillVoucherService, service.NewShopService, service.NewShopTypeService, service.NewUserService, service.NewVoucherService, service.NewVoucherOrderService)
 
-var handlerSet = wire.NewSet(handler.NewHandler, handler.NewShopHandler, handler.NewShopTypeHandler, handler.NewUserHandler, handler.NewVoucherHandler, handler.NewVoucherOrderHandler)
+var handlerSet = wire.NewSet(handler.NewHandler, handler.NewBlogHandler, handler.NewShopHandler, handler.NewShopTypeHandler, handler.NewUploadHandler, handler.NewUserHandler, handler.NewVoucherHandler, handler.NewVoucherOrderHandler)
 
 var serverSet = wire.NewSet(server.NewHTTPServer)
 

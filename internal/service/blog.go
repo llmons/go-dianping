@@ -6,7 +6,7 @@ import (
 )
 
 type BlogService interface {
-	GetBlog(ctx context.Context, id int64) (*model.Blog, error)
+	SaveBlog(ctx context.Context, blog *model.Blog) error
 }
 
 func NewBlogService(
@@ -21,6 +21,6 @@ type blogService struct {
 	*Service
 }
 
-func (s *blogService) GetBlog(ctx context.Context, id int64) (*model.Blog, error) {
-	return &model.Blog{}, nil
+func (s *blogService) SaveBlog(_ context.Context, blog *model.Blog) error {
+	return s.query.Blog.Save(blog)
 }
