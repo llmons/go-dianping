@@ -1,4 +1,35 @@
 definitions:
+  model.Blog:
+    properties:
+      comments:
+        description: 评论数量
+        type: integer
+      content:
+        description: 探店的文字描述
+        type: string
+      icon:
+        type: string
+      id:
+        description: 主键
+        type: integer
+      images:
+        description: 探店的照片，最多9张，多张以","隔开
+        type: string
+      liked:
+        description: 点赞数量
+        type: integer
+      name:
+        type: string
+      shopId:
+        description: 商户id
+        type: integer
+      title:
+        description: 标题
+        type: string
+      userId:
+        description: 用户id
+        type: integer
+    type: object
   model.Shop:
     properties:
       address:
@@ -169,6 +200,43 @@ definitions:
       total:
         type: integer
     type: object
+  v1.QueryBlogByIDResp:
+    properties:
+      data:
+        $ref: '#/definitions/model.Blog'
+      errorMsg:
+        type: string
+      success:
+        type: boolean
+      total:
+        type: integer
+    type: object
+  v1.QueryHotBlogResp:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/model.Blog'
+        type: array
+      errorMsg:
+        type: string
+      success:
+        type: boolean
+      total:
+        type: integer
+    type: object
+  v1.QueryMyBlogResp:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/model.Blog'
+        type: array
+      errorMsg:
+        type: string
+      success:
+        type: boolean
+      total:
+        type: integer
+    type: object
   v1.QueryShopByIDResp:
     properties:
       data:
@@ -257,6 +325,107 @@ paths:
           schema:
             $ref: '#/definitions/v1.Response'
       summary: 更新商铺信息
+      tags:
+      - shop
+  /blog/:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 博文信息
+        in: body
+        name: blog
+        required: true
+        schema:
+          $ref: '#/definitions/model.Blog'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/v1.Response'
+      summary: 保存博文
+      tags:
+      - shop
+  /blog/{id}:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: 博文 ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/v1.QueryBlogByIDResp'
+      summary: 根据 ID 查询博文
+      tags:
+      - shop
+  /blog/hot:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: 当前页码
+        in: query
+        name: current
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/v1.QueryHotBlogResp'
+      summary: 查询热门博文
+      tags:
+      - shop
+  /blog/like/{id}:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: 博文 ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/v1.Response'
+      summary: 点赞博文
+      tags:
+      - shop
+  /blog/of/me:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: 当前页码
+        in: query
+        name: current
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/v1.QueryMyBlogResp'
+      summary: 查询我的博文
       tags:
       - shop
   /shop-type/list:

@@ -56,6 +56,163 @@ const docTemplate = `{
                 }
             }
         },
+        "/blog/": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "shop"
+                ],
+                "summary": "保存博文",
+                "parameters": [
+                    {
+                        "description": "博文信息",
+                        "name": "blog",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.Blog"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/v1.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/blog/hot": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "shop"
+                ],
+                "summary": "查询热门博文",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "当前页码",
+                        "name": "current",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/v1.QueryHotBlogResp"
+                        }
+                    }
+                }
+            }
+        },
+        "/blog/like/{id}": {
+            "put": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "shop"
+                ],
+                "summary": "点赞博文",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "博文 ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/v1.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/blog/of/me": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "shop"
+                ],
+                "summary": "查询我的博文",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "当前页码",
+                        "name": "current",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/v1.QueryMyBlogResp"
+                        }
+                    }
+                }
+            }
+        },
+        "/blog/{id}": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "shop"
+                ],
+                "summary": "根据 ID 查询博文",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "博文 ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/v1.QueryBlogByIDResp"
+                        }
+                    }
+                }
+            }
+        },
         "/shop-type/list": {
             "get": {
                 "produces": [
@@ -287,6 +444,49 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "model.Blog": {
+            "type": "object",
+            "properties": {
+                "comments": {
+                    "description": "评论数量",
+                    "type": "integer"
+                },
+                "content": {
+                    "description": "探店的文字描述",
+                    "type": "string"
+                },
+                "icon": {
+                    "type": "string"
+                },
+                "id": {
+                    "description": "主键",
+                    "type": "integer"
+                },
+                "images": {
+                    "description": "探店的照片，最多9张，多张以\",\"隔开",
+                    "type": "string"
+                },
+                "liked": {
+                    "description": "点赞数量",
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "shopId": {
+                    "description": "商户id",
+                    "type": "integer"
+                },
+                "title": {
+                    "description": "标题",
+                    "type": "string"
+                },
+                "userId": {
+                    "description": "用户id",
+                    "type": "integer"
+                }
+            }
+        },
         "model.Shop": {
             "type": "object",
             "properties": {
@@ -520,6 +720,63 @@ const docTemplate = `{
             "properties": {
                 "data": {
                     "$ref": "#/definitions/v1.SimpleUser"
+                },
+                "errorMsg": {
+                    "type": "string"
+                },
+                "success": {
+                    "type": "boolean"
+                },
+                "total": {
+                    "type": "integer"
+                }
+            }
+        },
+        "v1.QueryBlogByIDResp": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/model.Blog"
+                },
+                "errorMsg": {
+                    "type": "string"
+                },
+                "success": {
+                    "type": "boolean"
+                },
+                "total": {
+                    "type": "integer"
+                }
+            }
+        },
+        "v1.QueryHotBlogResp": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.Blog"
+                    }
+                },
+                "errorMsg": {
+                    "type": "string"
+                },
+                "success": {
+                    "type": "boolean"
+                },
+                "total": {
+                    "type": "integer"
+                }
+            }
+        },
+        "v1.QueryMyBlogResp": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.Blog"
+                    }
                 },
                 "errorMsg": {
                     "type": "string"
