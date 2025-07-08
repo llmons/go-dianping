@@ -158,3 +158,30 @@ func (h *BlogHandler) QueryById(ctx *gin.Context) {
 	}
 	v1.HandleSuccess(ctx, blog)
 }
+
+// QueryBlogLikes godoc
+// @Summary 根据博文的点赞信息
+// @Schemes
+// @Description
+// @Tags shop
+// @Accept json
+// @Produce json
+// @Param id path uint64 true "博文 ID"
+// @Success 200 {object} v1.QueryBlogByIDResp
+// @Router /blog/{id} [get]
+func (h *BlogHandler) QueryBlogLikes(ctx *gin.Context) {
+	var req struct {
+		ID uint64 `uri:"id" binding:"required"`
+	}
+	if err := ctx.ShouldBindUri(&req); err != nil {
+		v1.HandleError(ctx, http.StatusBadRequest, err.Error(), nil)
+		return
+	}
+
+	blog, err := h.blogService.QueryBlogLikes(ctx, req.ID)
+	if err != nil {
+		v1.HandleError(ctx, http.StatusInternalServerError, err.Error(), nil)
+		return
+	}
+	v1.HandleSuccess(ctx, blog)
+}

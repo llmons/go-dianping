@@ -23,4 +23,6 @@ const (
 	RedisLockShopKey = "redis_lock:shop:"
 
 	RedisSeckillStockKey = "seckill:stock:"
+
+	RedisBlogLikeKey = "blog:liked:"
 )

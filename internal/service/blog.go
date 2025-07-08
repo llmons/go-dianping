@@ -3,12 +3,14 @@ package service
 import (
 	"context"
 	"errors"
+	"github.com/redis/go-redis/v9"
 	v1 "go-dianping/api/v1"
 	"go-dianping/internal/base/constants"
 	"go-dianping/internal/base/user_holder"
 	"go-dianping/internal/model"
 	"gorm.io/gorm"
 	"strconv"
+	"time"
 )
 
 type BlogService interface {
@@ -17,6 +19,7 @@ type BlogService interface {
 	QueryMyBlog(ctx context.Context, current int) ([]*model.Blog, error)
 	QueryHotBlog(ctx context.Context, current int) ([]*model.Blog, error)
 	QueryBlogById(ctx context.Context, id uint64) (*model.Blog, error)
+	QueryBlogLikes(ctx context.Context, id uint64) ([]*v1.SimpleUser, error)
 }
 
 func NewBlogService(
@@ -39,12 +42,9 @@ func (s *blogService) LikeBlog(ctx context.Context, id uint64) error {
 	// 1. 获取登陆用户
 	userId := *user_holder.GetUser(ctx).ID
 	// 2. 判断当前登录用户是否已经点赞
-	key := "blog:liked:" + strconv.Itoa(int(id))
-	isMember, err := s.rdb.SIsMember(ctx, key, strconv.Itoa(int(userId))).Result()
-	if err != nil {
-		return err
-	}
-	if !isMember {
+	key := constants.RedisBlogLikeKey + strconv.Itoa(int(id))
+	_, err := s.rdb.ZScore(ctx, key, strconv.Itoa(int(userId))).Result()
+	if errors.Is(err, redis.Nil) {
 		// 3. 如果未点赞，可以点赞
 		// 3.1. 数据库点赞数 +1
 		info, err := s.query.Blog.
@@ -55,10 +55,15 @@ func (s *blogService) LikeBlog(ctx context.Context, id uint64) error {
 		}
 		// 3.2. 保存用户到 redis 的 set 集合
 		if info.RowsAffected != 0 {
-			if err := s.rdb.SAdd(ctx, key, strconv.Itoa(int(userId))).Err(); err != nil {
+			if err := s.rdb.ZAdd(ctx, key, redis.Z{
+				Score:  float64(time.Now().UnixMilli()),
+				Member: strconv.Itoa(int(userId)),
+			}).Err(); err != nil {
 				return err
 			}
 		}
+	} else if err != nil {
+		return err
 	} else {
 		// 4. 如果已经点赞，取消点赞
 		// 4.1. 数据库点赞数 -1
@@ -70,7 +75,7 @@ func (s *blogService) LikeBlog(ctx context.Context, id uint64) error {
 		}
 		// 4.2. 把用户从 redis 的 set 集合中删除
 		if info.RowsAffected != 0 {
-			if err := s.rdb.SRem(ctx, key, strconv.Itoa(int(userId))).Err(); err != nil {
+			if err := s.rdb.ZRem(ctx, key, strconv.Itoa(int(userId))).Err(); err != nil {
 				return err
 			}
 		}
@@ -130,10 +135,51 @@ func (s *blogService) queryBlogUser(blog *model.Blog) error {
 
 func (s *blogService) isBlogLiked(ctx context.Context, blog *model.Blog) error {
 	// 1. 获取登陆用户
-	userId := *user_holder.GetUser(ctx).ID
+	user := user_holder.GetUser(ctx)
+	if user == nil {
+		// 如果没有登录用户，直接返回
+		return nil
+	}
+	userId := *user.ID
 	// 2. 判断当前登录用户是否已经点赞
-	key := "blog:liked:" + strconv.Itoa(int(blog.ID))
-	isMember, err := s.rdb.SIsMember(ctx, key, strconv.Itoa(int(userId))).Result()
-	blog.IsLike = isMember
+	key := constants.RedisBlogLikeKey + strconv.Itoa(int(blog.ID))
+	_, err := s.rdb.ZScore(ctx, key, strconv.Itoa(int(userId))).Result()
+	blog.IsLike = !errors.Is(err, redis.Nil)
 	return err
+}
+
+func (s *blogService) QueryBlogLikes(ctx context.Context, id uint64) ([]*v1.SimpleUser, error) {
+	//	 1. 查询 top5 的点赞用户
+	key := constants.RedisBlogLikeKey + strconv.Itoa(int(id))
+	top5, err := s.rdb.ZRange(ctx, key, 0, 4).Result()
+	if errors.Is(err, redis.Nil) {
+		// 如果没有点赞用户，直接返回空
+		return nil, nil
+	} else if err != nil {
+		return nil, err
+	}
+	//	2. 解析出其中的用户 ID
+	ids := make([]uint64, len(top5))
+	for i, idStr := range top5 {
+		id, err := strconv.Atoi(idStr)
+		if err != nil {
+			return nil, err
+		}
+		ids[i] = uint64(id)
+	}
+	//	3. 根据用户 ID 查询用户
+	result, err := s.query.User.Where(s.query.User.ID.In(ids...)).Order(s.query.User.ID.Field(ids...)).Find()
+	if err != nil {
+		return nil, err
+	}
+	users := make([]*v1.SimpleUser, len(ids))
+	for i, user := range result {
+		users[i] = &v1.SimpleUser{
+			ID:       &user.ID,
+			NickName: user.NickName,
+			Icon:     user.Icon,
+		}
+	}
+	//	4. 返回
+	return users, nil
 }
