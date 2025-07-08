@@ -24,6 +24,7 @@ type Blog struct {
 	UpdateTime *time.Time `gorm:"column:update_time;type:timestamp;not null;default:current_timestamp();autoUpdateTime;comment:更新时间" json:"-"` // 更新时间
 	Icon       *string    `gorm:"-" json:"icon"`
 	Name       *string    `gorm:"-" json:"name"`
+	IsLike     bool       `gorm:"-" json:"isLike"`
 }
 
 // TableName Blog's table name

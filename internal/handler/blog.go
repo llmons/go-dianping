@@ -151,7 +151,7 @@ func (h *BlogHandler) QueryById(ctx *gin.Context) {
 		return
 	}
 
-	blog, err := h.blogService.QueryById(ctx, req.ID)
+	blog, err := h.blogService.QueryBlogById(ctx, req.ID)
 	if err != nil {
 		v1.HandleError(ctx, http.StatusInternalServerError, err.Error(), nil)
 		return

@@ -101,7 +101,7 @@ func (b *blog) GetFieldByName(fieldName string) (field.OrderExpr, bool) {
 }
 
 func (b *blog) fillFieldMap() {
-	b.fieldMap = make(map[string]field.Expr, 12)
+	b.fieldMap = make(map[string]field.Expr, 13)
 	b.fieldMap["id"] = b.ID
 	b.fieldMap["shop_id"] = b.ShopID
 	b.fieldMap["user_id"] = b.UserID

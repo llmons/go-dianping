@@ -84,6 +84,7 @@ func main() {
 		g.GenerateModelAs("tb_blog", "Blog",
 			gen.FieldNew("Icon", "*string", field.Tag{"gorm": "-", "json": "icon"}),
 			gen.FieldNew("Name", "*string", field.Tag{"gorm": "-", "json": "name"}),
+			gen.FieldNew("IsLike", "bool", field.Tag{"gorm": "-", "json": "isLike"}),
 		),
 		g.GenerateModelAs("tb_blog_comments", "BlogComments"),
 		g.GenerateModelAs("tb_follow", "Follow"),
