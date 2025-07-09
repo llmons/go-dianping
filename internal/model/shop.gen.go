@@ -27,6 +27,7 @@ type Shop struct {
 	OpenHours  *string    `gorm:"column:open_hours;type:varchar(32);comment:营业时间，例如 10:00-22:00" json:"openHours"`                    // 营业时间，例如 10:00-22:00
 	CreateTime *time.Time `gorm:"column:create_time;type:timestamp;default:current_timestamp();autoCreateTime;comment:创建时间" json:"-"` // 创建时间
 	UpdateTime *time.Time `gorm:"column:update_time;type:timestamp;default:current_timestamp();autoUpdateTime;comment:更新时间" json:"-"` // 更新时间
+	Distance   float64    `gorm:"-" json:"distance"`
 }
 
 // TableName Shop's table name

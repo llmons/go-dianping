@@ -73,29 +73,31 @@ func (h *ShopHandler) UpdateShop(ctx *gin.Context) {
 }
 
 // QueryShopOfType godoc
-// @Summary 根据商铺类型查询商铺信息
+// @Summary 根据商铺类型分页查询商铺信息
 // @Schemes
 // @Description
 // @Tags shop
 // @Accept json
 // @Produce json
-// @Param typeId query uint true "商铺类型 ID"
-// @Param x query uint true "纬度"
-// @Param y query uint true "经度"
+// @Param typeId query uint64 true "商铺类型 ID"
+// @Param current query int true "页码"
+// @Param x query float64 true "纬度"
+// @Param y query float64 true "经度"
 // @Success 200 {object} v1.Response
 // @Router /shop/of/type [get]
 func (h *ShopHandler) QueryShopOfType(ctx *gin.Context) {
 	var req struct {
-		TypeId uint `form:"typeId" binding:"required"`
-		X      uint `form:"x" binding:"required"`
-		Y      uint `form:"y" binding:"required"`
+		TypeId  uint64   `form:"typeId" binding:"required"`
+		Current int      `form:"current,default=1" binding:"required"`
+		X       *float64 `form:"x"`
+		Y       *float64 `form:"y"`
 	}
 	if err := ctx.ShouldBindQuery(&req); err != nil {
 		v1.HandleError(ctx, http.StatusBadRequest, err.Error(), nil)
 		return
 	}
 
-	err := h.shopService.QueryShopOfType(ctx.Request.Context(), req.TypeId, req.X, req.Y)
+	err := h.shopService.QueryShopOfType(ctx.Request.Context(), req.TypeId, req.Current, req.X, req.Y)
 	if err != nil {
 		v1.HandleError(ctx, http.StatusBadRequest, err.Error(), nil)
 		return

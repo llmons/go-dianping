@@ -116,7 +116,7 @@ func (s *shop) GetFieldByName(fieldName string) (field.OrderExpr, bool) {
 }
 
 func (s *shop) fillFieldMap() {
-	s.fieldMap = make(map[string]field.Expr, 15)
+	s.fieldMap = make(map[string]field.Expr, 16)
 	s.fieldMap["id"] = s.ID
 	s.fieldMap["name"] = s.Name
 	s.fieldMap["type_id"] = s.TypeID
@@ -132,6 +132,7 @@ func (s *shop) fillFieldMap() {
 	s.fieldMap["open_hours"] = s.OpenHours
 	s.fieldMap["create_time"] = s.CreateTime
 	s.fieldMap["update_time"] = s.UpdateTime
+
 }
 
 func (s shop) clone(db *gorm.DB) shop {

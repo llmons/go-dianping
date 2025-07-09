@@ -120,7 +120,7 @@ func TestLoadShopData(t *testing.T) {
 	ctx := context.Background()
 	// 3. 将店铺类型信息存入缓存
 	for typeId, value := range group {
-		key := fmt.Sprintf("%s%d", "shop:geo:", typeId)
+		key := fmt.Sprintf("%s%d", constants.RedisShopGeoKey, typeId)
 		var locations []*redis.GeoLocation
 
 		for _, shop := range value {

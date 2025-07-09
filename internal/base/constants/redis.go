@@ -26,4 +26,6 @@ const (
 
 	RedisBlogLikeKey = "blog:liked:"
 	RedisBlogFeedKey = "feed:"
+
+	RedisShopGeoKey = "shop:geo:"
 )
