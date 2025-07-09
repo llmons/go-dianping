@@ -76,4 +76,31 @@ func (s *followService) FollowCommons(ctx context.Context, id uint64) ([]*v1.Sim
 	if err != nil {
 		return nil, err
 	}
+	if len(interset) == 0 {
+		return nil, nil
+	}
+
+	//	3. 解析 id
+	ids := make([]uint64, len(interset))
+	for i, idStr := range interset {
+		id, err := strconv.Atoi(idStr)
+		if err != nil {
+			return nil, err
+		}
+		ids[i] = uint64(id)
+	}
+	users, err := s.query.User.Where(s.query.User.ID.In(ids...)).Find()
+	if err != nil {
+		return nil, err
+	}
+
+	simpleUsers := make([]*v1.SimpleUser, len(users))
+	for i, user := range users {
+		simpleUsers[i] = &v1.SimpleUser{
+			ID:       &user.ID,
+			NickName: user.NickName,
+			Icon:     user.Icon,
+		}
+	}
+	return simpleUsers, nil
 }
