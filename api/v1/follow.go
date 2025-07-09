@@ -6,3 +6,10 @@ type (
 		Data bool `json:"data"`
 	}
 )
+
+type (
+	FollowCommonsResp struct {
+		Response
+		Data []*SimpleUser `json:"data"`
+	}
+)

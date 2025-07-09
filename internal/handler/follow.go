@@ -85,7 +85,7 @@ func (h *FollowHandler) IsFollow(ctx *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param id path uint64 true "ID"
-// @Success 200 {object} v1.QueryBlogByIDResp
+// @Success 200 {object} v1.FollowCommonsResp
 // @Router /follow/common/{id} [get]
 func (h *FollowHandler) FollowCommons(ctx *gin.Context) {
 	var req struct {
@@ -96,10 +96,10 @@ func (h *FollowHandler) FollowCommons(ctx *gin.Context) {
 		return
 	}
 
-	blog, err := h.followService.FollowCommons(ctx, req.ID)
+	users, err := h.followService.FollowCommons(ctx, req.ID)
 	if err != nil {
 		v1.HandleError(ctx, http.StatusInternalServerError, err.Error(), nil)
 		return
 	}
-	v1.HandleSuccess(ctx, blog)
+	v1.HandleListSuccess(ctx, users, len(users))
 }
