@@ -14,7 +14,7 @@ import (
 )
 
 type BlogService interface {
-	SaveBlog(ctx context.Context, blog *model.Blog) error
+	SaveBlog(ctx context.Context, blog *model.Blog) (uint64, error)
 	LikeBlog(ctx context.Context, id uint64) error
 	QueryMyBlog(ctx context.Context, current int) ([]*model.Blog, error)
 	QueryHotBlog(ctx context.Context, current int) ([]*model.Blog, error)
@@ -35,8 +35,32 @@ type blogService struct {
 	*Service
 }
 
-func (s *blogService) SaveBlog(_ context.Context, blog *model.Blog) error {
-	return s.query.Blog.Save(blog)
+func (s *blogService) SaveBlog(ctx context.Context, blog *model.Blog) (uint64, error) {
+	// 1. 获取登录用户
+	user := user_holder.GetUser(ctx)
+	blog.UserID = *user.ID
+	//	2. 保存探店笔记
+	if err := s.query.Blog.Save(blog); err != nil {
+		return 0, err
+	}
+	// 3. 查询笔记作者的所有粉丝
+	follows, err := s.query.Follow.Where(s.query.Follow.FollowUserID.Eq(blog.UserID)).Find()
+	if err != nil {
+		return 0, err
+	}
+	// 4. 推送笔记 id 给所有粉丝
+	for _, follow := range follows {
+		userID := follow.FollowUserID
+		key := "feed:" + strconv.Itoa(int(userID))
+		if err := s.rdb.ZAdd(ctx, key, redis.Z{
+			Score:  float64(time.Now().UnixMilli()),
+			Member: strconv.Itoa(int(blog.ID)),
+		}).Err(); err != nil {
+			return 0, err
+		}
+	}
+	// 5. 返回 id
+	return blog.ID, nil
 }
 
 func (s *blogService) LikeBlog(ctx context.Context, id uint64) error {

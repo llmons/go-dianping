@@ -3,7 +3,6 @@ package handler
 import (
 	"github.com/gin-gonic/gin"
 	v1 "go-dianping/api/v1"
-	"go-dianping/internal/base/user_holder"
 	"go-dianping/internal/model"
 	"go-dianping/internal/service"
 	"net/http"
@@ -40,16 +39,12 @@ func (h *BlogHandler) SaveBlog(ctx *gin.Context) {
 		v1.HandleError(ctx, http.StatusBadRequest, err.Error(), nil)
 		return
 	}
-	// 获取登录用户
-	user := user_holder.GetUser(ctx)
-	blog.ID = *user.ID
-	//	保存探店博文
-	if err := h.blogService.SaveBlog(ctx, &blog); err != nil {
+	id, err := h.blogService.SaveBlog(ctx, &blog)
+	if err != nil {
 		v1.HandleError(ctx, http.StatusInternalServerError, err.Error(), nil)
 		return
 	}
-	//	返回 id
-	v1.HandleSuccess(ctx, blog.ID)
+	v1.HandleSuccess(ctx, id)
 }
 
 // LikeBlog godoc
