@@ -208,3 +208,32 @@ func (h *BlogHandler) QueryBlogByUserID(ctx *gin.Context) {
 	}
 	v1.HandleListSuccess(ctx, blogs, len(blogs))
 }
+
+// QueryBlogOfFollow godoc
+// @Summary 查询关注里的 Blog
+// @Schemes
+// @Description
+// @Tags shop
+// @Accept json
+// @Produce json
+// @Param lastID query int true "上一次查询的最小时间戳"
+// @Param offset query int true "偏移量"
+// @Success 200 {object} v1.QueryBlogByUserIDResp
+// @Router /blog/of/follow [get]
+func (h *BlogHandler) QueryBlogOfFollow(ctx *gin.Context) {
+	var req struct {
+		Max    int   `form:"lastId" binding:"required"`
+		Offset int64 `form:"offset,default=0" binding:"required"`
+	}
+	if err := ctx.ShouldBindQuery(&req); err != nil {
+		v1.HandleError(ctx, http.StatusBadRequest, err.Error(), nil)
+		return
+	}
+
+	blogs, err := h.blogService.QueryBlogOfFollow(ctx, req.Max, req.Offset)
+	if err != nil {
+		v1.HandleError(ctx, http.StatusInternalServerError, err.Error(), nil)
+		return
+	}
+	v1.HandleListSuccess(ctx, blogs, len(blogs))
+}

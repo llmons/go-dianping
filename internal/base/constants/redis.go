@@ -25,4 +25,5 @@ const (
 	RedisSeckillStockKey = "seckill:stock:"
 
 	RedisBlogLikeKey = "blog:liked:"
+	RedisBlogFeedKey = "feed:"
 )

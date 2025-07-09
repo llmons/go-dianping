@@ -21,6 +21,7 @@ type BlogService interface {
 	QueryBlogById(ctx context.Context, id uint64) (*model.Blog, error)
 	QueryBlogLikes(ctx context.Context, id uint64) ([]*v1.SimpleUser, error)
 	QueryBlogByUserID(ctx context.Context, id uint64, current int) ([]*model.Blog, error)
+	QueryBlogOfFollow(ctx context.Context, max int, offset int64) (*v1.ScrollResult[model.Blog], error)
 }
 
 func NewBlogService(
@@ -51,7 +52,7 @@ func (s *blogService) SaveBlog(ctx context.Context, blog *model.Blog) (uint64, e
 	// 4. 推送笔记 id 给所有粉丝
 	for _, follow := range follows {
 		userID := follow.FollowUserID
-		key := "feed:" + strconv.Itoa(int(userID))
+		key := constants.RedisBlogFeedKey + strconv.Itoa(int(userID))
 		if err := s.rdb.ZAdd(ctx, key, redis.Z{
 			Score:  float64(time.Now().UnixMilli()),
 			Member: strconv.Itoa(int(blog.ID)),
@@ -212,4 +213,65 @@ func (s *blogService) QueryBlogLikes(ctx context.Context, id uint64) ([]*v1.Simp
 func (s *blogService) QueryBlogByUserID(ctx context.Context, id uint64, current int) ([]*model.Blog, error) {
 	result, _, err := s.query.Blog.Where(s.query.Blog.UserID.Eq(id)).FindByPage(current, constants.MaxPageSize)
 	return result, err
+}
+
+func (s *blogService) QueryBlogOfFollow(ctx context.Context, max int, offset int64) (*v1.ScrollResult[model.Blog], error) {
+	// 1. 获取当前用户
+	user := user_holder.GetUser(ctx)
+	// 2.查询收件箱
+	key := constants.RedisBlogFeedKey + strconv.Itoa(int(*user.ID))
+	result, err := s.rdb.ZRevRangeByScoreWithScores(ctx, key, &redis.ZRangeBy{
+		Min:    "0",
+		Max:    strconv.Itoa(max),
+		Offset: offset,
+		Count:  2,
+	}).Result()
+	if err != nil {
+		return nil, err
+	}
+	if errors.Is(err, redis.Nil) || (len(result)) == 0 {
+		return nil, nil
+	}
+	// 3. 解析数据
+	ids := make([]uint64, len(result))
+	var minTime float64
+	os := 1
+	for i, z := range result {
+		id, err := strconv.Atoi(z.Member.(string))
+		if err != nil {
+			return nil, err
+		}
+		ids[i] = uint64(id)
+		score := z.Score
+		if score == minTime {
+			os++
+		} else {
+			minTime = score
+			os = 1
+		}
+	}
+
+	// 4. 查询博客
+	blogs, err := s.query.Blog.Where(s.query.Blog.ID.In(ids...)).Order(s.query.Blog.ID.Field(ids...)).Find()
+	if err != nil {
+		return nil, err
+	}
+
+	for _, blog := range blogs {
+		//	2. 查询 blog 有关的用户
+		if err := s.queryBlogUser(blog); err != nil {
+			return nil, err
+		}
+		// 3. 查询 blog 是否被点赞
+		if err := s.isBlogLiked(ctx, blog); err != nil {
+			return nil, err
+		}
+	}
+
+	// 5. 封装并返回
+	return &v1.ScrollResult[model.Blog]{
+		List:    blogs,
+		Offset:  os,
+		MinTime: minTime,
+	}, nil
 }

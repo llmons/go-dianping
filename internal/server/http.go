@@ -68,6 +68,7 @@ func NewHTTPServer(
 			blogRouter.GET("/of/me", blogHandler.QueryMyBlog)
 			blogRouter.GET("/hot", blogHandler.QueryHotBlog)
 			blogRouter.GET("/:id", blogHandler.QueryById)
+			blogRouter.GET("/of/follow", blogHandler.QueryBlogOfFollow)
 		}
 
 		followRouter := s.Group("/follow")
