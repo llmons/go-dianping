@@ -4,8 +4,7 @@ import (
 	"context"
 	"flag"
 	"fmt"
-	"github.com/golang/mock/gomock"
-	goRedis "github.com/redis/go-redis/v9"
+	"github.com/redis/go-redis/v9"
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
 	"go-dianping/internal/base/cache_client"
@@ -17,6 +16,7 @@ import (
 	"go-dianping/pkg/log"
 	"os"
 	"path/filepath"
+	"strconv"
 	"sync"
 	"testing"
 	"time"
@@ -25,7 +25,7 @@ import (
 var (
 	conf   *viper.Viper
 	logger *log.Logger
-	rdb    *goRedis.Client
+	rdb    *redis.Client
 
 	redisWorker redis_worker.RedisWorker
 )
@@ -82,9 +82,6 @@ func TestIdWork(t *testing.T) {
 }
 
 func TestSaveSHop(t *testing.T) {
-	ctrl := gomock.NewController(t)
-	defer ctrl.Finish()
-
 	db := service.NewDB(conf, logger)
 	query := service.NewQuery(db)
 	cacheClient := cache_client.NewCacheClient[model.Shop](rdb)
@@ -97,6 +94,44 @@ func TestSaveSHop(t *testing.T) {
 	key := fmt.Sprintf("%s%d", constants.RedisCacheShopKey, 1)
 	if err := cacheClient.SetWithLogicExpire(ctx, key, shop, time.Second*10); err != nil {
 		return
+	}
+
+	assert.NoError(t, err)
+}
+
+func TestLoadShopData(t *testing.T) {
+	db := service.NewDB(conf, logger)
+	query := service.NewQuery(db)
+
+	// 1. 查询店铺信息
+	list, err := query.Shop.Find()
+	if err != nil {
+		return
+	}
+	// 2. 将店铺信息存入缓存
+	group := map[uint64][]*model.Shop{}
+	for _, shop := range list {
+		if _, ok := group[shop.ID]; !ok {
+			group[shop.ID] = []*model.Shop{}
+		}
+		group[shop.TypeID] = append(group[shop.TypeID], shop)
+	}
+
+	ctx := context.Background()
+	// 3. 将店铺类型信息存入缓存
+	for typeId, value := range group {
+		key := fmt.Sprintf("%s%d", "shop:geo:", typeId)
+		var locations []*redis.GeoLocation
+
+		for _, shop := range value {
+			locations = append(locations, &redis.GeoLocation{
+				Name:      strconv.Itoa(int(shop.ID)),
+				Longitude: shop.Y,
+				Latitude:  shop.X,
+			})
+
+		}
+		rdb.GeoAdd(ctx, key, locations...)
 	}
 
 	assert.NoError(t, err)
