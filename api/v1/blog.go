@@ -22,3 +22,10 @@ type (
 		Data *model.Blog `json:"data"`
 	}
 )
+
+type (
+	QueryBlogByUserIDResp struct {
+		Response
+		Data []*model.Blog `json:"data"`
+	}
+)

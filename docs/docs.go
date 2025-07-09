@@ -135,7 +135,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "integer",
-                        "description": "博文 ID",
+                        "description": "博文 FollowUserId",
                         "name": "id",
                         "in": "path",
                         "required": true
@@ -193,11 +193,11 @@ const docTemplate = `{
                 "tags": [
                     "shop"
                 ],
-                "summary": "根据 ID 查询博文",
+                "summary": "根据 FollowUserId 查询博文",
                 "parameters": [
                     {
                         "type": "integer",
-                        "description": "博文 ID",
+                        "description": "博文 FollowUserId",
                         "name": "id",
                         "in": "path",
                         "required": true

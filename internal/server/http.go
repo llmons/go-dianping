@@ -19,6 +19,7 @@ func NewHTTPServer(
 	conf *viper.Viper,
 	rdb *redis.Client,
 	blogHandler *handler.BlogHandler,
+	followHandler *handler.FollowHandler,
 	shopHandler *handler.ShopHandler,
 	shopTypeHandler *handler.ShopTypeHandler,
 	uploadHandler *handler.UploadHandler,
@@ -67,6 +68,13 @@ func NewHTTPServer(
 			blogRouter.GET("/of/me", blogHandler.QueryMyBlog)
 			blogRouter.GET("/hot", blogHandler.QueryHotBlog)
 			blogRouter.GET("/:id", blogHandler.QueryById)
+		}
+
+		followRouter := s.Group("/follow")
+		{
+			followRouter.PUT("/:id/:isFollow", followHandler.Follow)
+			followRouter.GET("/or/not/:id", followHandler.IsFollow)
+			followRouter.GET("/common/:id", followHandler.FollowCommons)
 		}
 
 		shopRouter := s.Group("/shop")

@@ -18,6 +18,7 @@ type UserService interface {
 	SendCode(ctx context.Context, req *v1.SendCodeReq) error
 	Login(ctx context.Context, req *v1.LoginReq) (*v1.LoginRespData, error)
 	Me(ctx context.Context) (*v1.SimpleUser, error)
+	QueryUserByID(ctx context.Context, userID uint64) (*v1.SimpleUser, error)
 }
 
 type userService struct {
@@ -123,6 +124,20 @@ func (s *userService) Me(ctx context.Context) (*v1.SimpleUser, error) {
 		return nil, v1.ErrCanNotGetUser
 	}
 	return user, nil
+}
+
+func (s *userService) QueryUserByID(ctx context.Context, userID uint64) (*v1.SimpleUser, error) {
+	user, err := s.query.User.Where(s.query.User.ID.Eq(userID)).First()
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil, nil
+	} else if err != nil {
+		return nil, err
+	}
+	return &v1.SimpleUser{
+		ID:       &user.ID,
+		NickName: user.NickName,
+		Icon:     user.Icon,
+	}, nil
 }
 
 func (s *userService) createUserWithPhone(phone string) (*model.User, error) {

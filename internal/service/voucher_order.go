@@ -230,7 +230,7 @@ func (s *voucherOrderService) SeckillVoucher(ctx context.Context, req *v1.Seckil
 
 //func (s *voucherOrderService) SeckillVoucher(ctx context.Context, req *v1.SeckillVoucherReq) (voucherId int64, err error) {
 //	// 获取用户
-//	userId := user_holder.GetUser(ctx).ID
+//	userId := user_holder.GetUser(ctx).FollowUserId
 //	1. 执行 lua 脚本
 //	result, err := s.seckillScript.Run(ctx, s.rdb, []string{}, req.VoucherID, *userId).Result()
 //	if err != nil {
@@ -252,7 +252,7 @@ func (s *voucherOrderService) SeckillVoucher(ctx context.Context, req *v1.Seckil
 //	if err != nil {
 //		return 0, err
 //	}
-//	voucherOrder.ID = orderId
+//	voucherOrder.FollowUserId = orderId
 //	// 2.4. 用户 id
 //	voucherOrder.UserID = *userId
 //	// 2.5. 代金券 id

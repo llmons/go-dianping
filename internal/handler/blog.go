@@ -59,7 +59,7 @@ func (h *BlogHandler) SaveBlog(ctx *gin.Context) {
 // @Tags shop
 // @Accept json
 // @Produce json
-// @Param id path uint64 true "博文 ID"
+// @Param id path uint64 true "博文 FollowUserId"
 // @Success 200 {object} v1.Response
 // @Router /blog/like/{id} [put]
 func (h *BlogHandler) LikeBlog(ctx *gin.Context) {
@@ -133,13 +133,13 @@ func (h *BlogHandler) QueryHotBlog(ctx *gin.Context) {
 }
 
 // QueryById godoc
-// @Summary 根据 ID 查询博文
+// @Summary 根据 FollowUserId 查询博文
 // @Schemes
 // @Description
 // @Tags shop
 // @Accept json
 // @Produce json
-// @Param id path uint64 true "博文 ID"
+// @Param id path uint64 true "博文 FollowUserId"
 // @Success 200 {object} v1.QueryBlogByIDResp
 // @Router /blog/{id} [get]
 func (h *BlogHandler) QueryById(ctx *gin.Context) {
@@ -166,7 +166,7 @@ func (h *BlogHandler) QueryById(ctx *gin.Context) {
 // @Tags shop
 // @Accept json
 // @Produce json
-// @Param id path uint64 true "博文 ID"
+// @Param id path uint64 true "博文 FollowUserId"
 // @Success 200 {object} v1.QueryBlogByIDResp
 // @Router /blog/{id} [get]
 func (h *BlogHandler) QueryBlogLikes(ctx *gin.Context) {
@@ -184,4 +184,32 @@ func (h *BlogHandler) QueryBlogLikes(ctx *gin.Context) {
 		return
 	}
 	v1.HandleSuccess(ctx, blog)
+}
+
+// QueryBlogByUserID godoc
+// @Summary 根据 userID 查询博文
+// @Schemes
+// @Description
+// @Tags shop
+// @Accept json
+// @Produce json
+// @Param id query uint64 true "userID"
+// @Success 200 {object} v1.QueryBlogByUserIDResp
+// @Router /blog/of/user [get]
+func (h *BlogHandler) QueryBlogByUserID(ctx *gin.Context) {
+	var req struct {
+		ID      uint64 `form:"id" binding:"required"`
+		Current int    `form:"current,default=1" binding:"required"`
+	}
+	if err := ctx.ShouldBindQuery(&req); err != nil {
+		v1.HandleError(ctx, http.StatusBadRequest, err.Error(), nil)
+		return
+	}
+
+	blogs, err := h.blogService.QueryBlogByUserID(ctx, req.ID, req.Current)
+	if err != nil {
+		v1.HandleError(ctx, http.StatusInternalServerError, err.Error(), nil)
+		return
+	}
+	v1.HandleListSuccess(ctx, blogs, len(blogs))
 }

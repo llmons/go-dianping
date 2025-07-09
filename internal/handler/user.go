@@ -87,3 +87,30 @@ func (h *UserHandler) Me(ctx *gin.Context) {
 	}
 	v1.HandleSuccess(ctx, user)
 }
+
+// QueryUserByID godoc
+// @Summary 获取当前登录的用户并返回
+// @Schemes
+// @Description
+// @Tags user
+// @Produce json
+// @Security Bearer
+// @Param id path uint64 true "用户ID"
+// @Success 200 {object} v1.MeResp
+// @Router /user/me [get]
+func (h *UserHandler) QueryUserByID(ctx *gin.Context) {
+	var req struct {
+		userID uint64 `uri:"id" binding:"required"`
+	}
+	if err := ctx.ShouldBindUri(&req); err != nil {
+		v1.HandleError(ctx, http.StatusBadRequest, err.Error(), nil)
+		return
+	}
+
+	user, err := h.userService.QueryUserByID(ctx.Request.Context(), req.userID)
+	if err != nil {
+		v1.HandleError(ctx, http.StatusInternalServerError, err.Error(), nil)
+		return
+	}
+	v1.HandleSuccess(ctx, user)
+}

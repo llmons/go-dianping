@@ -20,6 +20,7 @@ type BlogService interface {
 	QueryHotBlog(ctx context.Context, current int) ([]*model.Blog, error)
 	QueryBlogById(ctx context.Context, id uint64) (*model.Blog, error)
 	QueryBlogLikes(ctx context.Context, id uint64) ([]*v1.SimpleUser, error)
+	QueryBlogByUserID(ctx context.Context, id uint64, current int) ([]*model.Blog, error)
 }
 
 func NewBlogService(
@@ -158,7 +159,7 @@ func (s *blogService) QueryBlogLikes(ctx context.Context, id uint64) ([]*v1.Simp
 	} else if err != nil {
 		return nil, err
 	}
-	//	2. 解析出其中的用户 ID
+	//	2. 解析出其中的用户 FollowUserId
 	ids := make([]uint64, len(top5))
 	for i, idStr := range top5 {
 		id, err := strconv.Atoi(idStr)
@@ -167,7 +168,7 @@ func (s *blogService) QueryBlogLikes(ctx context.Context, id uint64) ([]*v1.Simp
 		}
 		ids[i] = uint64(id)
 	}
-	//	3. 根据用户 ID 查询用户
+	//	3. 根据用户 FollowUserId 查询用户
 	result, err := s.query.User.Where(s.query.User.ID.In(ids...)).Order(s.query.User.ID.Field(ids...)).Find()
 	if err != nil {
 		return nil, err
@@ -182,4 +183,9 @@ func (s *blogService) QueryBlogLikes(ctx context.Context, id uint64) ([]*v1.Simp
 	}
 	//	4. 返回
 	return users, nil
+}
+
+func (s *blogService) QueryBlogByUserID(ctx context.Context, id uint64, current int) ([]*model.Blog, error) {
+	result, _, err := s.query.Blog.Where(s.query.Blog.UserID.Eq(id)).FindByPage(current, constants.MaxPageSize)
+	return result, err
 }
