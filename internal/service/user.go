@@ -2,9 +2,11 @@ package service
 
 import (
 	"context"
+	"fmt"
 	"github.com/duke-git/lancet/v2/random"
 	"github.com/jinzhu/copier"
 	"github.com/pkg/errors"
+	"github.com/redis/go-redis/v9"
 	"go-dianping/api/v1"
 	"go-dianping/internal/base/constants"
 	"go-dianping/internal/base/regex_utils"
@@ -12,6 +14,8 @@ import (
 	"go-dianping/internal/model"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
+	"strconv"
+	"time"
 )
 
 type UserService interface {
@@ -19,6 +23,40 @@ type UserService interface {
 	Login(ctx context.Context, req *v1.LoginReq) (*v1.LoginRespData, error)
 	Me(ctx context.Context) (*v1.SimpleUser, error)
 	QueryUserByID(ctx context.Context, userID uint64) (*v1.SimpleUser, error)
+	Sign(ctx context.Context) error
+	SignCount(ctx context.Context) (int, error)
+}
+
+func (s *userService) SignCount(ctx context.Context) (int, error) {
+	user := user_holder.GetUser(ctx)
+	if user == nil {
+		return 0, v1.ErrCanNotGetUser
+	}
+	dayOfMonth := time.Now().Month()
+	key := constants.RedisUserSignKey + strconv.FormatUint(*user.ID, 10)
+	result, err := s.rdb.BitField(ctx, key,
+		"GET", fmt.Sprintf("u%d", dayOfMonth), 0,
+	).Result()
+	if errors.Is(err, redis.Nil) || len(result) == 0 {
+		return 0, nil
+	} else if err != nil {
+		return 0, err
+	}
+	num := result[0]
+	if num == 0 {
+		return 0, nil
+	}
+
+	var count int
+	for {
+		if (num & 1) == 0 {
+			break
+		} else {
+			count++
+		}
+		num >>= 1
+	}
+	return count, nil
 }
 
 type userService struct {
@@ -152,4 +190,17 @@ func (s *userService) createUserWithPhone(phone string) (*model.User, error) {
 		return nil, err
 	}
 	return &user, nil
+}
+
+func (s *userService) Sign(ctx context.Context) error {
+	user := user_holder.GetUser(ctx)
+	if user == nil {
+		return v1.ErrCanNotGetUser
+	}
+	now := time.Now()
+	keySuffix := now.Format("200601")
+	key := constants.RedisUserSignKey + strconv.FormatUint(*user.ID, 10) + ":" + keySuffix
+	dayOfMonth := now.Month()
+	s.rdb.SetBit(ctx, key, int64(dayOfMonth-1), 1)
+	return nil
 }

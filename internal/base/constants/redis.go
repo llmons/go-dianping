@@ -28,4 +28,6 @@ const (
 	RedisBlogFeedKey = "feed:"
 
 	RedisShopGeoKey = "shop:geo:"
+
+	RedisUserSignKey = "user:sign:"
 )

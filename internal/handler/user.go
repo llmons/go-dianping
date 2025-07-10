@@ -114,3 +114,39 @@ func (h *UserHandler) QueryUserByID(ctx *gin.Context) {
 	}
 	v1.HandleSuccess(ctx, user)
 }
+
+// Sign godoc
+// @Summary 签到
+// @Schemes
+// @Description
+// @Tags user
+// @Produce json
+// @Security Bearer
+// @Success 200 {object} v1.Response
+// @Router /user/sign [post]
+func (h *UserHandler) Sign(ctx *gin.Context) {
+	err := h.userService.Sign(ctx.Request.Context())
+	if err != nil {
+		v1.HandleError(ctx, http.StatusInternalServerError, err.Error(), nil)
+		return
+	}
+	v1.HandleSuccess(ctx, nil)
+}
+
+// SignCount godoc
+// @Summary 签到
+// @Schemes
+// @Description
+// @Tags user
+// @Produce json
+// @Security Bearer
+// @Success 200 {object} v1.Response
+// @Router /user/sign/count [get]
+func (h *UserHandler) SignCount(ctx *gin.Context) {
+	err := h.userService.SignCount(ctx.Request.Context())
+	if err != nil {
+		v1.HandleError(ctx, http.StatusInternalServerError, err.Error(), nil)
+		return
+	}
+	v1.HandleSuccess(ctx, nil)
+}
