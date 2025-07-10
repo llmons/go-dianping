@@ -136,3 +136,18 @@ func TestLoadShopData(t *testing.T) {
 
 	assert.NoError(t, err)
 }
+
+func TestHyperLogLog(t *testing.T) {
+	ctx := context.Background()
+	values := make([]any, 1000)
+	var err error
+	for i := 0; i < 1_000_000; i++ {
+		j := i % 1000
+		values[j] = "user_" + strconv.Itoa(i)
+		if j == 999 {
+			err = rdb.PFAdd(ctx, "h12", values...).Err()
+		}
+	}
+
+	assert.NoError(t, err)
+}
